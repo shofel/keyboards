@@ -107,6 +107,16 @@ tap_dance_action_t tap_dance_actions[] = {
 /* DK is for "dance key" */
 #define DK_SYMO TD(TD_SYM_MOUSE)
 
+/* Key overrides */
+
+// Suppress < and > on the main layer
+const key_override_t labk_override = ko_make_basic(MOD_MASK_SHIFT, KC_COMMA, KC_NO);
+const key_override_t rabk_override = ko_make_basic(MOD_MASK_SHIFT, KC_DOT, KC_NO);
+
+const key_override_t *key_overrides[] = {
+  &labk_override,
+  &rabk_override,
+};
 
 /* Combos */
 
