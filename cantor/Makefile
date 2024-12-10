@@ -1,6 +1,8 @@
 # Flashing the keyboard:
 # make flash
 
+.DEFAULT_GOAL := flash
+
 GIT_ROOT := $(shell git rev-parse --show-cdup)
 qmk_dir = ${GIT_ROOT}/qmk_firmware
 
