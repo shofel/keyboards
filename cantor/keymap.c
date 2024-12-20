@@ -13,6 +13,9 @@
 // TODO generate clean schemes from layer definitions.
 //      Now they are good, but manual and prone to be outdated.
 // TODO autoformat layer definitions
+/* NOTE nice spare combos:
+ *      right: space + a home row key
+ */
 
 #include QMK_KEYBOARD_H
 
@@ -74,7 +77,7 @@ enum my_layer_names {
 /* Tap dance */
 
 enum {
-  TD_SYM_MOUSE, /* Hold for SYM, tap-hold for MOUSE */
+  TD_SYS_MOUSE, /* Hold for SYS, tap-hold for MOUSE */
 };
 
 void td_sym_mouse_on_tap(tap_dance_state_t *state, void *user_data) {
@@ -87,25 +90,25 @@ void td_sym_mouse_on_finish(tap_dance_state_t *state, void *user_data) {
     };
   } else {
     switch (state->count) {
-      case 1: layer_on(L_SYMBOLS); break;
+      case 1: layer_on(L_FKEYS_SYSTEM); break;
       case 2: layer_on(L_MOUSE); break;
     };
   };
 };
 
 void td_sym_mouse_on_reset(tap_dance_state_t *state, void *user_data) {
-  layer_off(L_SYMBOLS);
+  layer_off(L_FKEYS_SYSTEM);
   layer_off(L_MOUSE);
 };
 
 tap_dance_action_t tap_dance_actions[] = {
-  [TD_SYM_MOUSE] = ACTION_TAP_DANCE_FN_ADVANCED(td_sym_mouse_on_tap,
+  [TD_SYS_MOUSE] = ACTION_TAP_DANCE_FN_ADVANCED(td_sym_mouse_on_tap,
                                                 td_sym_mouse_on_finish,
                                                 td_sym_mouse_on_reset),
 };
 
 /* DK is for "dance key" */
-#define DK_SYMO TD(TD_SYM_MOUSE)
+#define DK_SYSM TD(TD_SYS_MOUSE)
 
 /* Key overrides */
 
@@ -125,7 +128,7 @@ const key_override_t *key_overrides[] = {
 /* Hit both middle thumb keys for esc. */
 const uint16_t PROGMEM esc_combo[]  = {MY_LSFT, KC_SPACE, COMBO_END};
 /* Two outer bottom keys on a single half to get into bootloader. */
-const uint16_t PROGMEM boot_combo_left[]  = {XX_FAKE,  DK_SYMO, COMBO_END};
+const uint16_t PROGMEM boot_combo_left[]  = {XX_FAKE,  DK_SYSM, COMBO_END};
 const uint16_t PROGMEM boot_combo_right[] = {KC_ENTER, XX_FAKE, COMBO_END};
 /* On a single half: the outermost bottom pinky key + the middle thumb key to reboot the keyboard. */
 const uint16_t PROGMEM reset_combo_left[]  = {XX_FAKE,  MY_LSFT, COMBO_END};
@@ -171,7 +174,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
            __ ,   GUI_A,   ALT_O,   LT3_E,  CTL_S,  KC_G,     KC_B,  CTL_N, LT3_T, ALT_R, GUI_I,  KC_MINUS,
        XX_FAKE, KC_SCLN,    KC_X,  KC_DOT,   KC_W,  KC_Z,     KC_P,  KC_H,  KC_M,  KC_K,  KC_J,   XX_FAKE,
 
-                             MO_SYS , MY_LSFT , DK_SYMO ,     KC_ENTER , KC_SPC,  SWITCH_LANG            ),
+                            DK_SYSM , MY_LSFT , OSL_SYM ,     KC_ENTER , KC_SPC,  SWITCH_LANG            ),
 
   [L_QWERTY] = LAYOUT_split_3x6_3(
         KC_GRV,    KC_Q,    KC_W,    KC_E,   KC_R,  KC_T,     KC_Y,  KC_U,  KC_I,    KC_O,   KC_P,     KC_LBRC,
