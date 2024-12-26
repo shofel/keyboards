@@ -56,6 +56,10 @@
 enum my_keycodes {
   SWITCH_LANG = SAFE_RANGE,
   XX_FAKE,
+  KK_GO_DECLARATION,
+  KK_RIGHT_ARROW,
+  KK_FAT_RIGHT_ARROW,
+  KK_NOT_EQUAL,
 };
 
 /* Layer names */
@@ -134,14 +138,26 @@ const uint16_t PROGMEM boot_combo_right[] = {KC_ENTER, XX_FAKE, COMBO_END};
 /* On a single half: the outermost bottom pinky key + the middle thumb key to reboot the keyboard. */
 const uint16_t PROGMEM reset_combo_left[]  = {XX_FAKE,  MY_LSFT, COMBO_END};
 const uint16_t PROGMEM reset_combo_right[] = {KC_SPACE, XX_FAKE, COMBO_END};
+/* := -> => != */
+const uint16_t PROGMEM go_declaration_combo[]  = {KC_H, GUI_I, COMBO_END};
+const uint16_t PROGMEM right_arrow_combo[]     = {KC_M, GUI_I, COMBO_END};
+const uint16_t PROGMEM fat_right_arrow_combo[] = {KC_H, KC_M, COMBO_END};
+const uint16_t PROGMEM not_equal_combo[]       = {KC_H, KC_K, COMBO_END};
 
 combo_t key_combos[] = {
   COMBO(esc_combo, KC_ESC),
   COMBO(ctl_esc_combo, LCTL(KC_ESC)),
+
   COMBO(boot_combo_left,  QK_BOOT),
   COMBO(boot_combo_right, QK_BOOT),
+
   COMBO(reset_combo_left,  QK_REBOOT),
   COMBO(reset_combo_right, QK_REBOOT),
+
+  COMBO(go_declaration_combo, KK_GO_DECLARATION),
+  COMBO(right_arrow_combo, KK_RIGHT_ARROW),
+  COMBO(fat_right_arrow_combo, KK_FAT_RIGHT_ARROW),
+  COMBO(not_equal_combo, KK_NOT_EQUAL),
 };
 
 /* */
@@ -158,6 +174,26 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         layer_invert(L_QWERTY);
       }
       return false; // Skip all further processing of this key
+    case KK_GO_DECLARATION:
+      if (record->event.pressed) {
+        SEND_STRING(":=");
+      }
+      return false;
+    case KK_RIGHT_ARROW:
+      if (record->event.pressed) {
+        SEND_STRING("->");
+      }
+      return false;
+    case KK_FAT_RIGHT_ARROW:
+      if (record->event.pressed) {
+        SEND_STRING("=>");
+      }
+      return false;
+    case KK_NOT_EQUAL:
+      if (record->event.pressed) {
+        SEND_STRING("!=");
+      }
+      return false;
     default:
       return true; // Process all other keycodes normally
   }
