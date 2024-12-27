@@ -132,6 +132,7 @@ const key_override_t *key_overrides[] = {
 /* Hit both middle thumb keys for esc. */
 const uint16_t PROGMEM esc_combo[]     = {MY_LSFT, KC_SPACE,        COMBO_END};
 const uint16_t PROGMEM ctl_esc_combo[] = {MY_LSFT, KC_SPACE, CTL_S, COMBO_END};
+const uint16_t PROGMEM alt_esc_combo[] = {MY_LSFT, KC_SPACE, ALT_O, COMBO_END};
 /* Two outer bottom keys on a single half to get into bootloader. */
 const uint16_t PROGMEM boot_combo_left[]  = {XX_FAKE,  DK_SYSM, COMBO_END};
 const uint16_t PROGMEM boot_combo_right[] = {KC_ENTER, XX_FAKE, COMBO_END};
@@ -147,6 +148,7 @@ const uint16_t PROGMEM not_equal_combo[]       = {KC_H, KC_K, COMBO_END};
 combo_t key_combos[] = {
   COMBO(esc_combo, KC_ESC),
   COMBO(ctl_esc_combo, LCTL(KC_ESC)),
+  COMBO(alt_esc_combo, LALT(KC_ESC)),
 
   COMBO(boot_combo_left,  QK_BOOT),
   COMBO(boot_combo_right, QK_BOOT),
