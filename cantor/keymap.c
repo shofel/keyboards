@@ -234,14 +234,14 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                          __     ,         __  ,    __  ,       __  ,    __  ,    __                      ),
 
   [L_NUM_NAV] = LAYOUT_split_3x6_3(/*
-        __  __  7   8   9   scr                      hom pg↑ ↑   pg↓ end __
-        __  0   4   5   6   del                      bs  ←  ret  →   __  __
-        __  0   1   2   3   __                       __  tab ↓   __  __  __
+        __  __  7   8   9   __                       hom pg↑ ↑   pg↓ end __
+        __  0   4   5   6   :                        bs  ←  ret  →   __  __
+        __  0   1   2   3   .                        __  tab ↓   __  __  __
                            ___  ___ ___     ___ ___  ___
        */
-        XX,      XX,      KC_7,     KC_8,    KC_9, KC_PSCR,       KC_HOME, KC_PGUP,  KC_UP,    KC_PGDN, KC_END,  XX,
-        XX,    KC_0,      KC_4,     KC_5,    KC_6,      XX,       XX,      KC_LEFT,  KC_ENTER, KC_RGHT, XX,      XX,
-        XX,    KC_0,      KC_1,     KC_2,    KC_3,      XX,       XX,      KC_TAB,   KC_DOWN,  XX,      XX,      XX,
+        XX,      XX,      KC_7,     KC_8,    KC_9,      XX,       KC_HOME, KC_PGUP,  KC_UP,    KC_PGDN, KC_END,  XX,
+        XX,    KC_0,      KC_4,     KC_5,    KC_6, KC_COLN,       XX,      KC_LEFT,  KC_ENTER, KC_RGHT, XX,      XX,
+        XX,    KC_0,      KC_1,     KC_2,    KC_3,  KC_DOT,       XX,      KC_TAB,   KC_DOWN,  XX,      XX,      XX,
 
                          __     ,         __  ,    __  ,       __  ,    __  ,    __                      ),
 
