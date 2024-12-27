@@ -60,6 +60,7 @@ enum my_keycodes {
   KK_RIGHT_ARROW,
   KK_FAT_RIGHT_ARROW,
   KK_NOT_EQUAL,
+  KK_KITTY,
 };
 
 /* Layer names */
@@ -133,10 +134,12 @@ const key_override_t *key_overrides[] = {
 const uint16_t PROGMEM esc_combo[]     = {MY_LSFT, KC_SPACE,        COMBO_END};
 const uint16_t PROGMEM ctl_esc_combo[] = {MY_LSFT, KC_SPACE, CTL_S, COMBO_END};
 const uint16_t PROGMEM alt_esc_combo[] = {MY_LSFT, KC_SPACE, ALT_O, COMBO_END};
+/* Kitty prefix */
+const uint16_t PROGMEM win_t_combo[]   = {OSL_SYM, KC_ENTER, COMBO_END};
 /* Two outer bottom keys on a single half to get into bootloader. */
 const uint16_t PROGMEM boot_combo_left[]  = {XX_FAKE,  DK_SYSM, COMBO_END};
 const uint16_t PROGMEM boot_combo_right[] = {KC_ENTER, XX_FAKE, COMBO_END};
-/* On a single half: the outermost bottom pinky key + the middle thumb key to reboot the keyboard. */
+/* On each half: the outermost bottom pinky key + the middle thumb key to reboot the keyboard. */
 const uint16_t PROGMEM reset_combo_left[]  = {XX_FAKE,  MY_LSFT, COMBO_END};
 const uint16_t PROGMEM reset_combo_right[] = {KC_SPACE, XX_FAKE, COMBO_END};
 /* := -> => != */
@@ -149,6 +152,8 @@ combo_t key_combos[] = {
   COMBO(esc_combo, KC_ESC),
   COMBO(ctl_esc_combo, LCTL(KC_ESC)),
   COMBO(alt_esc_combo, LALT(KC_ESC)),
+
+  COMBO(win_t_combo, KK_KITTY),
 
   COMBO(boot_combo_left,  QK_BOOT),
   COMBO(boot_combo_right, QK_BOOT),
@@ -176,6 +181,14 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         layer_invert(L_QWERTY);
       }
       return false; // Skip all further processing of this key
+    case KK_KITTY:
+      if (record->event.pressed) {
+        // win+t
+        register_code(KC_LGUI);
+        tap_code16(KC_T);
+        unregister_code(KC_LGUI);
+      }
+      return false
     case KK_GO_DECLARATION:
       if (record->event.pressed) {
         SEND_STRING(":=");
