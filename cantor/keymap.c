@@ -237,13 +237,13 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                          __     ,         __  ,    __  ,       __  ,    __  ,    __                      ),
 
   [L_SYMBOLS] = LAYOUT_split_3x6_3(/*
-        __  ~   __  __  {   __                       __  }   +   |   ;   __
-        __  `   /   (   [   <                        >   ]   )   \   :   __
+        __  `   __  __  {   __                       __  }   +   |   ;   __
+        __  ~   /   (   [   <                        >   ]   )   \   :   __
         __  __  __  <   __  __                       __  =   >   !   __  __
                            ___  ___ ___     ___ ___  ___
        */
-        XX, KC_TILD,        XX,       XX, KC_LCBR,      XX,       XX,      KC_RCBR,  KC_PLUS,  KC_PIPE, KC_SCLN, XX,
-        XX,  KC_GRV,  KC_SLASH,  KC_LPRN, KC_LBRC, KC_LABK,       KC_RABK, KC_RBRC,  KC_RPRN,  KC_BSLS, KC_COLN, KC_MINUS,
+        XX,  KC_GRV,        XX,       XX, KC_LCBR,      XX,       XX,      KC_RCBR,  KC_PLUS,  KC_PIPE, KC_SCLN, XX,
+        XX, KC_TILD,  KC_SLASH,  KC_LPRN, KC_LBRC, KC_LABK,       KC_RABK, KC_RBRC,  KC_RPRN,  KC_BSLS, KC_COLN, KC_MINUS,
         XX,      XX,        XX,  KC_LABK,      XX,  KC_DEL,       KC_BSPC,  KC_EQL,  KC_RABK,  KC_EXLM, XX,      XX,
 
                          __     ,         __  ,    __  ,       __  ,    __  ,    __                      ),
