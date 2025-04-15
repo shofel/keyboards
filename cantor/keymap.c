@@ -19,33 +19,6 @@
 
 #include QMK_KEYBOARD_H
 
-/* Home-row mods */
-
-// Home-row mods (Boo).
-//
-#define GUI_A LGUI_T(KC_A)
-#define ALT_O LALT_T(KC_O)
-#define LT3_E LT(L_NUM_NAV, KC_E)
-#define CTL_S LCTL_T(KC_S)
-//
-#define CTL_N RCTL_T(KC_N)
-#define LT3_T LT(L_NUM_NAV, KC_T)
-#define ALT_R LALT_T(KC_R)
-#define GUI_I RGUI_T(KC_I)
-
-// Home-row mods (qwerty).
-//
-#define GUI_A LGUI_T(KC_A)
-#define ALT_S LALT_T(KC_S)
-#define LT3_D LT(L_NUM_NAV, KC_D)
-#define CTL_F LCTL_T(KC_F)
-//
-#define CTL_J RCTL_T(KC_J)
-#define LT3_K LT(L_NUM_NAV, KC_K)
-#define ALT_L LALT_T(KC_L)
-#define GUI_SCLN RGUI_T(KC_SCLN)
-
-
 /* Key aliases */
 
 #define __ KC_TRNS
@@ -61,7 +34,26 @@ enum my_keycodes {
   KK_FAT_RIGHT_ARROW,
   KK_NOT_EQUAL,
   KK_KITTY,
+  SMTD_KEYCODES_BEGIN,
+  GUI_A,
+  ALT_O,
+  LT3_E,
+  CTL_S,
+  CTL_N,
+  LT3_T,
+  ALT_R,
+  GUI_I,
+  ALT_S,
+  LT3_D,
+  CTL_F,
+  CTL_J,
+  LT3_K,
+  ALT_L,
+  GUI_SCLN,
+  SMTD_KEYCODES_END,
 };
+
+#include "sm_td.h"
 
 /* Layer names */
 enum my_layer_names {
@@ -170,6 +162,10 @@ combo_t key_combos[] = {
 /* */
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+  if (!process_smtd(keycode, record)) {
+    return false;
+  }
+
   switch (keycode) {
     case SWITCH_LANG:
       if (record->event.pressed) {
@@ -211,6 +207,32 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
       return false;
     default:
       return true; // Process all other keycodes normally
+  }
+}
+
+void on_smtd_action(uint16_t keycode, smtd_action action, uint8_t tap_count) {
+  switch (keycode) {
+    // Home-row mods (Boo).
+    SMTD_MT(GUI_A, KC_A, KC_LEFT_GUI)
+    SMTD_MT(ALT_O, KC_O, KC_LEFT_ALT)
+    SMTD_LT(LT3_E, KC_E, L_NUM_NAV)
+    SMTD_MT(CTL_S, KC_S, KC_LEFT_CTRL)
+    //
+    SMTD_MT(CTL_N, KC_N, KC_RIGHT_CTRL)
+    SMTD_LT(LT3_T, KC_T, L_NUM_NAV)
+    SMTD_MT(ALT_R, KC_R, KC_RIGHT_ALT)
+    SMTD_MT(GUI_I, KC_I, KC_RIGHT_GUI)
+
+    // Home-row mods (qwerty).
+    // SMTD_MT(GUI_A, KC_A, KC_LEFT_GUI) // Duplicates boo
+    SMTD_MT(ALT_S, KC_S, KC_LEFT_ALT)
+    SMTD_LT(LT3_D, KC_D, L_NUM_NAV)
+    SMTD_MT(CTL_F, KC_F, KC_LEFT_CTRL)
+    //
+    SMTD_MT(CTL_J, KC_N, KC_RIGHT_CTRL)
+    SMTD_LT(LT3_K, KC_K, L_NUM_NAV)
+    SMTD_MT(ALT_L, KC_L, KC_RIGHT_ALT)
+    SMTD_MT(GUI_SCLN, KC_SCLN, KC_RIGHT_GUI)
   }
 }
 

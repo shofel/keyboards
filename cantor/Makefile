@@ -18,7 +18,7 @@ keymap_clean:
 
 keymap_copy: keymap_clean
 	mkdir ${keymap_path}
-	cp ./* ${keymap_path}
+	cp -r ./* ${keymap_path}
 
 qmk_flash:
 	cd ${qmk_dir} && ${build_cmd}
