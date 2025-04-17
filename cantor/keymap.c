@@ -238,12 +238,12 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   [L_BOO] = LAYOUT_split_3x6_3(/* BOO LAYOUT
        --- '   ,   u   c   v                        q   f   d   l   y   /
        --- a   o   e   s   g                        b   n   t   r   i   -
-       --- ;   x   .   w   z                        p   h   m   k   j   ---
+       ---     x   .   w   z                        p   h   m   k   j   ---
                        SYS sft SYMO             ret spc ---
        */
            __ , KC_QUOT, KC_COMM,    KC_U,   KC_C,  KC_V,     KC_Q,  KC_F,  KC_D,  KC_L,  KC_Y,   KC_SLASH,
            __ ,   GUI_A,   ALT_O,   LT3_E,  CTL_S,  KC_G,     KC_B,  CTL_N, LT3_T, ALT_R, GUI_I,  KC_MINUS,
-       XX_FAKE, KC_SCLN,    KC_X,  KC_DOT,   KC_W,  KC_Z,     KC_P,  KC_H,  KC_M,  KC_K,  KC_J,   XX_FAKE,
+       XX_FAKE,      XX,    KC_X,  KC_DOT,   KC_W,  KC_Z,     KC_P,  KC_H,  KC_M,  KC_K,  KC_J,   XX_FAKE,
 
                             DK_SYSM , KK_SHIFT , OSL_SYM ,     KC_ENTER , KK_SPACE, SWITCH_LANG          ),
 
@@ -255,13 +255,13 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                          __     ,         __  ,    __  ,       __  ,    __  ,    __                      ),
 
   [L_SYMBOLS] = LAYOUT_split_3x6_3(/*
-        __  `   __  __  {   __                       __  }   +   |   ;   __
-        __  ~   /   (   [   <                        >   ]   )   \   :   __
+        __  `   __  __  {   __                       __  }   +   |   ~   __
+        __  ;   /   (   [   __                       __  ]   )   \   :   __
         __  __  __  <   __  __                       __  =   >   !   __  __
                            ___  ___ ___     ___ ___  ___
        */
-        XX,  KC_GRV,        XX,       XX, KC_LCBR,      XX,       XX,      KC_RCBR,  KC_PLUS,  KC_PIPE, KC_SCLN, XX,
-        XX, KC_TILD,  KC_SLASH,  KC_LPRN, KC_LBRC, KC_LABK,       KC_RABK, KC_RBRC,  KC_RPRN,  KC_BSLS, KC_COLN, KC_MINUS,
+        XX,  KC_GRV,        XX,       XX, KC_LCBR,      XX,       XX,      KC_RCBR,  KC_PLUS,  KC_PIPE, KC_TILD, XX,
+        XX, KC_SCLN,  KC_SLASH,  KC_LPRN, KC_LBRC,      XX,       XX,      KC_RBRC,  KC_RPRN,  KC_BSLS, KC_COLN, KC_MINUS,
         XX,      XX,        XX,  KC_LABK,      XX,  KC_DEL,       KC_BSPC,  KC_EQL,  KC_RABK,  KC_EXLM, XX,      XX,
 
                          __     ,         __  ,    __  ,       __  ,    __  ,    __                      ),
