@@ -23,7 +23,6 @@
 
 #define __ KC_TRNS
 #define XX KC_NO
-#define MY_LSFT OSM(MOD_LSFT)
 
 /* */
 enum my_keycodes {
@@ -34,6 +33,7 @@ enum my_keycodes {
   KK_FAT_RIGHT_ARROW,
   KK_NOT_EQUAL,
   SMTD_KEYCODES_BEGIN,
+  // boo home-row mods
   GUI_A,
   ALT_O,
   LT3_E,
@@ -42,6 +42,7 @@ enum my_keycodes {
   LT3_T,
   ALT_R,
   GUI_I,
+  // qwerty home-row mods
   ALT_S,
   LT3_D,
   CTL_F,
@@ -49,6 +50,10 @@ enum my_keycodes {
   LT3_K,
   ALT_L,
   GUI_SCLN,
+  // thumb keys
+  KK_SHIFT,
+  KK_ENTER,
+  KK_SPACE,
   SMTD_KEYCODES_END,
 };
 
@@ -121,15 +126,15 @@ const key_override_t *key_overrides[] = {
 #define COMBO_ONLY_FROM_LAYER 0
 
 /* Hit both middle thumb keys for esc. */
-const uint16_t PROGMEM esc_combo[]     = {MY_LSFT, KC_SPACE, COMBO_END};
-const uint16_t PROGMEM ctl_esc_combo[] = {MY_LSFT, CTL_S,    COMBO_END};
-const uint16_t PROGMEM alt_esc_combo[] = {MY_LSFT, ALT_O,    COMBO_END};
+const uint16_t PROGMEM esc_combo[]     = {KK_SHIFT, KK_SPACE, COMBO_END};
+const uint16_t PROGMEM ctl_esc_combo[] = {KK_SHIFT, CTL_S,    COMBO_END};
+const uint16_t PROGMEM alt_esc_combo[] = {KK_SHIFT, ALT_O,    COMBO_END};
 /* Two outer bottom keys on a single half to get into bootloader. */
 const uint16_t PROGMEM boot_combo_left[]  = {XX_FAKE,  DK_SYSM, COMBO_END};
-const uint16_t PROGMEM boot_combo_right[] = {KC_ENTER, XX_FAKE, COMBO_END};
+const uint16_t PROGMEM boot_combo_right[] = {KK_ENTER, XX_FAKE, COMBO_END};
 /* On each half: the outermost bottom pinky key + the middle thumb key to reboot the keyboard. */
-const uint16_t PROGMEM reset_combo_left[]  = {XX_FAKE,  MY_LSFT, COMBO_END};
-const uint16_t PROGMEM reset_combo_right[] = {KC_SPACE, XX_FAKE, COMBO_END};
+const uint16_t PROGMEM reset_combo_left[]  = {XX_FAKE,  KK_SHIFT, COMBO_END};
+const uint16_t PROGMEM reset_combo_right[] = {KK_SPACE, XX_FAKE, COMBO_END};
 /* := -> => != */
 const uint16_t PROGMEM go_declaration_combo[]  = {KC_H, GUI_I, COMBO_END};
 const uint16_t PROGMEM right_arrow_combo[]     = {KC_M, GUI_I, COMBO_END};
@@ -219,6 +224,11 @@ void on_smtd_action(uint16_t keycode, smtd_action action, uint8_t tap_count) {
     SMTD_LT(LT3_K, KC_K, L_NUM_NAV)
     SMTD_MT(ALT_L, KC_L, KC_RIGHT_ALT)
     SMTD_MT(GUI_SCLN, KC_SCLN, KC_RIGHT_GUI)
+
+    // Thumb keys
+    SMTD_MT(KK_SHIFT, KC_DOT  , KC_LEFT_SHIFT)
+    SMTD_LT(KK_ENTER, KC_ENTER, L_SYMBOLS)
+    SMTD_LT(KK_SPACE, KC_SPACE, L_SYMBOLS)
   }
 }
 
@@ -235,7 +245,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
            __ ,   GUI_A,   ALT_O,   LT3_E,  CTL_S,  KC_G,     KC_B,  CTL_N, LT3_T, ALT_R, GUI_I,  KC_MINUS,
        XX_FAKE, KC_SCLN,    KC_X,  KC_DOT,   KC_W,  KC_Z,     KC_P,  KC_H,  KC_M,  KC_K,  KC_J,   XX_FAKE,
 
-                            DK_SYSM , MY_LSFT , OSL_SYM ,     KC_ENTER , KC_SPC,  SWITCH_LANG            ),
+                            DK_SYSM , KK_SHIFT , OSL_SYM ,     KC_ENTER , KK_SPACE, SWITCH_LANG          ),
 
   [L_QWERTY] = LAYOUT_split_3x6_3(
         KC_GRV,    KC_Q,    KC_W,    KC_E,   KC_R,  KC_T,     KC_Y,  KC_U,  KC_I,    KC_O,   KC_P,     KC_LBRC,
