@@ -41,7 +41,8 @@ enum my_keycodes {
   LT3_T,
   ALT_R,
   GUI_I,
-  // qwerty home-row mods
+  // ru home-row mods
+  RH_A,
   ALT_S,
   LT3_D,
   CTL_F,
@@ -185,7 +186,6 @@ void on_smtd_action(uint16_t keycode, smtd_action action, uint8_t tap_count) {
     SMTD_MT(KK_SHIFT, KC_DOT  , KC_LEFT_SHIFT)
     SMTD_LT(KK_ENTER, KC_ENTER, L_SYMBOLS)
     SMTD_LT(KK_SPACE, KC_SPACE, L_SYMBOLS)
-
     /* tap = english, hold = mouse */
     case KK_EN:
     {
@@ -252,6 +252,29 @@ void on_smtd_action(uint16_t keycode, smtd_action action, uint8_t tap_count) {
       }
       break;
     }
+
+    /* RU home row */
+    case RH_A: // RH = russian homerow
+    {
+      switch (action) {
+        case SMTD_ACTION_TOUCH:
+          break;
+
+        case SMTD_ACTION_TAP:
+          register_unicodemap(CYR_LC_A);
+          break;
+
+        case SMTD_ACTION_HOLD:
+          layer_off(L_RUSSIAN);
+          add_mods(MOD_MASK_CTRL);
+          break;
+
+        case SMTD_ACTION_RELEASE:
+          layer_on(L_RUSSIAN);
+          del_mods(MOD_MASK_CTRL);
+          break;
+      }
+    }
   }
 }
 
@@ -275,7 +298,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
       //  фывап ролджэ
       //  ячсми тьбю.
          RU_YO,   RU_Y,    RU_TS,    RU_U,   RU_K,  RU_E,     RU_N,  RU_G,   RU_SH, RU_SHCH,RU_Z,    RU_H,
-           __ ,   RU_F,    RU_YERU,  RU_V,   RU_A,  RU_P,     RU_R,  RU_O,   RU_L,  RU_D,   RU_ZH,  RU_EE,
+           __ ,   RU_F,    RU_YERU,  RU_V,   RH_A,  RU_P,     RU_R,  RU_O,   RU_L,  RU_D,   RU_ZH,  RU_EE,
            __ ,   RU_YA,   RU_CH,    RU_S,   RU_M,  RU_I,     RU_T,  RU_SOFT,RU_B,  RU_YU,  KC_DOT, RU_HARD,
 
                          __     ,         __  ,    __  ,       __  ,    __  ,    __                      ),
