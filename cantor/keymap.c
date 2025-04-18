@@ -54,6 +54,7 @@ enum my_keycodes {
   KK_SHIFT,
   KK_ENTER,
   KK_SPACE,
+  KK_EN,
   SMTD_KEYCODES_END,
 };
 
@@ -65,50 +66,14 @@ enum my_layer_names {
   L_RUSSIAN,
   L_SYMBOLS,
   L_NUM_NAV,
-  L_FKEYS_SYSTEM,
+  L_FKEYS,
   L_MOUSE,
   L_RGB,
 };
 
 #define TG_RU   TG(L_RUSSIAN)
 #define OSL_SYM OSL(L_SYMBOLS)
-#define MO_SYS  MO(L_FKEYS_SYSTEM)
 #define MO_RGB  MO(L_RGB)
-
-/* Tap dance */
-
-enum {
-  TD_SYS_MOUSE,
-};
-
-void td_sym_mouse_on_tap(tap_dance_state_t *state, void *user_data) {
-};
-
-void td_sym_mouse_on_finish(tap_dance_state_t *state, void *user_data) {
-  if (!state->pressed) {
-    switch (state->count) {
-    };
-  } else {
-    switch (state->count) {
-      case 1: layer_on(L_MOUSE); break;
-      case 2: layer_on(L_FKEYS_SYSTEM); break;
-    };
-  };
-};
-
-void td_sym_mouse_on_reset(tap_dance_state_t *state, void *user_data) {
-  layer_off(L_FKEYS_SYSTEM);
-  layer_off(L_MOUSE);
-};
-
-tap_dance_action_t tap_dance_actions[] = {
-  [TD_SYS_MOUSE] = ACTION_TAP_DANCE_FN_ADVANCED(td_sym_mouse_on_tap,
-                                                td_sym_mouse_on_finish,
-                                                td_sym_mouse_on_reset),
-};
-
-/* DK is for "dance key" */
-#define DK_SYSM TD(TD_SYS_MOUSE)
 
 /* Key overrides */
 
@@ -130,7 +95,7 @@ const uint16_t PROGMEM esc_combo[]     = {KK_SHIFT, KK_SPACE, COMBO_END};
 const uint16_t PROGMEM ctl_esc_combo[] = {KK_SHIFT, CTL_S,    COMBO_END};
 const uint16_t PROGMEM alt_esc_combo[] = {KK_SHIFT, ALT_O,    COMBO_END};
 /* Two outer bottom keys on a single half to get into bootloader. */
-const uint16_t PROGMEM boot_combo_left[]  = {XX_FAKE,  DK_SYSM, COMBO_END};
+const uint16_t PROGMEM boot_combo_left[]  = {XX_FAKE,  OSL_SYM, COMBO_END};
 const uint16_t PROGMEM boot_combo_right[] = {KK_ENTER, XX_FAKE, COMBO_END};
 /* On each half: the outermost bottom pinky key + the middle thumb key to reboot the keyboard. */
 const uint16_t PROGMEM reset_combo_left[]  = {XX_FAKE,  KK_SHIFT, COMBO_END};
@@ -219,6 +184,48 @@ void on_smtd_action(uint16_t keycode, smtd_action action, uint8_t tap_count) {
     SMTD_MT(KK_SHIFT, KC_DOT  , KC_LEFT_SHIFT)
     SMTD_LT(KK_ENTER, KC_ENTER, L_SYMBOLS)
     SMTD_LT(KK_SPACE, KC_SPACE, L_SYMBOLS)
+
+    /* tap = english
+       hold = mouse
+       tap-hold = sys */
+    case KK_EN:
+    {
+      switch (action) {
+        case SMTD_ACTION_TOUCH:
+          break;
+
+        case SMTD_ACTION_TAP:
+          layer_off(L_RUSSIAN);
+          break;
+
+        case SMTD_ACTION_HOLD:
+          switch (tap_count) {
+            case 0:
+              layer_on(L_MOUSE);
+              break;
+            case 1:
+              layer_on(L_FKEYS);
+              break;
+            default:
+              break;
+          }
+          break;
+
+        case SMTD_ACTION_RELEASE:
+          switch (tap_count) {
+            case 0:
+              layer_off(L_MOUSE);
+              break;
+            case 1:
+              layer_off(L_FKEYS);
+              break;
+            default:
+              break;
+          }
+          break;
+      }
+      break;
+    }
   }
 }
 
@@ -408,13 +415,13 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
        --- '   ,   u   c   v                        q   f   d   l   y   /
        --- a   o   e   s   g                        b   n   t   r   i   -
        ---     x   .   w   z                        p   h   m   k   j   ---
-                       SYS sft SYMO             ret spc ---
+                        EN sft SYM              ret spc RU
        */
            __ , KC_QUOT, KC_COMM,    KC_U,   KC_C,  KC_V,     KC_Q,  KC_F,  KC_D,  KC_L,  KC_Y,   KC_SLASH,
            __ ,   GUI_A,   ALT_O,   LT3_E,  CTL_S,  KC_G,     KC_B,  CTL_N, LT3_T, ALT_R, GUI_I,  KC_MINUS,
        XX_FAKE,      XX,    KC_X,  KC_DOT,   KC_W,  KC_Z,     KC_P,  KC_H,  KC_M,  KC_K,  KC_J,   XX_FAKE,
 
-                            DK_SYSM , KK_SHIFT , OSL_SYM ,     KK_ENTER , KK_SPACE, TG_RU          ),
+                              KK_EN , KK_SHIFT , OSL_SYM ,     KK_ENTER , KK_SPACE, TG_RU          ),
 
   [L_RUSSIAN] = LAYOUT_split_3x6_3(
       // ёйцуке нгшщзх
@@ -450,7 +457,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
                          __     ,         __  ,    __  ,       __  ,    __  ,    __                      ),
 
-  [L_FKEYS_SYSTEM] = LAYOUT_split_3x6_3(/*
+  [L_FKEYS] = LAYOUT_split_3x6_3(/*
         __ F11  F7  F8  F9  __                       __  br↑ vl↑ __  __  __
         __ F11  F4  F5  F6  __                       __  __  mut __  __  __
         __ F10  F1  F2  F3  __                       __  br↓ vl↓ __  __  __
