@@ -186,9 +186,7 @@ void on_smtd_action(uint16_t keycode, smtd_action action, uint8_t tap_count) {
     SMTD_LT(KK_ENTER, KC_ENTER, L_SYMBOLS)
     SMTD_LT(KK_SPACE, KC_SPACE, L_SYMBOLS)
 
-    /* tap = english
-       hold = mouse
-       tap-hold = sys */
+    /* tap = english, hold = mouse */
     case KK_EN:
     {
       switch (action) {
@@ -204,9 +202,6 @@ void on_smtd_action(uint16_t keycode, smtd_action action, uint8_t tap_count) {
             case 0:
               layer_on(L_MOUSE);
               break;
-            case 1:
-              layer_on(L_FKEYS);
-              break;
             default:
               break;
           }
@@ -217,7 +212,37 @@ void on_smtd_action(uint16_t keycode, smtd_action action, uint8_t tap_count) {
             case 0:
               layer_off(L_MOUSE);
               break;
-            case 1:
+            default:
+              break;
+          }
+          break;
+      }
+      break;
+    }
+    /* tap = ru, hold = fkeys */
+    case KK_RU:
+    {
+      switch (action) {
+        case SMTD_ACTION_TOUCH:
+          break;
+
+        case SMTD_ACTION_TAP:
+          layer_on(L_RUSSIAN);
+          break;
+
+        case SMTD_ACTION_HOLD:
+          switch (tap_count) {
+            case 0:
+              layer_on(L_FKEYS);
+              break;
+            default:
+              break;
+          }
+          break;
+
+        case SMTD_ACTION_RELEASE:
+          switch (tap_count) {
+            case 0:
               layer_off(L_FKEYS);
               break;
             default:
@@ -243,7 +268,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
            __ ,   GUI_A,   ALT_O,   LT3_E,  CTL_S,  KC_G,     KC_B,  CTL_N, LT3_T, ALT_R, GUI_I,  KC_MINUS,
        XX_FAKE,      XX,    KC_X,  KC_DOT,   KC_W,  KC_Z,     KC_P,  KC_H,  KC_M,  KC_K,  KC_J,   XX_FAKE,
 
-                              KK_EN , KK_SHIFT , OSL_SYM ,     KK_ENTER , KK_SPACE, TG_RU          ),
+                              KK_EN , KK_SHIFT , OSL_SYM ,     KK_ENTER , KK_SPACE, KK_RU          ),
 
   [L_RUSSIAN] = LAYOUT_split_3x6_3(
       // ёйцуке нгшщзх
