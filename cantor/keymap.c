@@ -170,14 +170,14 @@ void on_smtd_action(uint16_t keycode, smtd_action action, uint8_t tap_count) {
     SMTD_MT(GUI_I, KC_I, KC_RIGHT_GUI)
 
     /* RU home row */
-    SM_MU(RH_F, CYR_LC_F, KC_LEFT_GUI)
-    SM_MU(RH_Y, CYR_LC_YERU, KC_LEFT_ALT)
+    SM_MU(RH_F, RU_F, KC_LEFT_GUI)
+    SM_MU(RH_Y, RU_YERU, KC_LEFT_ALT)
     // SM_LU(RH_V, CYR_LC_V, L_NUM_NAV)
-    SM_MU(RH_A, CYR_LC_A, KC_LEFT_CTRL)
-    SM_MU(RH_O, CYR_LC_O, KC_LEFT_CTRL)
+    SM_MU(RH_A, RU_A, KC_LEFT_CTRL)
+    SM_MU(RH_O, RU_O, KC_LEFT_CTRL)
     // SM_LU(RH_L, CYR_LC_L, L_NUM_NAV)
-    SM_MU(RH_D, CYR_LC_D, KC_LEFT_ALT)
-    SM_MU(RH_Z, CYR_LC_ZH, KC_LEFT_GUI)
+    SM_MU(RH_D, RU_D, KC_LEFT_ALT)
+    SM_MU(RH_Z, RU_ZH, KC_LEFT_GUI)
 
     // Thumb keys
     SMTD_MT(KK_SHIFT, KC_DOT  , KC_LEFT_SHIFT)

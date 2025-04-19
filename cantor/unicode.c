@@ -187,7 +187,7 @@ const uint32_t PROGMEM unicode_map[] = {
           break;                            \
                                             \
         case SMTD_ACTION_TAP:               \
-          register_unicodemap(unicode_i);   \
+          register_unicodemap(unicodemap_index(unicode_i));   \
           break;                            \
                                             \
         case SMTD_ACTION_HOLD:              \
