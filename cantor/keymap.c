@@ -41,15 +41,15 @@ enum my_keycodes {
   LT3_T,
   ALT_R,
   GUI_I,
-  // ru home-row mods
+  // ru home-row mods // RH = russian homerow
+  RH_F,
+  RH_Y,
+  RH_V,
   RH_A,
-  ALT_S,
-  LT3_D,
-  CTL_F,
-  CTL_J,
-  LT3_K,
-  ALT_L,
-  GUI_SCLN,
+  RH_O,
+  RH_L,
+  RH_D,
+  RH_Z,
   // thumb keys
   KK_RU,
   KK_SHIFT,
@@ -73,9 +73,7 @@ enum my_layer_names {
   L_RGB,
 };
 
-#define TG_RU   TG(L_RUSSIAN)
 #define OSL_SYM OSL(L_SYMBOLS)
-#define MO_RGB  MO(L_RGB)
 
 /* Key overrides */
 
@@ -171,16 +169,15 @@ void on_smtd_action(uint16_t keycode, smtd_action action, uint8_t tap_count) {
     SMTD_MT(ALT_R, KC_R, KC_RIGHT_ALT)
     SMTD_MT(GUI_I, KC_I, KC_RIGHT_GUI)
 
-    // Home-row mods (qwerty).
-    // SMTD_MT(GUI_A, KC_A, KC_LEFT_GUI) // Duplicates boo
-    SMTD_MT(ALT_S, KC_S, KC_LEFT_ALT)
-    SMTD_LT(LT3_D, KC_D, L_NUM_NAV)
-    SMTD_MT(CTL_F, KC_F, KC_LEFT_CTRL)
-    //
-    SMTD_MT(CTL_J, KC_N, KC_RIGHT_CTRL)
-    SMTD_LT(LT3_K, KC_K, L_NUM_NAV)
-    SMTD_MT(ALT_L, KC_L, KC_RIGHT_ALT)
-    SMTD_MT(GUI_SCLN, KC_SCLN, KC_RIGHT_GUI)
+    /* RU home row */
+    SM_MU(RH_F, CYR_LC_F, KC_LEFT_GUI)
+    SM_MU(RH_Y, CYR_LC_YERU, KC_LEFT_ALT)
+    // SM_LU(RH_V, CYR_LC_V, L_NUM_NAV)
+    SM_MU(RH_A, CYR_LC_A, KC_LEFT_CTRL)
+    SM_MU(RH_O, CYR_LC_O, KC_LEFT_CTRL)
+    // SM_LU(RH_L, CYR_LC_L, L_NUM_NAV)
+    SM_MU(RH_D, CYR_LC_D, KC_LEFT_ALT)
+    SM_MU(RH_Z, CYR_LC_ZH, KC_LEFT_GUI)
 
     // Thumb keys
     SMTD_MT(KK_SHIFT, KC_DOT  , KC_LEFT_SHIFT)
@@ -252,29 +249,6 @@ void on_smtd_action(uint16_t keycode, smtd_action action, uint8_t tap_count) {
       }
       break;
     }
-
-    /* RU home row */
-    case RH_A: // RH = russian homerow
-    {
-      switch (action) {
-        case SMTD_ACTION_TOUCH:
-          break;
-
-        case SMTD_ACTION_TAP:
-          register_unicodemap(CYR_LC_A);
-          break;
-
-        case SMTD_ACTION_HOLD:
-          layer_off(L_RUSSIAN);
-          add_mods(MOD_MASK_CTRL);
-          break;
-
-        case SMTD_ACTION_RELEASE:
-          layer_on(L_RUSSIAN);
-          del_mods(MOD_MASK_CTRL);
-          break;
-      }
-    }
   }
 }
 
@@ -297,8 +271,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
       // ёйцуке нгшщзх
       //  фывап ролджэ
       //  ячсми тьбю.
-         RU_YO,   RU_Y,    RU_TS,    RU_U,   RU_K,  RU_E,     RU_N,  RU_G,   RU_SH, RU_SHCH,RU_Z,    RU_H,
-           __ ,   RU_F,    RU_YERU,  RU_V,   RH_A,  RU_P,     RU_R,  RU_O,   RU_L,  RU_D,   RU_ZH,  RU_EE,
+         RU_YO,   RU_Y,    RU_TS,    RU_U,   RU_K,  RU_E,     RU_N,  RU_G,   RU_SH, RU_SHCH,RU_Z,   RU_H,
+           __ ,   RH_F,    RH_Y,     RH_V,   RH_A,  RU_P,     RU_R,  RH_O,   RH_L,  RH_D,   RH_Z,   RU_EE,
            __ ,   RU_YA,   RU_CH,    RU_S,   RU_M,  RU_I,     RU_T,  RU_SOFT,RU_B,  RU_YU,  KC_DOT, RU_HARD,
 
                          __     ,         __  ,    __  ,       __  ,    __  ,    __                      ),

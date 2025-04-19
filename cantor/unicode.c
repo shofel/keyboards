@@ -179,4 +179,27 @@ const uint32_t PROGMEM unicode_map[] = {
 /* SM layer - unicode */
 // #define SM_LU
 /* SM modifier unicode */
-// #define SM_MU
+#define SM_MU(macro_key, unicode_i, mod)    \
+    case macro_key:                         \
+    {                                       \
+      switch (action) {                     \
+        case SMTD_ACTION_TOUCH:             \
+          break;                            \
+                                            \
+        case SMTD_ACTION_TAP:               \
+          register_unicodemap(unicode_i);   \
+          break;                            \
+                                            \
+        case SMTD_ACTION_HOLD:              \
+          layer_off(L_RUSSIAN);             \
+          register_mods(MOD_BIT(mod));      \
+          break;                            \
+                                            \
+        case SMTD_ACTION_RELEASE:           \
+          layer_on(L_RUSSIAN);              \
+          unregister_mods(MOD_BIT(mod));    \
+          break;                            \
+      }                                     \
+      break;                                \
+    }                                       \
+
