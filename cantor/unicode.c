@@ -68,6 +68,9 @@ enum unicode_names {
   RU_UC_EE,
   RU_UC_YU,
   RU_UC_YA,
+
+  U_DOT,
+  U_COMMA,
 };
 
 const uint32_t PROGMEM unicode_map[] = {
@@ -139,6 +142,9 @@ const uint32_t PROGMEM unicode_map[] = {
   [RU_UC_EE] = 0x42D,
   [RU_UC_YU] = 0x42E,
   [RU_UC_YA] = 0x42F,
+
+  [U_DOT] = 0x02E,
+  [U_COMMA] = 0x02C,
 };
 
 // Combine lower and upper case letters as a single key
@@ -175,6 +181,7 @@ const uint32_t PROGMEM unicode_map[] = {
 #define RU_EE UP(RU_LC_EE, RU_UC_EE)
 #define RU_YU UP(RU_LC_YU, RU_UC_YU)
 #define RU_YA UP(RU_LC_YA, RU_UC_YA)
+#define RU_DOT UP(U_DOT, U_COMMA)
 
 /* SM hold=layer tap=unicodemap */
 #define SM_LU(macro_key, unicode_i, layer)  \

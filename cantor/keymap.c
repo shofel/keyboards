@@ -298,7 +298,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
       //  ячсми тьбю.
          RU_YO,   RU_Y,    RU_TS,    RU_U,   RU_K,  RU_E,     RU_N,  RU_G,   RU_SH, RU_SHCH,RU_Z,   RU_H,
            __ ,   RH_F,    RH_Y,     RH_V,   RH_A,  RU_P,     RU_R,  RH_O,   RH_L,  RH_D,   RH_Z,   RU_EE,
-           __ ,   RU_YA,   RU_CH,    RU_S,   RU_M,  RU_I,     RU_T,  RU_SOFT,RU_B,  RU_YU,  KC_DOT, RU_HARD,
+           __ ,   RU_YA,   RU_CH,    RU_S,   RU_M,  RU_I,     RU_T,  RU_SOFT,RU_B,  RU_YU,  RU_DOT, RU_HARD,
 
                          __     ,         __  ,    __  ,       __  ,    __  ,    __                      ),
 
