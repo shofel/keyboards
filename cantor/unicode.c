@@ -176,9 +176,29 @@ const uint32_t PROGMEM unicode_map[] = {
 #define RU_YU UP(RU_LC_YU, RU_UC_YU)
 #define RU_YA UP(RU_LC_YA, RU_UC_YA)
 
-/* SM layer - unicode */
-// #define SM_LU
-/* SM modifier unicode */
+/* SM hold=layer tap=unicodemap */
+#define SM_LU(macro_key, unicode_i, layer)  \
+    case macro_key:                         \
+    {                                       \
+      switch (action) {                     \
+        case SMTD_ACTION_TOUCH:             \
+          break;                            \
+                                            \
+        case SMTD_ACTION_TAP:               \
+          register_unicodemap(unicodemap_index(unicode_i));   \
+          break;                            \
+                                            \
+        case SMTD_ACTION_HOLD:              \
+          layer_on(L_NUM_NAV);              \
+          break;                            \
+                                            \
+        case SMTD_ACTION_RELEASE:           \
+          layer_off(L_NUM_NAV);              \
+          break;                            \
+      }                                     \
+      break;                                \
+    }                                       \
+/* SM hold=modifier tap=unicodemap */
 #define SM_MU(macro_key, unicode_i, mod)    \
     case macro_key:                         \
     {                                       \

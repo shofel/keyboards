@@ -189,10 +189,10 @@ void on_smtd_action(uint16_t keycode, smtd_action action, uint8_t tap_count) {
     /* RU home row */
     SM_MU(RH_F, RU_F, KC_LEFT_GUI)
     SM_MU(RH_Y, RU_YERU, KC_LEFT_ALT)
-    // SM_LU(RH_V, CYR_LC_V, L_NUM_NAV)
+    SM_LU(RH_V, RU_V, L_NUM_NAV)
     SM_MU(RH_A, RU_A, KC_LEFT_CTRL)
     SM_MU(RH_O, RU_O, KC_LEFT_CTRL)
-    // SM_LU(RH_L, CYR_LC_L, L_NUM_NAV)
+    SM_LU(RH_L, RU_L, L_NUM_NAV)
     SM_MU(RH_D, RU_D, KC_LEFT_ALT)
     SM_MU(RH_Z, RU_ZH, KC_LEFT_GUI)
 
