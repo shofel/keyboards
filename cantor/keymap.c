@@ -33,14 +33,14 @@ enum my_keycodes {
   KK_NOT_EQUAL,
   SMTD_KEYCODES_BEGIN,
   // boo home-row mods
-  GUI_A,
-  ALT_O,
-  LT3_E,
-  CTL_S,
-  CTL_N,
-  LT3_T,
-  ALT_R,
-  GUI_I,
+  BH_A,
+  BH_O,
+  BH_E,
+  BH_S,
+  BH_N,
+  BH_T,
+  BH_R,
+  BH_I,
   // ru home-row mods // RH = russian homerow
   RH_F,
   RH_Y,
@@ -92,8 +92,8 @@ const key_override_t *key_overrides[] = {
 
 /* Hit both middle thumb keys for esc. */
 const uint16_t PROGMEM esc_combo[]     = {KK_SHIFT, KK_SPACE, COMBO_END};
-const uint16_t PROGMEM ctl_esc_combo[] = {KK_SHIFT, CTL_S,    COMBO_END};
-const uint16_t PROGMEM alt_esc_combo[] = {KK_SHIFT, ALT_O,    COMBO_END};
+const uint16_t PROGMEM ctl_esc_combo[] = {KK_SHIFT, BH_S, COMBO_END};
+const uint16_t PROGMEM alt_esc_combo[] = {KK_SHIFT, BH_O, COMBO_END};
 /* Two outer bottom keys on a single half to get into bootloader. */
 const uint16_t PROGMEM boot_combo_left[]  = {XX_FAKE,  OSL_SYM, COMBO_END};
 const uint16_t PROGMEM boot_combo_right[] = {KK_ENTER, XX_FAKE, COMBO_END};
@@ -101,8 +101,8 @@ const uint16_t PROGMEM boot_combo_right[] = {KK_ENTER, XX_FAKE, COMBO_END};
 const uint16_t PROGMEM reset_combo_left[]  = {XX_FAKE,  KK_SHIFT, COMBO_END};
 const uint16_t PROGMEM reset_combo_right[] = {KK_SPACE, XX_FAKE, COMBO_END};
 /* := -> => != */
-const uint16_t PROGMEM go_declaration_combo[]  = {KC_H, GUI_I, COMBO_END};
-const uint16_t PROGMEM right_arrow_combo[]     = {KC_M, GUI_I, COMBO_END};
+const uint16_t PROGMEM go_declaration_combo[]  = {KC_H, BH_I, COMBO_END};
+const uint16_t PROGMEM right_arrow_combo[]     = {KC_M, BH_I, COMBO_END};
 const uint16_t PROGMEM fat_right_arrow_combo[] = {KC_H, KC_M, COMBO_END};
 const uint16_t PROGMEM not_equal_combo[]       = {KC_H, KC_K, COMBO_END};
 
@@ -159,15 +159,15 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 void on_smtd_action(uint16_t keycode, smtd_action action, uint8_t tap_count) {
   switch (keycode) {
     // Home-row mods (Boo).
-    SMTD_MT(GUI_A, KC_A, KC_LEFT_GUI)
-    SMTD_MT(ALT_O, KC_O, KC_LEFT_ALT)
-    SMTD_LT(LT3_E, KC_E, L_NUM_NAV)
-    SMTD_MT(CTL_S, KC_S, KC_LEFT_CTRL)
+    SMTD_MT(BH_A, KC_A, KC_LEFT_GUI)
+    SMTD_MT(BH_O, KC_O, KC_LEFT_ALT)
+    SMTD_LT(BH_E, KC_E, L_NUM_NAV)
+    SMTD_MT(BH_S, KC_S, KC_LEFT_CTRL)
     //
-    SMTD_MT(CTL_N, KC_N, KC_RIGHT_CTRL)
-    SMTD_LT(LT3_T, KC_T, L_NUM_NAV)
-    SMTD_MT(ALT_R, KC_R, KC_RIGHT_ALT)
-    SMTD_MT(GUI_I, KC_I, KC_RIGHT_GUI)
+    SMTD_MT(BH_N, KC_N, KC_RIGHT_CTRL)
+    SMTD_LT(BH_T, KC_T, L_NUM_NAV)
+    SMTD_MT(BH_R, KC_R, KC_RIGHT_ALT)
+    SMTD_MT(BH_I, KC_I, KC_RIGHT_GUI)
 
     /* RU home row */
     SM_MU(RH_F, RU_F, KC_LEFT_GUI)
@@ -262,7 +262,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                         EN sft SYM              ret spc RU
        */
            __ , KC_QUOT, KC_COMM,    KC_U,   KC_C,  KC_V,     KC_Q,  KC_F,  KC_D,  KC_L,  KC_Y,   KC_SLASH,
-           __ ,   GUI_A,   ALT_O,   LT3_E,  CTL_S,  KC_G,     KC_B,  CTL_N, LT3_T, ALT_R, GUI_I,  KC_MINUS,
+           __ ,    BH_A,    BH_O,    BH_E,   BH_S,  KC_G,     KC_B,  BH_N,  BH_T,  BH_R,  BH_I,   KC_MINUS,
        XX_FAKE,      XX,    KC_X,  KC_DOT,   KC_W,  KC_Z,     KC_P,  KC_H,  KC_M,  KC_K,  KC_J,   XX_FAKE,
 
                               KK_EN , KK_SHIFT , OSL_SYM ,     KK_ENTER , KK_SPACE, KK_RU          ),
