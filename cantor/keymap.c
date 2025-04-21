@@ -54,7 +54,7 @@ enum my_keycodes {
   KK_RU,
   KK_ENTER,
   KK_SPACE,
-  KK_EN,
+  KK_MO,
   SMTD_KEYCODES_END,
 };
 
@@ -125,12 +125,29 @@ combo_t key_combos[] = {
 
 /* */
 
+typedef enum {
+  Ru, En,
+} SlavaLang;
+void slava_set_language(SlavaLang l) {
+  switch (l) {
+    case Ru:
+      layer_on(L_RUSSIAN);
+      break;
+    case En:
+      layer_off(L_RUSSIAN);
+      break;
+  }
+}
+
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   if (!process_smtd(keycode, record)) {
     return false;
   }
 
   switch (keycode) {
+    case KC_ESC: /* Switch language in vim. */
+      slava_set_language(En);
+      return true;
     case KK_GO_DECLARATION:
       if (record->event.pressed) {
         SEND_STRING(":=");
@@ -158,7 +175,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 
 void on_smtd_action(uint16_t keycode, smtd_action action, uint8_t tap_count) {
   switch (keycode) {
-    // Home-row mods (Boo).
+    /* Boo home-row mods. */
     SMTD_MT(BH_A, KC_A, KC_LEFT_GUI)
     SMTD_MT(BH_O, KC_O, KC_LEFT_ALT)
     SMTD_LT(BH_E, KC_E, L_NUM_NAV)
@@ -182,15 +199,14 @@ void on_smtd_action(uint16_t keycode, smtd_action action, uint8_t tap_count) {
     // Thumb keys
     SMTD_LT(KK_ENTER, KC_ENTER, L_SYMBOLS)
     SMTD_LT(KK_SPACE, KC_SPACE, L_SYMBOLS)
-    /* tap = english, hold = mouse */
-    case KK_EN:
+    /* hold = mouse */
+    case KK_MO:
     {
       switch (action) {
         case SMTD_ACTION_TOUCH:
           break;
 
         case SMTD_ACTION_TAP:
-          layer_off(L_RUSSIAN);
           break;
 
         case SMTD_ACTION_HOLD:
@@ -215,7 +231,7 @@ void on_smtd_action(uint16_t keycode, smtd_action action, uint8_t tap_count) {
       }
       break;
     }
-    /* tap = ru, hold = fkeys */
+    /* tap = ru, taptap = en, hold = fkeys */
     case KK_RU:
     {
       switch (action) {
@@ -223,7 +239,17 @@ void on_smtd_action(uint16_t keycode, smtd_action action, uint8_t tap_count) {
           break;
 
         case SMTD_ACTION_TAP:
-          layer_on(L_RUSSIAN);
+          switch (tap_count) {
+            case 0:
+            case 1:
+              slava_set_language(Ru);
+              break;
+            case 2:
+              slava_set_language(En);
+              break;
+            default:
+              break;
+          }
           break;
 
         case SMTD_ACTION_HOLD:
@@ -264,7 +290,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
            __ ,    BH_A,    BH_O,    BH_E,   BH_S,  KC_G,     KC_B,  BH_N,  BH_T,  BH_R,  BH_I,   KC_MINUS,
        XX_FAKE,      XX,    KC_X,  KC_DOT,   KC_W,  KC_Z,     KC_P,  KC_H,  KC_M,  KC_K,  KC_J,   XX_FAKE,
 
-                              KK_EN , KK_SHIFT , OSL_SYM ,     KK_ENTER , KK_SPACE, KK_RU          ),
+                              KK_MO , KK_SHIFT , OSL_SYM ,     KK_ENTER , KK_SPACE, KK_RU          ),
 
   [L_RUSSIAN] = LAYOUT_split_3x6_3(
       // ёйцуке нгшщзх
