@@ -52,7 +52,6 @@ enum my_keycodes {
   RH_Z,
   // thumb keys
   KK_RU,
-  KK_SHIFT,
   KK_ENTER,
   KK_SPACE,
   KK_EN,
@@ -73,6 +72,7 @@ enum my_layer_names {
   L_RGB,
 };
 
+#define KK_SHIFT OSM(MOD_LSFT)
 #define OSL_SYM OSL(L_SYMBOLS)
 
 /* Key overrides */
@@ -180,7 +180,6 @@ void on_smtd_action(uint16_t keycode, smtd_action action, uint8_t tap_count) {
     SM_MU(RH_Z, RU_ZH, KC_LEFT_GUI)
 
     // Thumb keys
-    SMTD_MT(KK_SHIFT, KC_DOT  , KC_LEFT_SHIFT)
     SMTD_LT(KK_ENTER, KC_ENTER, L_SYMBOLS)
     SMTD_LT(KK_SPACE, KC_SPACE, L_SYMBOLS)
     /* tap = english, hold = mouse */
