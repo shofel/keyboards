@@ -173,6 +173,17 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   }
 }
 
+uint32_t get_smtd_timeout(uint16_t keycode, smtd_timeout timeout) {
+  switch (keycode) {
+    case BH_T:
+      if (timeout == SMTD_TIMEOUT_TAP) return SMTD_GLOBAL_TAP_TERM + 50;
+      if (timeout == SMTD_TIMEOUT_RELEASE) return SMTD_GLOBAL_RELEASE_TERM - 10;
+      break;
+  }
+
+  return get_smtd_timeout_default(timeout);
+}
+
 void on_smtd_action(uint16_t keycode, smtd_action action, uint8_t tap_count) {
   switch (keycode) {
     /* Boo home-row mods. */
