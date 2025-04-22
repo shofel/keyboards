@@ -31,6 +31,8 @@ enum my_keycodes {
   KK_RIGHT_ARROW,
   KK_FAT_RIGHT_ARROW,
   KK_NOT_EQUAL,
+  KK_CSB1,
+
   SMTD_KEYCODES_BEGIN,
   // boo home-row mods
   BH_A,
@@ -166,6 +168,15 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     case KK_NOT_EQUAL:
       if (record->event.pressed) {
         SEND_STRING("!=");
+      }
+      return false;
+    case KK_CSB1:
+      if (record->event.pressed) {
+        register_mods(MOD_BIT(KC_LCTL) | MOD_BIT(KC_LSFT));
+        register_code16(KC_BTN1);
+      } else {
+        unregister_code16(KC_BTN1);
+        unregister_mods(MOD_BIT(KC_LCTL) | MOD_BIT(KC_LSFT));
       }
       return false;
     default:
@@ -357,7 +368,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
        */
         XX,      XX,        XX,       XX,      XX,     XX,       XX, KC_WH_U,  KC_MS_U,  KC_WH_D, KC_BTN3,      XX,
         XX,      XX,   KC_LALT,  KC_BTN1, KC_LCTL,     XX,       XX, KC_MS_L,  KC_BTN1,  KC_MS_R, KC_BTN2,      XX,
-        XX,      XX,        XX,       XX,      XX,     XX,       XX,      XX,  KC_MS_D,       XX,      XX,      XX,
+        XX,      XX,        XX,       XX,      XX,     XX,       XX, KK_CSB1,  KC_MS_D,       XX,      XX,      XX,
 
                          __     ,         __  ,    __  ,       __  ,    __  ,    __                      ),
 
