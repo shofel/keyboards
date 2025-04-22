@@ -2,8 +2,25 @@
 
 {
   # https://devenv.sh/packages/
-  packages = [ pkgs.gnumake ];
+  packages = [ pkgs.qmk ];
 
-  enterShell = ''
+  # To install qmk udev rules, add to your nixos configuration:
+  # hardware.keyboard.qmk.enable = true;
+
+  env = {
+    QMK_TAG = "0.28.6";
+  };
+
+  enterShell = /* sh */ ''
+    source <(qmk env)
+    export QMK_FIRMWARE
+
+    source <(qmk env)
+    if test ! -d "$QMK_FIRMWARE"; then
+      gh repo clone qmk/qmk_firmware "$QMK_FIRMWARE" -- \
+        --branch "$QMK_TAG" \
+        --filter=blob:none --depth=1
+        qmk setup -y
+    fi
   '';
 }
