@@ -21,5 +21,5 @@ qmk_flash:
 
 flash:
 	@make copy
-	@make qmk_flash
+	@make qmk_flash || true
 	@make clean
