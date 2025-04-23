@@ -77,6 +77,21 @@ enum my_layer_names {
 #define KK_SHIFT OSM(MOD_LSFT)
 #define OSL_SYM OSL(L_SYMBOLS)
 
+/* Switch language */
+typedef enum {
+  Ru, En,
+} SlavaLang;
+void slava_set_language(SlavaLang l) {
+  switch (l) {
+    case Ru:
+      layer_on(L_RUSSIAN);
+      break;
+    case En:
+      layer_off(L_RUSSIAN);
+      break;
+  }
+}
+
 /* Key overrides */
 
 // Suppress < and > on the main layer
@@ -133,19 +148,7 @@ combo_t key_combos[] = {
 
 /* */
 
-typedef enum {
-  Ru, En,
-} SlavaLang;
-void slava_set_language(SlavaLang l) {
-  switch (l) {
-    case Ru:
-      layer_on(L_RUSSIAN);
-      break;
-    case En:
-      layer_off(L_RUSSIAN);
-      break;
-  }
-}
+/* */
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   if (!process_smtd(keycode, record)) {
@@ -260,7 +263,8 @@ void on_smtd_action(uint16_t keycode, smtd_action action, uint8_t tap_count) {
       }
       break;
     }
-    /* tap = ru, taptap = en, hold = fkeys */
+    /* tap = ru, taptap = en, taphold = (↓en ↑ru)
+       hold = fkeys */
     case KK_RU:
     {
       switch (action) {
@@ -270,11 +274,12 @@ void on_smtd_action(uint16_t keycode, smtd_action action, uint8_t tap_count) {
         case SMTD_ACTION_TAP:
           switch (tap_count) {
             case 0:
-            case 1:
               slava_set_language(Ru);
               break;
-            case 2:
+            case 1:
               slava_set_language(En);
+              break;
+            case 2:
               break;
             default:
               break;
@@ -286,6 +291,9 @@ void on_smtd_action(uint16_t keycode, smtd_action action, uint8_t tap_count) {
             case 0:
               layer_on(L_FKEYS);
               break;
+            case 1:
+              slava_set_language(En);
+              break;
             default:
               break;
           }
@@ -296,6 +304,8 @@ void on_smtd_action(uint16_t keycode, smtd_action action, uint8_t tap_count) {
             case 0:
               layer_off(L_FKEYS);
               break;
+            case 1:
+              slava_set_language(Ru);
             default:
               break;
           }
