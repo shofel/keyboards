@@ -325,14 +325,14 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                          __     ,         __  ,    __  ,       __  ,    __  ,    __                      ),
 
   [L_SYMBOLS] = LAYOUT_split_3x6_3(/*
-        __  `   __  __  {   __                       __  }   +   |   ~   __
-        __  ;   /   (   [   __                       __  ]   )   \   :   __
-        __  __  __  <   __  __                       __  =   >   !   __  __
+        __  `   &   *   /   __                       __  \   +   |   ~   __
+        __  ;   {   (   [   <                        >   ]   )   }   :   __
+        __  __  ?   @   #   __                       __  =   >   !   __  __
                            ___  ___ ___     ___ ___  ___
        */
-        XX,  KC_GRV,        XX,       XX, KC_LCBR,      XX,       XX,      KC_RCBR,  KC_PLUS,  KC_PIPE, KC_TILD, XX,
-        XX, KC_SCLN,  KC_SLASH,  KC_LPRN, KC_LBRC,      XX,       XX,      KC_RBRC,  KC_RPRN,  KC_BSLS, KC_COLN, KC_MINUS,
-   QK_BOOT,      XX,        XX,  KC_LABK,      XX,  KC_DEL,       KC_BSPC,  KC_EQL,  KC_RABK,  KC_EXLM, XX,      QK_BOOT,
+        XX,  KC_GRV,   KC_AMPR,  KC_ASTR, KC_SLSH,      XX,       KC_BSLS, KC_RCBR,  KC_PLUS,  KC_PIPE, KC_TILD, __,
+        XX, KC_SCLN,   KC_LCBR,  KC_LPRN, KC_LBRC,      XX,       XX,      KC_RBRC,  KC_RPRN,  KC_RCBR, KC_COLN, __,
+        XX,      XX,   KC_QUES,  KC_LABK, KC_HASH,  KC_DEL,       KC_BSPC,  KC_EQL,  KC_RABK,  KC_EXLM, XX,      XX,
 
                          __     ,         __  ,    __  ,       __  ,    __  ,    __                      ),
 
@@ -356,7 +356,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
        */
         XX,  KC_F12,     KC_F7,    KC_F8,   KC_F9,     XX,       XX, KC_BRIU,  KC_VOLU,       XX,      XX,      XX,
         XX,  KC_F11,     KC_F4,    KC_F5,   KC_F6,     XX,       XX,      XX,  KC_MUTE,       XX,      XX,      XX,
-        XX,  KC_F10,     KC_F1,    KC_F2,   KC_F3,     XX,       XX, KC_BRID,  KC_VOLD,       XX,      XX,      XX,
+   QK_BOOT,  KC_F10,     KC_F1,    KC_F2,   KC_F3,     XX,       XX, KC_BRID,  KC_VOLD,       XX,      XX, QK_BOOT,
 
                          __     ,         __  ,    __  ,       __  ,    __  ,    __                      ),
 

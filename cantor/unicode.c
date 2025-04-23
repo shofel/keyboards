@@ -71,6 +71,9 @@ enum unicode_names {
 
   U_DOT,
   U_COMMA,
+  U_COLON,
+  U_ASTRS,
+  U_QSTN,
 };
 
 const uint32_t PROGMEM unicode_map[] = {
@@ -145,6 +148,9 @@ const uint32_t PROGMEM unicode_map[] = {
 
   [U_DOT] = 0x02E,
   [U_COMMA] = 0x02C,
+  [U_COLON] = 0x03A,
+  [U_ASTRS] = 0x02A,
+  [U_QSTN] = 0x03F,
 };
 
 // Combine lower and upper case letters as a single key
