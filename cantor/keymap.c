@@ -100,13 +100,16 @@ const uint16_t PROGMEM alt_esc_combo[] = {KK_SHIFT, BH_O, COMBO_END};
 const uint16_t PROGMEM boot_combo_left[]  = {XX_FAKE,  OSL_SYM, COMBO_END};
 const uint16_t PROGMEM boot_combo_right[] = {KK_ENTER, XX_FAKE, COMBO_END};
 /* On each half: the outermost bottom pinky key + the middle thumb key to reboot the keyboard. */
-const uint16_t PROGMEM reset_combo_left[]  = {XX_FAKE,  KK_SHIFT, COMBO_END};
-const uint16_t PROGMEM reset_combo_right[] = {KK_SPACE, XX_FAKE, COMBO_END};
-/* := -> => != */
-const uint16_t PROGMEM go_declaration_combo[]  = {KC_H, BH_I, COMBO_END};
-const uint16_t PROGMEM right_arrow_combo[]     = {KC_M, BH_I, COMBO_END};
-const uint16_t PROGMEM fat_right_arrow_combo[] = {KC_H, KC_M, COMBO_END};
-const uint16_t PROGMEM not_equal_combo[]       = {KC_H, KC_K, COMBO_END};
+const uint16_t PROGMEM reset_combo_left[]  = {QK_LEADER, KK_SHIFT,  COMBO_END};
+const uint16_t PROGMEM reset_combo_right[] = {KK_SPACE,  QK_LEADER, COMBO_END};
+/* Digraphs */
+const uint16_t PROGMEM go_declaration_combo[]  = {KC_H, BH_I, COMBO_END}; // :=
+const uint16_t PROGMEM right_arrow_combo[]     = {KC_M, BH_I, COMBO_END}; // ->
+const uint16_t PROGMEM fat_right_arrow_combo[] = {KC_H, KC_M, COMBO_END}; // =>
+const uint16_t PROGMEM not_equal_combo[]       = {KC_H, KC_K, COMBO_END}; // !=
+/* For unimpaired */
+const uint16_t PROGMEM square_left_combo[]  = {BH_O, BH_S, COMBO_END};
+const uint16_t PROGMEM square_right_combo[] = {BH_N, BH_R, COMBO_END};
 
 combo_t key_combos[] = {
   COMBO(esc_combo, KC_ESC),
@@ -123,6 +126,9 @@ combo_t key_combos[] = {
   COMBO(right_arrow_combo, KK_RIGHT_ARROW),
   COMBO(fat_right_arrow_combo, KK_FAT_RIGHT_ARROW),
   COMBO(not_equal_combo, KK_NOT_EQUAL),
+
+  COMBO(square_left_combo , KC_LBRC),
+  COMBO(square_right_combo, KC_RBRC),
 };
 
 /* */
