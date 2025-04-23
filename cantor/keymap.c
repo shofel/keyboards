@@ -26,12 +26,12 @@
 /* */
 enum my_keycodes {
   SWITCH_LANG = SAFE_RANGE,
-  XX_FAKE,
   KK_GO_DECLARATION,
   KK_RIGHT_ARROW,
   KK_FAT_RIGHT_ARROW,
   KK_NOT_EQUAL,
   KK_CSB1,
+  KK_NOOP,
 
   SMTD_KEYCODES_BEGIN,
   // boo home-row mods
@@ -112,11 +112,11 @@ const uint16_t PROGMEM esc_combo[]     = {KK_SHIFT, KK_SPACE, COMBO_END};
 const uint16_t PROGMEM ctl_esc_combo[] = {KK_SHIFT, BH_S, COMBO_END};
 const uint16_t PROGMEM alt_esc_combo[] = {KK_SHIFT, BH_O, COMBO_END};
 /* Two outer bottom keys on a single half to get into bootloader. */
-const uint16_t PROGMEM boot_combo_left[]  = {XX_FAKE,  OSL_SYM, COMBO_END};
-const uint16_t PROGMEM boot_combo_right[] = {KK_ENTER, XX_FAKE, COMBO_END};
+const uint16_t PROGMEM boot_combo_left[]  = {KK_NOOP,  OSL_SYM, COMBO_END};
+const uint16_t PROGMEM boot_combo_right[] = {KK_ENTER, KK_NOOP, COMBO_END};
 /* On each half: the outermost bottom pinky key + the middle thumb key to reboot the keyboard. */
-const uint16_t PROGMEM reset_combo_left[]  = {QK_LEADER, KK_SHIFT,  COMBO_END};
-const uint16_t PROGMEM reset_combo_right[] = {KK_SPACE,  QK_LEADER, COMBO_END};
+const uint16_t PROGMEM reset_combo_left[]  = {KK_NOOP,  KK_SHIFT, COMBO_END};
+const uint16_t PROGMEM reset_combo_right[] = {KK_SPACE, KK_NOOP,  COMBO_END};
 /* Digraphs */
 const uint16_t PROGMEM go_declaration_combo[]  = {KC_H, BH_I, COMBO_END}; // :=
 const uint16_t PROGMEM right_arrow_combo[]     = {KC_M, BH_I, COMBO_END}; // ->
@@ -323,11 +323,11 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
        --- '   ,   u   c   v                        q   f   d   l   y   /
        --- a   o   e   s   g                        b   n   t   r   i   -
        ---     x   .   w   z                        p   h   m   k   j   ---
-                        EN sft SYM              ret spc RU
+                     MOUSE sft SYM              ret spc RU
        */
            __ , KC_QUOT, KC_COMM,    KC_U,   KC_C,  KC_V,     KC_Q,  KC_F,  KC_D,  KC_L,  KC_Y,   KC_SLASH,
            __ ,    BH_A,    BH_O,    BH_E,   BH_S,  KC_G,     KC_B,  BH_N,  BH_T,  BH_R,  BH_I,   KC_MINUS,
-       XX_FAKE,      XX,    KC_X,  KC_DOT,   KC_W,  KC_Z,     KC_P,  KC_H,  KC_M,  KC_K,  KC_J,   XX_FAKE,
+       KK_NOOP,      XX,    KC_X,  KC_DOT,   KC_W,  KC_Z,     KC_P,  KC_H,  KC_M,  KC_K,  KC_J,   KK_NOOP,
 
                               KK_MO , KK_SHIFT , OSL_SYM ,     KK_ENTER , KK_SPACE, KK_RU          ),
 
