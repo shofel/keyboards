@@ -20,7 +20,7 @@
       gh repo clone qmk/qmk_firmware "$QMK_FIRMWARE" -- \
         --branch "$QMK_TAG" \
         --filter=blob:none --depth=1
-        qmk setup -y
+      qmk setup -y
     fi
   '';
 }
