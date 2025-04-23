@@ -230,7 +230,7 @@ void on_smtd_action(uint16_t keycode, smtd_action action, uint8_t tap_count) {
 
     // Thumb keys
     SMTD_LT(KK_ENTER, KC_ENTER, L_SYMBOLS)
-    SMTD_LT(KK_SPACE, KC_SPACE, L_SYMBOLS)
+    SMTD_LT(KK_SPACE, KC_SPACE, L_NUM_NAV)
     /* hold = mouse */
     case KK_MO:
     {
