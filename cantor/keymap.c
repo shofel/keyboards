@@ -13,7 +13,6 @@ enum my_keycodes {
   KK_RIGHT_ARROW,
   KK_FAT_RIGHT_ARROW,
   KK_NOT_EQUAL,
-  KK_CSB1,
   KK_NOOP,
 
   SMTD_KEYCODES_BEGIN,
@@ -57,8 +56,15 @@ enum my_layer_names {
   L_MOUSE,
 };
 
+/* Simple thumb keys. */
 #define KK_SHIFT OSM(MOD_LSFT)
 #define KK_SYMBO OSL(L_SYMBOLS)
+
+/* One-shot modifiers, to place on L_MOUSE and L_FKEYS_SYS */
+#define OSM_SFT OSM(MOD_LSFT)
+#define OSM_ALT OSM(MOD_LALT)
+#define OSM_CTL OSM(MOD_LCTL)
+#define OSM_GUI OSM(MOD_LGUI)
 
 /* Switch language */
 typedef enum {
@@ -160,15 +166,6 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     case KK_NOT_EQUAL:
       if (record->event.pressed) {
         SEND_STRING("!=");
-      }
-      return false;
-    case KK_CSB1:
-      if (record->event.pressed) {
-        register_mods(MOD_BIT(KC_LCTL) | MOD_BIT(KC_LSFT));
-        register_code16(KC_BTN1);
-      } else {
-        unregister_code16(KC_BTN1);
-        unregister_mods(MOD_BIT(KC_LCTL) | MOD_BIT(KC_LSFT));
       }
       return false;
     default:
@@ -347,7 +344,6 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
            __ , KC_QUOT, KC_COMM,    KC_U,   KC_C,  KC_V,     KC_Q,  KC_F,  KC_D,  KC_L,  KC_Y,   KC_SLASH,
            __ ,    KC_A,    KC_O,    KC_E,   KC_S,  KC_G,     KC_B,  KC_N,  KC_T,  KC_R,  KC_I,   KC_MINUS,
        KK_NOOP,      XX,    KC_X,  KC_DOT,   KC_W,  KC_Z,     KC_P,  KC_H,  KC_M,  KC_K,  KC_J,   KK_NOOP,
-
                                      __ ,    __ ,   __ ,       __ ,   __ ,   __
   ),
 
@@ -441,6 +437,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   ),
   /**
    * Layer for F keys and multimedia buttons.
+   * Also modifiers on the home-row.
    *
    * Activated by right-most key of the right thumb.
    *
@@ -451,38 +448,41 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    */
   [L_FKEYS_SYS] = LAYOUT_split_3x6_3(/*
         __ F11  F7  F8  F9  UVIM                     __  br↑ vl↑ ULX __  __
-        __ F11  F4  F5  F6  __                       __  __  mut __  __  __
-        __ F10  F1  F2  F3  __                       __  br↓ vl↓ __  __  __
+        __ F11  F4  F5  F6  __                       __  ctl sft alt gui __
+        __ F10  F1  F2  F3  __                       __  br↓ vl↓ vl0 __  __
                              __  __  __     __  __  __
        */
         XX,  KC_F12,  KC_F7,  KC_F8,  KC_F9, UC_VIM,       XX, KC_BRIU,  KC_VOLU,  UC_LINX,  XX,      XX,
-        XX,  KC_F11,  KC_F4,  KC_F5,  KC_F6,     XX,       XX,      XX,  KC_MUTE,       XX,  XX,      XX,
-   QK_BOOT,  KC_F10,  KC_F1,  KC_F2,  KC_F3,     XX,       XX, KC_BRID,  KC_VOLD,       XX,  XX, QK_BOOT,
+        XX,  KC_F11,  KC_F4,  KC_F5,  KC_F6,     XX,       XX, OSM_CTL,  OSM_SFT,  OSM_ALT,  OSM_GUI, XX,
+   QK_BOOT,  KC_F10,  KC_F1,  KC_F2,  KC_F3,     XX,       XX, KC_BRID,  KC_VOLD,  KC_MUTE,  XX, QK_BOOT,
                                 __ ,    __ ,   __ ,         __ ,   __ ,   __
   ),
 
   /**
    * Mouse layer.
+   * Also contains modifiers on the home row.
    *
    * Activated by the left-most key of the left thumb.
    *
    * Right hand does all the job.
+   * Mouse buttons are duplicated on thumb keys.
    *
+   * Left hand has its own button one to facilitate selection
    * Left hand can apply modifiers, to perform shift+click, or ctrl+wheelup.
-   * Left hand can also press and hold the left mouse button, so you can select some text.
    *
    * Idea: my dream is to implement mouse bisection (with every step you choose direction to finally get the destination point. Like in binary search.). It's even possible and easy with [digitizer](https://docs.qmk.fm/features/digitizer). But unfortunately digitizer doesn't work on my Linux.
    */
   [L_MOUSE] = LAYOUT_split_3x6_3(/*
         __  __  __  __  __  __                       __  w↑  ↑  w↓  b3  __
-        __  sft alt b1  ctl __                       __  <-  c  ->  b2  __
-        __  __  __  __  __  __                       __  __  ↓  __  __  __
-                             __  __  __     __  __  __
+        __  gui alt sft ctl __                       __  <-  c  ->  b2  __
+        __  __  __  __  b1  __                       __  __  ↓  __  __  __
+                             __  __  __     b1  b2  b3
        */
         XX,      XX,        XX,       XX,      XX,  XX,       XX, KC_WH_U,  KC_MS_U,  KC_WH_D, KC_BTN3,  XX,
-        XX, KC_LSFT,   KC_LALT,  KC_BTN1, KC_LCTL,  XX,       XX, KC_MS_L,  KC_BTN1,  KC_MS_R, KC_BTN2,  XX,
-        XX,      XX,        XX,       XX,      XX,  XX,       XX, KK_CSB1,  KC_MS_D,       XX,      XX,  XX,
-                                   __ ,    __ ,   __ ,        __ ,   __ ,   __
+        XX, OSM_GUI,   OSM_ALT,  OSM_SFT, OSM_CTL,  XX,       XX, KC_MS_L,  KC_BTN1,  KC_MS_R, KC_BTN2,  XX,
+        XX,      XX,        XX,       XX, KC_BTN1,  XX,       XX,      XX,  KC_MS_D,       XX,      XX,  XX,
+
+                                   __ ,    __ ,   __ ,     KC_BTN1, KC_BTN2, KC_BTN3
   ),
 };
 
