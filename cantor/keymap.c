@@ -342,8 +342,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    * Activated by right-most key of the right thumb. Activation is tricky:
    *
    * 1. Tap activates the layer
-   * 2. Tap of Esc swithes back to English. This is especially useful in Vim
-   * 3. When Ru is active, tap-hold the RU key. While you hold it, type English letters. Release to continue typing Russian. The idea is to facilitate typing English words in a flow of Russian text.
+   * 1. Double tap switches back to English.
+   * 1. Tap of Esc switches back to English. This is especially useful in Vim
+   * 1. When Ru is active, tap-hold the RU key. While you hold it, type English letters. Release to continue typing Russian. The idea is to facilitate typing isolated English words in a flow of Russian text.
    */
   [L_RUSSIAN] = LAYOUT_split_3x6_3(/** Russian layer ```
        ё   й   ц   у   к   е                        н   г   ш   щ   з   х
