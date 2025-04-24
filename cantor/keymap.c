@@ -316,7 +316,8 @@ void on_smtd_action(uint16_t keycode, smtd_action action, uint8_t tap_count) {
  *  ** Unicode Input
  *  1. A unicode layer with Russian letters. Switch between `Linux` and `Vim` input modes  
  *     VIM mode looks and awesome, but works only on Vim/Neovim  
- *     Linux mode implies a blink of a window for each character, but kinda works in all apps. By the way you can hide that window, being dedicated enough
+ *     Linux mode implies a blink of a window for each character, but kinda works in all apps. By the way you can prevent appearance of that window, being dedicated enough  
+ *     Also, as of time of writing, the vim mode is not in upstream QMK. I sent [a pull-request](https://github.com/qmk/qmk_firmware/pull/25188) which implements it
  *  2. When using non-qwerty layout, switching language in OS requires lots of effort.  
  *     And symbols are spoiled: with Ru active, your `}` sent from keyboard becomes `ъ`
  *     With unicode input, theese issues just disappear.
