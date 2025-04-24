@@ -103,7 +103,7 @@ const uint16_t PROGMEM reset_combo_right[] = {KK_SPACE, KK_NOOP, COMBO_END};
 const uint16_t PROGMEM go_declaration_combo[]  = {KC_H, BH_I, COMBO_END}; // :=
 const uint16_t PROGMEM right_arrow_combo[]     = {KC_M, BH_I, COMBO_END}; // ->
 const uint16_t PROGMEM fat_right_arrow_combo[] = {KC_H, KC_M, COMBO_END}; // =>
-const uint16_t PROGMEM not_equal_combo[]       = {KC_H, KC_K, COMBO_END}; // !=
+const uint16_t PROGMEM not_equal_combo[]       = {KC_H, KC_X, COMBO_END}; // !=
 /* For unimpaired */
 const uint16_t PROGMEM square_left_combo[]  = {BH_O, BH_S, COMBO_END};
 const uint16_t PROGMEM square_right_combo[] = {BH_N, BH_R, COMBO_END};
