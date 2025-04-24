@@ -1,4 +1,16 @@
-/* A layout for the Cantor Keyboard */
+/**
+ * A layout for the Cantor Keyboard.
+ *
+ * When I return later, then I'll try
+ * - combos instead of a sym layer. Or just more combos. @see Urob's config
+ * -- don't fire combos while typing
+ * -- or maybe use only vertical combos. Or non-adjacest keys
+ * - locked layers, without need to hold the layer key
+ * - leader key for one-shot switches
+ * - shift pairs: .: ,;
+ * - Maybe make a shared layout for cantor and dactyl
+ * -- make a macro to convert cantor's layer to a dactyl's
+ */
 
 #include QMK_KEYBOARD_H
 
@@ -485,12 +497,3 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                                    __ ,    __ ,   __ ,     KC_BTN1, KC_BTN2, KC_BTN3
   ),
 };
-
-/*
- mayBE make a shared layout for cantor and dactyl
- make a macro to convert cantor's layer to a dactyl's
-*/
-
-/* facility:
- * , and . are used only as non-shifted. There are two half-keys to occuqy!
- */
