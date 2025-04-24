@@ -357,7 +357,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
          RU_YO,   RU_Y,    RU_TS,    RU_U,   RU_K,  RU_E,     RU_N,  RU_G,   RU_SH, RU_SHCH,RU_Z,   RU_H,
            __ ,   RH_F,    RH_Y,     RH_V,   RH_A,  RU_P,     RU_R,  RH_O,   RH_L,  RH_D,   RH_Z,   RU_EE,
            __ ,   RU_YA,   RU_CH,    RU_S,   RU_M,  RU_I,     RU_T,  RU_SOFT,RU_B,  RU_YU,  RU_DOT, RU_HARD,
-                                     __ ,    __ ,   __ ,       __ ,   __ ,   __ ,
+                                     __ ,    __ ,   __ ,       __ ,   __ ,   __
   ),
 
   /**
@@ -399,7 +399,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         XX,  KC_GRV,   KC_AMPR,  KC_ASTR, KC_SLSH,      XX,       XX,      KC_BSLS,  KC_PLUS,  KC_PIPE, KC_TILD, __,
         XX, KC_SCLN,   KC_LCBR,  KC_LPRN, KC_LBRC, KC_LABK,       KC_RABK, KC_RBRC,  KC_RPRN,  KC_RCBR, KC_COLN, __,
         XX,      XX,   KC_EXLM,    KC_AT, KC_HASH,  KC_DEL,       KC_BSPC,  KC_EQL,  KC_RABK,  KC_QUES, XX,      XX,
-                                       __ ,    __ ,   __ ,         __ ,   __ ,   __ ,
+                                       __ ,    __ ,   __ ,         __ ,   __ ,   __
   ),
 
   /**
@@ -423,7 +423,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         XX,    XX,  KC_7,  KC_8,  KC_9, KC_SLSH,       XX,      KC_PGUP,  KC_UP,    KC_PGDN, XX,      XX,
         XX,  KC_0,  KC_4,  KC_5,  KC_6, KC_COLN,       KC_HOME, KC_LEFT,  KC_ENTER, KC_RGHT, KC_END,  XX,
         XX,  KC_0,  KC_1,  KC_2,  KC_3,  KC_DOT,       XX,      KC_TAB,   KC_DOWN,  XX,      XX,      XX,
-                            __ ,    __ ,   __ ,         __ ,   __ ,   __ ,
+                            __ ,    __ ,   __ ,         __ ,   __ ,   __
   ),
   /**
    * Layer for F keys and multimedia buttons.
@@ -444,7 +444,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         XX,  KC_F12,  KC_F7,  KC_F8,  KC_F9, UC_VIM,       XX, KC_BRIU,  KC_VOLU,  UC_LINX,  XX,      XX,
         XX,  KC_F11,  KC_F4,  KC_F5,  KC_F6,     XX,       XX,      XX,  KC_MUTE,       XX,  XX,      XX,
    QK_BOOT,  KC_F10,  KC_F1,  KC_F2,  KC_F3,     XX,       XX, KC_BRID,  KC_VOLD,       XX,  XX, QK_BOOT,
-                                __ ,    __ ,   __ ,         __ ,   __ ,   __ ,
+                                __ ,    __ ,   __ ,         __ ,   __ ,   __
   ),
 
   /**
@@ -468,7 +468,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         XX,      XX,        XX,       XX,      XX,  XX,       XX, KC_WH_U,  KC_MS_U,  KC_WH_D, KC_BTN3,  XX,
         XX, KC_LSFT,   KC_LALT,  KC_BTN1, KC_LCTL,  XX,       XX, KC_MS_L,  KC_BTN1,  KC_MS_R, KC_BTN2,  XX,
         XX,      XX,        XX,       XX,      XX,  XX,       XX, KK_CSB1,  KC_MS_D,       XX,      XX,  XX,
-                                   __ ,    __ ,   __ ,        __ ,   __ ,   __ ,
+                                   __ ,    __ ,   __ ,        __ ,   __ ,   __
   ),
 };
 
