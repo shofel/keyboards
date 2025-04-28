@@ -12,8 +12,12 @@
  * -- make a macro to convert cantor's layer to a dactyl's
  *
  * problems with sm_td:
- * - leader key
+ * - leader key is shadowed
  * - one-shot mods on an sm_td hold-layer
+ *
+ * an idea about home-row mods
+ * - disable ctrl-w or ctrl+backspace : as if mod misfire detected
+ * - enable back on space : as if a problem word was successfully typed
  */
 
 #include QMK_KEYBOARD_H
