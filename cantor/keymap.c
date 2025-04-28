@@ -1,24 +1,21 @@
 /**
  * A layout for the Cantor Keyboard.
  *
- * Now
- * - leader key for one-shot switches
- *
- * When I return later, then I'll try
- * - combos instead of a sym layer. Or just more combos. @see Urob's config
- * -- don't fire combos while typing
- * -- or maybe use only vertical combos. Or non-adjacest keys
- * - locked layers, without need to hold the layer key
- * - Maybe make a shared layout for cantor and dactyl
- * -- make a macro to convert cantor's layer to a dactyl's
+ * When I return later, then I'll
+ * - rewrite sm_td to replicate behaviour, but make it cleaner
+ * - make a slim firmware ground-up with zig
  *
  * problems with sm_td:
- * - leader key is shadowed
+ * - leader key is shadowed : https://github.com/stasmarkin/sm_td/issues/29
  * - one-shot mods on an sm_td hold-layer
+ * - caps-word is non-trivial
+ *
+ * more problems:
+ * - homerow mods on layers are unusable
  *
  * an idea about home-row mods
- * - disable ctrl-w or ctrl+backspace : as if mod misfire detected
- * - enable back on space : as if a problem word was successfully typed
+ * - disable HRM on ctrl-w or ctrl+backspace : as if mod misfire detected
+ * - enable HRM back on space : as if a problem word was successfully typed
  */
 
 #include QMK_KEYBOARD_H
@@ -486,9 +483,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    *       [leader-sequences](https://docs.qmk.fm/features/leader_key).
    */
   [L_FKEYS_SYS] = LAYOUT_split_3x6_3(/*
-        __ F11  F7  F8  F9  UVIM                     __  br↑ vl↑ ULX DBG __
-        __ F11  F4  F5  F6  __                       __  ctl sft alt gui __
-        __ F10  F1  F2  F3  __                       __  br↓ vl↓ vl0 __  __
+        __ F11  F7  F8  F9  UVIM                     hr↑ br↑ vl↑ ULX DBG __
+        __ F11  F4  F5  F6  __                       hr↓ ctl sft alt gui __
+       bot F10  F1  F2  F3  __                       __  br↓ vl↓ vl0 __  bot
                              __  __  __     __  __  __
        */
         XX,  KC_F12,  KC_F7,  KC_F8,  KC_F9, UC_VIM,   HRM_ON, KC_BRIU,  KC_VOLU,  UC_LINX,  DB_TOGG, XX,
