@@ -10,6 +10,10 @@
  * - shift pairs: .: ,;
  * - Maybe make a shared layout for cantor and dactyl
  * -- make a macro to convert cantor's layer to a dactyl's
+ *
+ * problems with sm_td:
+ * - leader key
+ * - one-shot mods on an sm_td hold-layer
  */
 
 #include QMK_KEYBOARD_H
@@ -34,6 +38,8 @@ enum my_keycodes {
   KK_FAT_RIGHT_ARROW,
   KK_NOT_EQUAL,
   KK_NOOP,
+  HRM_ON,
+  HRM_NO,
 
   SMTD_KEYCODES_BEGIN,
   // boo home-row mods
@@ -81,10 +87,10 @@ enum my_layer_names {
 #define KK_SYMBO OSL(L_SYMBOLS)
 
 /* One-shot modifiers, to place on L_MOUSE and L_FKEYS_SYS */
-#define OSM_SFT OSM(MOD_LSFT)
-#define OSM_ALT OSM(MOD_LALT)
-#define OSM_CTL OSM(MOD_LCTL)
-#define OSM_GUI OSM(MOD_LGUI)
+#define OSM_SFT KC_LSFT
+#define OSM_ALT KC_LALT
+#define OSM_CTL KC_LCTL
+#define OSM_GUI KC_LGUI
 
 /* Switch language */
 typedef enum {
@@ -156,9 +162,6 @@ combo_t key_combos[] = {
 };
 
 /* */
-
-/* */
-
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   if (!process_smtd(keycode, record)) {
     return false;
@@ -188,6 +191,16 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         SEND_STRING("!=");
       }
       return false;
+    case HRM_ON:
+      if (record->event.pressed) {
+        layer_off(L_BOO_NOHRM);
+      }
+      return false;
+    case HRM_NO:
+      if (record->event.pressed) {
+        layer_on(L_BOO_NOHRM);
+      }
+      return false;
     default:
       return true; // Process all other keycodes normally
   }
@@ -200,6 +213,9 @@ uint32_t get_smtd_timeout(uint16_t keycode, smtd_timeout timeout) {
     case RU_L:
       if (timeout == SMTD_TIMEOUT_TAP) return SMTD_GLOBAL_TAP_TERM + 100;
       if (timeout == SMTD_TIMEOUT_RELEASE) return 5;
+      break;
+    case KK_RU:
+      if (timeout == SMTD_TIMEOUT_TAP) return 100;
       break;
   }
 
@@ -355,7 +371,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                           KK_MOUSE , KK_SHIFT , KK_SYMBO,     KK_ENTER , KK_SPACE, KK_RU
   ),
 
-  [L_BOO_NOHRM] = LAYOUT_split_3x6_3(/** BOO LAYOUT without hrm
+  [L_BOO_NOHRM] = LAYOUT_split_3x6_3(/** BOO LAYOUT without HRM. To be used as a base layer.
        __  '   ,   u   c   v                        q   f   d   l   y   /
        __  a   o   e   s   g                        b   n   t   r   i   -
        __      x   .   w   z                        p   h   m   k   j   __
@@ -364,7 +380,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
            __ , KC_QUOT, KC_COMM,    KC_U,   KC_C,  KC_V,     KC_Q,  KC_F,  KC_D,  KC_L,  KC_Y,   KC_SLASH,
            __ ,    KC_A,    KC_O,    KC_E,   KC_S,  KC_G,     KC_B,  KC_N,  KC_T,  KC_R,  KC_I,   KC_MINUS,
        KK_NOOP,      XX,    KC_X,  KC_DOT,   KC_W,  KC_Z,     KC_P,  KC_H,  KC_M,  KC_K,  KC_J,   KK_NOOP,
-                                     __ ,    __ ,   __ ,       __ ,   __ ,   __
+
+                          KK_MOUSE , KK_SHIFT , KK_SYMBO,     KK_ENTER , KK_SPACE, KK_RU
   ),
 
   /**
@@ -472,8 +489,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         __ F10  F1  F2  F3  __                       __  br↓ vl↓ vl0 __  __
                              __  __  __     __  __  __
        */
-        XX,  KC_F12,  KC_F7,  KC_F8,  KC_F9, UC_VIM,       XX, KC_BRIU,  KC_VOLU,  UC_LINX,  XX,      XX,
-        XX,  KC_F11,  KC_F4,  KC_F5,  KC_F6,     XX,       XX, OSM_CTL,  OSM_SFT,  OSM_ALT,  OSM_GUI, XX,
+        XX,  KC_F12,  KC_F7,  KC_F8,  KC_F9, UC_VIM,   HRM_ON, KC_BRIU,  KC_VOLU,  UC_LINX,  DB_TOGG, XX,
+        XX,  KC_F11,  KC_F4,  KC_F5,  KC_F6,     XX,   HRM_NO, OSM_CTL,  OSM_SFT,  OSM_ALT,  OSM_GUI, XX,
    QK_BOOT,  KC_F10,  KC_F1,  KC_F2,  KC_F3,     XX,       XX, KC_BRID,  KC_VOLD,  KC_MUTE,  XX, QK_BOOT,
                                 __ ,    __ ,   __ ,         __ ,   __ ,   __
   ),
