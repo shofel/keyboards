@@ -1,13 +1,15 @@
 /**
  * A layout for the Cantor Keyboard.
  *
+ * Now
+ * - shift pairs: .: ,;
+ * - leader key for one-shot switches
+ *
  * When I return later, then I'll try
  * - combos instead of a sym layer. Or just more combos. @see Urob's config
  * -- don't fire combos while typing
  * -- or maybe use only vertical combos. Or non-adjacest keys
  * - locked layers, without need to hold the layer key
- * - leader key for one-shot switches
- * - shift pairs: .: ,;
  * - Maybe make a shared layout for cantor and dactyl
  * -- make a macro to convert cantor's layer to a dactyl's
  *
