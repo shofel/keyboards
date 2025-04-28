@@ -14,6 +14,14 @@
 
 #include QMK_KEYBOARD_H
 
+void keyboard_post_init_user(void) {
+  // Customise these values to desired behaviour
+  debug_enable = false;
+  debug_matrix = false;
+  debug_keyboard = false;
+  debug_mouse = false;
+}
+
 /* Fancy looking spare keys. */
 #define __ KC_TRNS
 #define XX KC_NO
@@ -459,7 +467,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    *       [leader-sequences](https://docs.qmk.fm/features/leader_key).
    */
   [L_FKEYS_SYS] = LAYOUT_split_3x6_3(/*
-        __ F11  F7  F8  F9  UVIM                     __  br↑ vl↑ ULX __  __
+        __ F11  F7  F8  F9  UVIM                     __  br↑ vl↑ ULX DBG __
         __ F11  F4  F5  F6  __                       __  ctl sft alt gui __
         __ F10  F1  F2  F3  __                       __  br↓ vl↓ vl0 __  __
                              __  __  __     __  __  __
@@ -494,6 +502,6 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         XX, OSM_GUI,   OSM_ALT,  OSM_SFT, OSM_CTL,  XX,       XX, KC_MS_L,  KC_BTN1,  KC_MS_R, KC_BTN2,  XX,
         XX,      XX,        XX,       XX, KC_BTN1,  XX,       XX,      XX,  KC_MS_D,       XX,      XX,  XX,
 
-                                   __ ,    __ ,   __ ,     KC_BTN1, KC_BTN2, KC_BTN3
+                                   __ ,    __ ,   __ ,     KC_BTN1, KC_BTN3, KC_BTN2
   ),
 };
