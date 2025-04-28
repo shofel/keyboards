@@ -2,7 +2,6 @@
  * A layout for the Cantor Keyboard.
  *
  * Now
- * - shift pairs: .: ,;
  * - leader key for one-shot switches
  *
  * When I return later, then I'll try
@@ -116,8 +115,8 @@ void slava_set_language(SlavaLang l) {
 /* Key overrides */
 
 // Suppress < and > on the main layer
-const key_override_t labk_override = ko_make_with_layers(MOD_MASK_SHIFT, KC_COMMA, KC_NO, 1<<L_BOO);
-const key_override_t rabk_override = ko_make_with_layers(MOD_MASK_SHIFT, KC_DOT,   KC_NO, 1<<L_BOO);
+const key_override_t labk_override = ko_make_basic(MOD_MASK_SHIFT, KC_COMMA, KC_SEMICOLON);
+const key_override_t rabk_override = ko_make_basic(MOD_MASK_SHIFT, KC_DOT,   KC_COLON);
 
 const key_override_t *key_overrides[] = {
   &labk_override,
