@@ -89,10 +89,10 @@ enum my_layer_names {
 #define KK_SYMBO OSL(L_SYMBOLS)
 
 /* One-shot modifiers, to place on L_MOUSE and L_FKEYS_SYS */
-#define OSM_SFT KC_LSFT
-#define OSM_ALT KC_LALT
-#define OSM_CTL KC_LCTL
-#define OSM_GUI KC_LGUI
+#define OSM_SFT OSM(MOD_LSFT)
+#define OSM_ALT OSM(MOD_LALT)
+#define OSM_CTL OSM(MOD_LCTL)
+#define OSM_GUI OSM(MOD_LGUI)
 
 /* Switch language */
 typedef enum {
