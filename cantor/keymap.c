@@ -442,8 +442,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
        __  __  !   @   #   󰹿                        󰭜   |   ?   __  __  __
                             __  __  __    __  __  __
        */
-        XX,  KC_GRV,   KC_AMPR,  KC_ASTR, KC_SLSH,      XX,       XX,      KC_BSLS,  KC_PLUS,  KC_PIPE, KC_TILD, __,
-        XX, KC_SCLN,   KC_LCBR,  KC_LPRN, KC_LBRC, KC_LABK,       KC_RABK, KC_RBRC,  KC_RPRN,  KC_RCBR, KC_COLN, __,
+        XX,  KC_GRV,   KC_AMPR,  KC_ASTR, KC_SLSH,      XX,       XX,      KC_BSLS,  KC_PLUS,  KC_PIPE, KC_TILD, KC_SLASH,
+        XX, KC_SCLN,   KC_LCBR,  KC_LPRN, KC_LBRC, KC_LABK,       KC_RABK, KC_RBRC,  KC_RPRN,  KC_RCBR, KC_COLN, KC_MINUS,
         XX,      XX,   KC_EXLM,    KC_AT, KC_HASH,  KC_DEL,       KC_BSPC,  KC_EQL,  KC_RABK,  KC_QUES, XX,      XX,
                                        __ ,    __ ,   __ ,         __ ,   __ ,   __
   ),
