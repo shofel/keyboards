@@ -142,6 +142,10 @@ const uint16_t PROGMEM not_equal_combo[]       = {KC_H, KC_X, COMBO_END}; // !=
 /* For unimpaired */
 const uint16_t PROGMEM square_left_combo[]  = {BH_O, BH_S, COMBO_END};
 const uint16_t PROGMEM square_right_combo[] = {BH_N, BH_R, COMBO_END};
+/* $ % ^  vertical combo */
+const uint16_t PROGMEM dollar_combo[]  = {BH_O, KC_X, COMBO_END};
+const uint16_t PROGMEM percent_combo[] = {BH_E, KC_DOT, COMBO_END};
+const uint16_t PROGMEM caret_combo[]   = {BH_S, KC_W, COMBO_END};
 
 combo_t key_combos[] = {
   COMBO(esc_combo, KC_ESC),
@@ -161,6 +165,10 @@ combo_t key_combos[] = {
 
   COMBO(square_left_combo , KC_LBRC),
   COMBO(square_right_combo, KC_RBRC),
+
+  COMBO(dollar_combo, KC_DOLLAR),
+  COMBO(percent_combo, KC_PERCENT),
+  COMBO(caret_combo, KC_CIRCUMFLEX),
 };
 
 /* */
