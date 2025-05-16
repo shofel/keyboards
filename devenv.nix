@@ -12,6 +12,12 @@
   };
 
   enterShell = /* sh */ ''
+    # assert qmk util
+    if ! qmk >/dev/null; then
+      echo "FAIL: qmk error"
+      exit 2
+    fi
+
     source <(qmk env)
     export QMK_FIRMWARE
 
