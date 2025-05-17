@@ -451,19 +451,16 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    *   - `!=` `:=` are literally sums of their symbols
    *
    * Combos work independently of layers.
-   *
-   * Facility:
-   *  - right hand: ringer finger: top row
    */
   [L_SYMBOLS] = LAYOUT_split_3x6_3(/*
-       __  `   &   *   /   __                       __  \   +   |   ~   __
-       __  ;   $   %   ^   __                       __  __  __  __  :   __
-       __  __  !   @   #   󰹿                        󰭜   =   >   ?   __  __
+       __  `   &   *   __  __                       __  \   +   |   ~   /
+       __  ;   $   %   ^   __                       __  __  __  __  :   -
+       __  __  !   @   #   󰹿                        󰭜   =   __  ?   __  __
                             __  __  __    __  __  __
        */
-        XX,  KC_GRV,   KC_AMPR,  KC_ASTR, KC_SLSH,      XX,       XX,      KC_BSLS,  KC_PLUS,  KC_PIPE, KC_TILD, KC_SLASH,
-        XX, KC_SCLN,    KC_DLR,  KC_PERC, KC_CIRC,      XX,       XX,      KC_RBRC,  KC_RPRN,  KC_RCBR, KC_COLN, KC_MINUS,
-        XX,      XX,   KC_EXLM,    KC_AT, KC_HASH,  KC_DEL,       KC_BSPC,  KC_EQL,  KC_RABK,  KC_QUES, XX,      XX,
+        XX,  KC_GRV,   KC_AMPR,  KC_ASTR,      XX,      XX,       XX,      KC_BSLS,  KC_PLUS,  KC_PIPE, KC_TILD, KC_SLASH,
+        XX, KC_SCLN,    KC_DLR,  KC_PERC, KC_CIRC,      XX,       XX,           XX,       XX,       XX, KC_COLN, KC_MINUS,
+        XX,      XX,   KC_EXLM,    KC_AT, KC_HASH,  KC_DEL,       KC_BSPC,  KC_EQL,       XX,  KC_QUES, XX,      XX,
                                        __ ,    __ ,   __ ,         __ ,   __ ,   __
   ),
 
