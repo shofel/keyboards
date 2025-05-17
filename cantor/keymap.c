@@ -136,8 +136,8 @@ const uint16_t PROGMEM reset_combo_left[]  = {KK_NOOP, KK_SHIFT, COMBO_END};
 const uint16_t PROGMEM reset_combo_right[] = {KK_SPACE, KK_NOOP, COMBO_END};
 /* Digraphs */
 const uint16_t PROGMEM go_declaration_combo[]  = {KC_H, BH_I, COMBO_END}; // :=
-const uint16_t PROGMEM right_arrow_combo[]     = {KC_M, BH_I, COMBO_END}; // ->
 const uint16_t PROGMEM fat_right_arrow_combo[] = {KC_H, KC_M, COMBO_END}; // =>
+const uint16_t PROGMEM right_arrow_combo[]     = {KC_H, KC_K, COMBO_END}; // ->
 const uint16_t PROGMEM not_equal_combo[]       = {KC_H, KC_X, COMBO_END}; // !=
 /* [{(<>)}] */
 const uint16_t PROGMEM square_left_combo[]  = {BH_S, BH_O, COMBO_END};
@@ -165,8 +165,8 @@ combo_t key_combos[] = {
   COMBO(reset_combo_right, QK_REBOOT),
 
   COMBO(go_declaration_combo, KK_GO_DECLARATION),
-  COMBO(right_arrow_combo, KK_RIGHT_ARROW),
   COMBO(fat_right_arrow_combo, KK_FAT_RIGHT_ARROW),
+  COMBO(right_arrow_combo, KK_RIGHT_ARROW),
   COMBO(not_equal_combo, KK_NOT_EQUAL),
 
   COMBO(square_left_combo , KC_LBRC),
@@ -447,7 +447,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    * Everything can be typed without combos, but we have combos for some digraphs: => != := ->
    * Mnemonics for these combos:
    *   - `=>` is like `=` plus the key on the right
-   *   - `->` is a lighter arrow, so shifted one key to the weak fingers
+   *   - `->` is a lighter arrow, so shifted head key to the weaker finger
    *   - `!=` `:=` are literally sums of their symbols
    *
    * Combos work independently of layers.
