@@ -148,7 +148,7 @@ const uint16_t PROGMEM curly_left_combo[]   = {BH_E, BH_A, COMBO_END};
 const uint16_t PROGMEM curly_right_combo[]  = {BH_T, BH_I, COMBO_END};
 const uint16_t PROGMEM angle_left_combo[]   = {KC_G, BH_E, COMBO_END};
 const uint16_t PROGMEM angle_right_combo[]  = {KC_B, BH_T, COMBO_END};
-/* $ % ^  vertical combo */
+/* $ % ^  vertical combos */ // TODO ??remove??
 const uint16_t PROGMEM dollar_combo[]  = {BH_O, KC_X, COMBO_END};
 const uint16_t PROGMEM percent_combo[] = {BH_E, KC_DOT, COMBO_END};
 const uint16_t PROGMEM caret_combo[]   = {BH_S, KC_W, COMBO_END};
@@ -437,7 +437,6 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    * - symbols are placed as on `shift`ed L_NUM_NAV.
    * -- ? on the right is useful when L_RUSSIAN is active, since `/` is shadowed by `RU_H`
    *
-   * - / and \ are symmetrical and placed just by coincidence
    * - `*` `!` `#` on the left are kinda paired with
    *   `+` `?` `=` on the right
    *
