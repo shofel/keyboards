@@ -139,9 +139,15 @@ const uint16_t PROGMEM go_declaration_combo[]  = {KC_H, BH_I, COMBO_END}; // :=
 const uint16_t PROGMEM right_arrow_combo[]     = {KC_M, BH_I, COMBO_END}; // ->
 const uint16_t PROGMEM fat_right_arrow_combo[] = {KC_H, KC_M, COMBO_END}; // =>
 const uint16_t PROGMEM not_equal_combo[]       = {KC_H, KC_X, COMBO_END}; // !=
-/* For unimpaired */
-const uint16_t PROGMEM square_left_combo[]  = {BH_O, BH_S, COMBO_END};
+/* [{(<>)}] */
+const uint16_t PROGMEM square_left_combo[]  = {BH_S, BH_O, COMBO_END};
 const uint16_t PROGMEM square_right_combo[] = {BH_N, BH_R, COMBO_END};
+const uint16_t PROGMEM brace_left_combo[]   = {BH_S, BH_A, COMBO_END};
+const uint16_t PROGMEM brace_right_combo[]  = {BH_N, BH_I, COMBO_END};
+const uint16_t PROGMEM curly_left_combo[]   = {BH_E, BH_A, COMBO_END};
+const uint16_t PROGMEM curly_right_combo[]  = {BH_T, BH_I, COMBO_END};
+const uint16_t PROGMEM angle_left_combo[]   = {KC_G, BH_E, COMBO_END};
+const uint16_t PROGMEM angle_right_combo[]  = {KC_B, BH_T, COMBO_END};
 /* $ % ^  vertical combo */
 const uint16_t PROGMEM dollar_combo[]  = {BH_O, KC_X, COMBO_END};
 const uint16_t PROGMEM percent_combo[] = {BH_E, KC_DOT, COMBO_END};
@@ -165,6 +171,12 @@ combo_t key_combos[] = {
 
   COMBO(square_left_combo , KC_LBRC),
   COMBO(square_right_combo, KC_RBRC),
+  COMBO(brace_left_combo, KC_LPRN),
+  COMBO(brace_right_combo, KC_RPRN),
+  COMBO(curly_left_combo, KC_LCBR),
+  COMBO(curly_right_combo, KC_RCBR),
+  COMBO(angle_left_combo, KC_LABK),
+  COMBO(angle_right_combo, KC_RABK),
 
   COMBO(dollar_combo, KC_DOLLAR),
   COMBO(percent_combo, KC_PERCENT),
@@ -419,11 +431,10 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    *
    * Activated by right-most thumb of the left hand.
    *
-   * On both hands: middle row is for braces
+   * Braces are combos, they are not in this layer.
    *
    * On the left hand:
-   * - symbols on the top and bottom rows are placed as on `shift`ed L_NUM_NAV.
-   * - middle row is prioritised for braces. So to reach `$` `%` `^` we tap `OSM(SHIFT)` and then a key from `L_NUM_NAV` layer.
+   * - symbols are placed as on `shift`ed L_NUM_NAV.
    * -- ? on the right is useful when L_RUSSIAN is active, since `/` is shadowed by `RU_H`
    *
    * - / and \ are symmetrical and placed just by coincidence
@@ -445,13 +456,13 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    *  - right hand: ringer finger: top row
    */
   [L_SYMBOLS] = LAYOUT_split_3x6_3(/*
-       __  `   &   *   /   __                       __  \   +   __  ~   __
-       __  ;   {   (   [   <                        >   ]   )   }   :   __
-       __  __  !   @   #   󰹿                        󰭜   |   ?   __  __  __
+       __  `   &   *   /   __                       __  \   +   |   ~   __
+       __  ;   $   %   ^   __                       __  __  __  __  :   __
+       __  __  !   @   #   󰹿                        󰭜   =   >   ?   __  __
                             __  __  __    __  __  __
        */
         XX,  KC_GRV,   KC_AMPR,  KC_ASTR, KC_SLSH,      XX,       XX,      KC_BSLS,  KC_PLUS,  KC_PIPE, KC_TILD, KC_SLASH,
-        XX, KC_SCLN,   KC_LCBR,  KC_LPRN, KC_LBRC, KC_LABK,       KC_RABK, KC_RBRC,  KC_RPRN,  KC_RCBR, KC_COLN, KC_MINUS,
+        XX, KC_SCLN,    KC_DLR,  KC_PERC, KC_CIRC,      XX,       XX,      KC_RBRC,  KC_RPRN,  KC_RCBR, KC_COLN, KC_MINUS,
         XX,      XX,   KC_EXLM,    KC_AT, KC_HASH,  KC_DEL,       KC_BSPC,  KC_EQL,  KC_RABK,  KC_QUES, XX,      XX,
                                        __ ,    __ ,   __ ,         __ ,   __ ,   __
   ),
