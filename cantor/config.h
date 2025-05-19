@@ -36,14 +36,14 @@
 */
 #define MK_3_SPEED
 #define MK_MOMENTARY_ACCEL
-#define MK_C_OFFSET_UNMOD    16
-#define MK_C_INTERVAL_UNMOD  16
+#define MK_C_OFFSET_UNMOD    7
+#define MK_C_INTERVAL_UNMOD  10
 #define MK_C_OFFSET_0        1
-#define MK_C_INTERVAL_0      32
-#define MK_C_OFFSET_1        4
-#define MK_C_INTERVAL_1      16
-#define MK_C_OFFSET_2        32
-#define MK_C_INTERVAL_2      16
+#define MK_C_INTERVAL_0      10
+#define MK_C_OFFSET_1        3
+#define MK_C_INTERVAL_1      10
+#define MK_C_OFFSET_2        30
+#define MK_C_INTERVAL_2      10
 #define MK_W_OFFSET_UNMOD    1
 #define MK_W_INTERVAL_UNMOD  40
 #define MK_W_OFFSET_0        1
