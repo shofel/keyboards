@@ -10,12 +10,11 @@
  * - one-shot mods on an sm_td hold-layer
  * - caps-word is non-trivial
  *
- * more problems:
- * - homerow mods on layers are unusable
- *
  * an idea about home-row mods
  * - disable HRM on ctrl-w or ctrl+backspace : as if mod misfire detected
  * - enable HRM back on space : as if a problem word was successfully typed
+ *
+ * https://github.com/possumvibes/keyboard-layout?tab=readme-ov-file#code-influences-alphabetically-and-non-comprehensively
  */
 
 #include QMK_KEYBOARD_H

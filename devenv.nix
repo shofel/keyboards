@@ -12,7 +12,7 @@
   };
 
   enterShell = /* sh */ ''
-    # assert qmk util
+    # assert qmk util # does this check work?
     if ! qmk >/dev/null; then
       echo "FAIL: qmk error"
       exit 2
@@ -29,4 +29,10 @@
       qmk setup -y
     fi
   '';
+
+  # Keymap drawer # https://github.com/caksoylar/keymap-drawer
+  languages.python.enable = true;
+  languages.python.poetry.enable = true;
+  languages.python.poetry.activate.enable = true;
+  languages.python.poetry.install.enable = true;
 }

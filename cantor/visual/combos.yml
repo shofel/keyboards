@@ -1,0 +1,6 @@
+combos:
+  - trigger_keys: [Space, Shift]
+    key: Esc
+    layers: [L0]
+    align: bottom
+    offset: 1
