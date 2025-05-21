@@ -42,34 +42,36 @@ parse:
 
 parse_and_fix:
 	@make c2json
-	keymap parse -q ${json} > ${yaml}
+	keymap parse -c 12 -q ${json} \
+		--layer-names Boo Ru Sym Num Fsys Mouse \
+		> ${yaml}
 	sd XX "''" ${yaml}
 	# BOO home row mods
 	sd 'BH A' "{t: 'A', h: 'Super'}" ${yaml}
 	sd 'BH O' "{t: 'O', h: 'Alt'}" ${yaml}
-	sd 'BH E' "{t: 'E', h: 'NAV'}" ${yaml}
+	sd 'BH E' "{t: 'E', h: 'Num'}" ${yaml}
 	sd 'BH S' "{t: 'S', h: 'Ctrl'}" ${yaml}
 	sd 'BH N' "{t: 'N', h: 'Ctrl'}" ${yaml}
-	sd 'BH T' "{t: 'T', h: 'NUM'}" ${yaml}
+	sd 'BH T' "{t: 'T', h: 'Num'}" ${yaml}
 	sd 'BH R' "{t: 'R', h: 'Alt'}" ${yaml}
 	sd 'BH I' "{t: 'I', h: 'Super'}" ${yaml}
 	# Ru home row mods
 	sd 'RU ' '' ${yaml}
 	sd 'RH F' "{t: 'F', h: 'Super'}" ${yaml}
 	sd 'RH Y' "{t: 'Y', h: 'Alt'}" ${yaml}
-	sd 'RH V' "{t: 'V', h: 'NAV'}" ${yaml}
+	sd 'RH V' "{t: 'V', h: 'Num'}" ${yaml}
 	sd 'RH A' "{t: 'A', h: 'Ctrl'}" ${yaml}
 	sd 'RH O' "{t: 'O', h: 'Ctrl'}" ${yaml}
-	sd 'RH L' "{t: 'L', h: 'NUM'}" ${yaml}
+	sd 'RH L' "{t: 'L', h: 'Num'}" ${yaml}
 	sd 'RH D' "{t: 'D', h: 'Alt'}" ${yaml}
 	sd 'RH Z' "{t: 'Z', h: 'Super'}" ${yaml}
 	#
-	sd 'KK[ \n]MOUSE' '{h: MOUSE}' ${yaml}
+	sd 'KK[ \n]MOUSE' '{h: Mouse}' ${yaml}
 	sd 'KK[ \n]SHIFT' 'Shift' ${yaml}
-	sd 'KK[ \n]SYMBO' 'SYM' ${yaml}
-	sd 'KK[ \n]ENTER' '{t: Enter, h: SYM}' ${yaml}
-	sd 'KK[ \n]SPACE' '{t: Space, h: NAV}' ${yaml}
-	sd 'KK[ \n]RU' '{t: RU, h: FSYS}' ${yaml}
+	sd 'KK[ \n]SYMBO' 'Sym' ${yaml}
+	sd 'KK[ \n]ENTER' '{t: Enter, h: Sym}' ${yaml}
+	sd 'KK[ \n]SPACE' '{t: Space, h: Nav}' ${yaml}
+	sd 'KK[ \n]RU' '{t: Ru, h: Fsys}' ${yaml}
 	sd 'NOOP' "''" ${yaml}
 	sd 'EM THNK' "🤔" ${yaml}
 	cat ${combos} >> ${yaml}
