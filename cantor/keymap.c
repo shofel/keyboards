@@ -9,6 +9,7 @@
  * - leader key is shadowed : https://github.com/stasmarkin/sm_td/issues/29
  * - one-shot mods on an sm_td hold-layer
  * - caps-word is non-trivial
+ * - hold tap-hold alt + hold tap-hold fsys + f4 => just f4, no alt
  *
  * an idea about home-row mods
  * - disable HRM on ctrl-w or ctrl+backspace : as if mod misfire detected
