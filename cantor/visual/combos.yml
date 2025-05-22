@@ -1,6 +1,36 @@
 combos:
+  # Escape
   - trigger_keys: [Space, Shift]
     key: Esc
-    layers: [L0]
+    layers: [Boo]
     align: bottom
     offset: 1
+  - trigger_keys: [O, Shift]
+    key: Alt+Esc
+    layers: [Boo]
+    align: bottom
+    offset: 2
+  - trigger_keys: [S, Shift]
+    key: Ctrl+Esc
+    layers: [Boo]
+    align: bottom
+    offset: 1
+# braces
+  - key: "("
+    trigger_keys: [A, S]
+  - key: "["
+    trigger_keys: [O, S]
+  - key: "{"
+    trigger_keys: [A, E]
+  - key: ")"
+    trigger_keys: [N, I]
+  - key: "]"
+    trigger_keys: [N, R]
+  - key: "}"
+    trigger_keys: [T, I]
+  - key: "<"
+    trigger_keys: [E, G]
+  - key: ">"
+    trigger_keys: [B, T]
+# digraphs
+

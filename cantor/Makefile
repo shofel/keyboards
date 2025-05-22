@@ -26,10 +26,11 @@ flash:
 
 visual = visual
 json = ${visual}/keymap.json
-yaml = ${visual}/keymap.yaml
+yaml = ${visual}/keymap.yml
 yaml_old = ${visual}/keymap.yaml.old
 svg = ${visual}/keymap.svg
 combos = ${visual}/combos.yml
+draw_config = ${visual}/draw_config.yml
 
 c2json:
 	qmk c2json -q keymap.c -kb ${keyboard} -km ${keymap} --no-cpp > ${json}
@@ -43,7 +44,7 @@ parse:
 parse_and_fix:
 	@make c2json
 	keymap parse -c 12 -q ${json} \
-		--layer-names Boo Ru Sym Num Fsys Mouse \
+		--layer-names Boo Ru Symbols Num Fsys Mouse \
 		> ${yaml}
 	sd XX "''" ${yaml}
 	# BOO home row mods
@@ -68,12 +69,13 @@ parse_and_fix:
 	#
 	sd 'KK[ \n]MOUSE' '{h: Mouse}' ${yaml}
 	sd 'KK[ \n]SHIFT' 'Shift' ${yaml}
-	sd 'KK[ \n]SYMBO' 'Sym' ${yaml}
-	sd 'KK[ \n]ENTER' '{t: Enter, h: Sym}' ${yaml}
+	sd 'KK[ \n]SYMBO' 'Symbols' ${yaml}
+	sd 'KK[ \n]ENTER' '{t: Enter, h: Symbols}' ${yaml}
 	sd 'KK[ \n]SPACE' '{t: Space, h: Nav}' ${yaml}
 	sd 'KK[ \n]RU' '{t: Ru, h: Fsys}' ${yaml}
-	sd 'NOOP' "''" ${yaml}
+	sd 'KK[ \n]NOOP' "''" ${yaml}
 	sd 'EM THNK' "🤔" ${yaml}
+	cat ${draw_config} >> ${yaml}
 	cat ${combos} >> ${yaml}
 
 draw:
