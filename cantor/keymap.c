@@ -11,11 +11,21 @@
  * - caps-word is non-trivial
  * - hold tap-hold alt + hold tap-hold fsys + f4 => just f4, no alt
  *
- * an idea about home-row mods
+ * Idea: one-word without home-row mods
  * - disable HRM on ctrl-w or ctrl+backspace : as if mod misfire detected
  * - enable HRM back on space : as if a problem word was successfully typed
  *
+ * Idea: One-word layer
+ * It can also be a mod-layer
+ * Contra: I don't mind holding a layer key, since all of them are on thumb keys
+ *
+ * Idea: Draw the layers diagram by hand
+ *
+ * References
  * https://github.com/possumvibes/keyboard-layout?tab=readme-ov-file#code-influences-alphabetically-and-non-comprehensively
+ * callum
+ *   - callum
+ *   - drashma
  */
 
 #include QMK_KEYBOARD_H
