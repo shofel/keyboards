@@ -21,6 +21,8 @@
  *
  * Idea: Draw the layers diagram by hand
  *
+ * Idea: Make animations to explain tricks
+ *
  * References
  * https://github.com/possumvibes/keyboard-layout?tab=readme-ov-file#code-influences-alphabetically-and-non-comprehensively
  * callum
@@ -395,19 +397,19 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    * 1. Tap activates the layer
    * 1. Double tap switches back to English.
    * 1. Tap of Esc switches back to English. This is especially useful in Vim
-   * 1. When Ru is active, tap-hold the RU key. While you hold it, type English letters. Release to continue typing Russian. The idea is to facilitate typing isolated English words in a flow of Russian text.
+   * 1. Tap-then-hold RU key to type an English word in a flow of Russian text. When Ru is active, tap-then-hold the RU key. While you hold it, you type English letters. Release it to continue typing Russian. The idea is to facilitate typing isolated English words in a flow of Russian text.
    */
   [L_RUSSIAN] = LAYOUT_split_3x6_3(/** Russian layer ```
        ё   й   ц   у   к   е                        н   г   ш   щ   з   х
        __  ф   ы   в   а   п                        р   о   л   д   ж   э
        __  я   ч   с   м   и                        т   ь   б   ю   .   ъ
-                            __  __  __    __  __  __
+                            __  __  __    __  __  RU
        ```
        */
          RU_YO,   RU_Y,    RU_TS,    RU_U,   RU_K,  RU_E,     RU_N,  RU_G,   RU_SH, RU_SHCH,RU_Z,   RU_H,
            __ ,   RH_F,    RH_Y,     RH_V,   RH_A,  RU_P,     RU_R,  RH_O,   RH_L,  RH_D,   RH_Z,   RU_EE,
            __ ,   RU_YA,   RU_CH,    RU_S,   RU_M,  RU_I,     RU_T,  RU_SOFT,RU_B,  RU_YU,  RU_DOT, RU_HARD,
-                                     __ ,    __ ,   __ ,       __ ,   __ ,   __
+                                     __ ,    __ ,   __ ,       __ ,   __ ,   KK_RU
   ),
 
   /**
@@ -439,18 +441,19 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
        __  `   &   *   __  __                       __  \   +   |   ~   /
        __  ;   $   %   ^   __                       __  __  __  __  :   -
        __  __  !   @   #   󰹿                        󰭜   =   __  ?   __  __
-                            __  __  __    __  __  __
+                            __  __  SYM   __  __  __
        */
         XX,  KC_GRV,   KC_AMPR,  KC_ASTR, EM_THNK,      XX,       XX,      KC_BSLS,  KC_PLUS,  KC_PIPE, KC_TILD, KC_SLASH,
         XX, KC_SCLN,    KC_DLR,  KC_PERC, KC_CIRC,      XX,       XX,           XX,       XX,       XX, KC_COLN, KC_MINUS,
         XX,      XX,   KC_EXLM,    KC_AT, KC_HASH,  KC_DEL,       KC_BSPC,  KC_EQL,       XX,  KC_QUES, XX,      XX,
-                                       __ ,    __ ,   __ ,         __ ,   __ ,   __
+                                      __ ,  __ , KK_SYMBO,         __ ,  __ ,  __
   ),
 
   /**
    * Layer for numbers and navigation.
    *
-   * Activated by holding home-row keys of the middle fingers.
+   * Activated by holding home-row of the middle fingers.
+   * Extra activation: middle thumb on the right hand. This way you can use ↑,↓ with a single hand.
    *
    * Basic idea is clean: numbers on the left, and navigation on the right.
    *
@@ -458,9 +461,13 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    * - two zeroes: one is in its logical place, before `1`, and another is on the home row place,
    *   which is easier to reach and free.
    * - `/` `:` `.` is to type `05/06/1970` `05:50` `3.1415`
+   * - KC_GRV (```) is to switch windows in gnome:
+   *   - with the left hand hold alt+L_NUM_NAV
+   *   - with the right hand tap KC_GRV
+   *   - while still holding alt and L_NUM_NAV, you can tap left and right arrows with right
    */
   [L_NUM_NAV] = LAYOUT_split_3x6_3(/*
-       __  __  7   8   9   /                        __  pg↑ ↑   pg↓ __  __
+       __  __  7   8   9   /                        `   pg↑ ↑   pg↓ __  __
        __  0   4   5   6   :                        ⇤-  ←   ⏎   →   -⇥  __
        __  0   1   2   3   .                        __  ⮀   ↓   __  __  __
                             __  __  __    __  __  __
