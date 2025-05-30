@@ -1,5 +1,7 @@
 /* Unicode */
 
+// LC is for lowercase
+// UC is for uppercase
 enum unicode_names {
   RU_LC_A,
   RU_LC_B,
@@ -74,8 +76,8 @@ enum unicode_names {
   U_COLON,
   U_ASTRS,
   U_QSTN,
-  U_THFA,
-  U_MOFA,
+  U_THINKING_FACE,
+  U_FACE_WITH_MONOCLE,
 };
 
 const uint32_t PROGMEM unicode_map[] = {
@@ -153,11 +155,11 @@ const uint32_t PROGMEM unicode_map[] = {
   [U_COLON] = 0x03A,
   [U_ASTRS] = 0x02A,
   [U_QSTN] = 0x03F,
-  [U_THFA] = 0x1F914,
-  [U_MOFA] = 0x1F9D0,
+  [U_THINKING_FACE] = 0x1F914,
+  [U_FACE_WITH_MONOCLE] = 0x1F9D0,
 };
 
-// Combine lower and upper case letters as a single key
+// Combine lower and upper case letter as a single `unicode pair` key
 #define RU_A UP(RU_LC_A, RU_UC_A)
 #define RU_B UP(RU_LC_B, RU_UC_B)
 #define RU_V UP(RU_LC_V, RU_UC_V)
@@ -193,7 +195,7 @@ const uint32_t PROGMEM unicode_map[] = {
 #define RU_YA UP(RU_LC_YA, RU_UC_YA)
 #define RU_DOT UP(U_DOT, U_COMMA)
 
-#define EM_THNK UP(U_THFA, U_MOFA)
+#define EM_THNK UP(U_THINKING_FACE, U_FACE_WITH_MONOCLE)
 
 /* SM hold=layer tap=unicodemap */
 #define SM_LU(macro_key, unicode_i, layer)  \

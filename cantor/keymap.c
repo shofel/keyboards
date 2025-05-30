@@ -361,19 +361,31 @@ void on_smtd_action(uint16_t keycode, smtd_action action, uint8_t tap_count) {
  *
  *  ** Modifiers
  *  1. Spatial closeness is prioritised over predictability and speed
- *  2. As a result, home row mods are all the way down. There are misfirings some times,  
+ *  2. As a result, home row mods are all the way down. There are misfirings some times,
  *     but when it works, it feels great.
- *  3. Exception is for SHIFT, which is a dedicated `OSM(L_SFT)` key on a thumb.
+ *  3. Exception is for SHIFT, which is a dedicated `OSM(L_SFT)` key on a middle thumb of left hand.
  *
  *  ** Unicode Input
- *  1. A unicode layer with Russian letters. Switch between `Linux` and `Vim` input modes  
- *     VIM mode looks and awesome, but works only on Vim/Neovim  
- *     Linux mode implies a blink of a window for each character, but kinda works in all apps. By the way you can prevent appearance of that window, being dedicated enough  
- *     Also, as of time of writing, the vim mode is not in upstream QMK. I sent [a pull-request](https://github.com/qmk/qmk_firmware/pull/25188) which implements it
- *  2. When using non-qwerty layout, switching language in OS requires lots of effort.  
- *     And symbols are spoiled: with Ru active, your `}` sent from keyboard becomes `ъ`
- *     With unicode input, theese issues just disappear.
+ *  *** Why?
+ *  When using non-qwerty layout, then switching language in OS is non-trivial. Normally there is just
+ *  a keymap from qwerty to a language. That is, each latin letter is mapped to a letter of another
+ *  alphabet: q->й, w->ц. But with non-qwerty layout the map is different.
+ *  To mitigate this, one would implement a keymap for their case. But what if we have two keyboards
+ *  attached? Let's say, I prefer qwerty on the notebook keyboard, and Boo layout on QMK keyboard.
+ *  Since an OS can't make difference between keyboards, it can't know which keymap to apply when
+ *  receiving a keypress from any of the keyboards.
+ *  To solve this:
+ *  - with notebook keeb I just switch language with `win+space`,
+ *  - and the qmk keyboard uses its own Russian layer.
  *
+ *  *** How
+ *  A separate layer with Russian letters.  
+ *  https://docs.qmk.fm/features/unicode#input-subsystems
+ *  
+ *  Switch between `Linux` and `Vim` input modes  
+ *  VIM mode looks and feels awesome, but works only in Vim/Neovim  
+ *  Linux mode feels clunky in some apps, but kinda works everywhere.  
+ *  Also, as of time of writing, the vim mode is not in upstream QMK. I sent [a pull-request](https://github.com/qmk/qmk_firmware/pull/25188) which implements it
  */
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   [L_BOO] = LAYOUT_split_3x6_3(/** BOO LAYOUT
@@ -396,7 +408,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    *
    * 1. Tap activates the layer
    * 1. Double tap switches back to English.
-   * 1. Tap of Esc switches back to English. This is especially useful in Vim
+   * 1. Tap of Esc switches back to English. So that in vim you return to normal mode in English.
    * 1. Tap-then-hold RU key to type an English word in a flow of Russian text. When Ru is active, tap-then-hold the RU key. While you hold it, you type English letters. Release it to continue typing Russian. The idea is to facilitate typing isolated English words in a flow of Russian text.
    */
   [L_RUSSIAN] = LAYOUT_split_3x6_3(/** Russian layer ```
