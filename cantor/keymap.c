@@ -25,12 +25,14 @@
  *
  * References
  * https://github.com/possumvibes/keyboard-layout?tab=readme-ov-file#code-influences-alphabetically-and-non-comprehensively
- * callum
  *   - callum
  *   - drashma
  */
 
 #include QMK_KEYBOARD_H
+
+// #define SMTD_DEBUG_ENABLED
+#include "sm_td.h"
 
 void keyboard_post_init_user(void) {
   // Customise these values to desired behaviour
@@ -55,12 +57,9 @@ enum my_keycodes {
 
   // thumb keys
   KK_RU,
-  KK_ENTER,
-  KK_SPACE,
   KK_MOUSE,
 };
 
-#include "sm_td.h"
 #include "unicode.c"
 
 /* Layer names */
@@ -114,15 +113,15 @@ const key_override_t *key_overrides[] = {
 #define COMBO_ONLY_FROM_LAYER 0
 
 /* Hit both middle thumb keys for esc. */
-const uint16_t PROGMEM esc_combo[]     = {KK_SHIFT, KK_SPACE, COMBO_END};
+const uint16_t PROGMEM esc_combo[]     = {KK_SHIFT, KC_SPACE, COMBO_END};
 const uint16_t PROGMEM ctl_esc_combo[] = {KK_SHIFT, KC_S, COMBO_END};
 const uint16_t PROGMEM alt_esc_combo[] = {KK_SHIFT, KC_O, COMBO_END};
 /* Two outer bottom keys on a single half to get into bootloader. */
 const uint16_t PROGMEM boot_combo_left[]  = {KK_NOOP, KK_SYMBO, COMBO_END};
-const uint16_t PROGMEM boot_combo_right[] = {KK_ENTER, KK_NOOP, COMBO_END};
+const uint16_t PROGMEM boot_combo_right[] = {KC_ENTER, KK_NOOP, COMBO_END};
 /* On each half: the outermost bottom pinky key + the middle thumb key to reboot the keyboard. */
 const uint16_t PROGMEM reset_combo_left[]  = {KK_NOOP, KK_SHIFT, COMBO_END};
-const uint16_t PROGMEM reset_combo_right[] = {KK_SPACE, KK_NOOP, COMBO_END};
+const uint16_t PROGMEM reset_combo_right[] = {KC_SPACE, KK_NOOP, COMBO_END};
 /* Digraphs */
 const uint16_t PROGMEM go_declaration_combo[]  = {KC_H, KC_I, COMBO_END}; // :=
 const uint16_t PROGMEM fat_right_arrow_combo[] = {KC_H, KC_M, COMBO_END}; // =>
@@ -137,10 +136,6 @@ const uint16_t PROGMEM curly_left_combo[]   = {KC_E, KC_A, COMBO_END};
 const uint16_t PROGMEM curly_right_combo[]  = {KC_T, KC_I, COMBO_END};
 const uint16_t PROGMEM angle_left_combo[]   = {KC_G, KC_E, COMBO_END};
 const uint16_t PROGMEM angle_right_combo[]  = {KC_B, KC_T, COMBO_END};
-/* $ % ^  vertical combos */ // TODO ??remove??
-const uint16_t PROGMEM dollar_combo[]  = {KC_O, KC_X, COMBO_END};
-const uint16_t PROGMEM percent_combo[] = {KC_E, KC_DOT, COMBO_END};
-const uint16_t PROGMEM caret_combo[]   = {KC_S, KC_W, COMBO_END};
 
 combo_t key_combos[] = {
   COMBO(esc_combo, KC_ESC),
@@ -166,18 +161,10 @@ combo_t key_combos[] = {
   COMBO(curly_right_combo, KC_RCBR),
   COMBO(angle_left_combo, KC_LABK),
   COMBO(angle_right_combo, KC_RABK),
-
-  COMBO(dollar_combo, KC_DOLLAR),
-  COMBO(percent_combo, KC_PERCENT),
-  COMBO(caret_combo, KC_CIRCUMFLEX),
 };
 
 /* */
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
-  if (!process_smtd(keycode, record)) {
-    return false;
-  }
-
   switch (keycode) {
     case KC_ESC: /* Switch language in vim. */
       slava_set_language(En);
@@ -202,9 +189,31 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         SEND_STRING("!=");
       }
       return false;
+
+    case LCTL(KC_ESC): return true;
+    case LALT(KC_ESC): return true;
+
+    case QK_BOOT: return true;
+    case QK_REBOOT: return true;
+
+    case KC_LBRC: return true;
+    case KC_RBRC: return true;
+    case KC_LPRN: return true;
+    case KC_RPRN: return true;
+    case KC_LCBR: return true;
+    case KC_RCBR: return true;
+    case KC_LABK: return true;
+    case KC_RABK: return true;
+
     default:
-      return true; // Process all other keycodes normally
+      break;
   }
+
+  if (!process_smtd(keycode, record)) {
+    return false;
+  }
+
+  return true;
 }
 
 /* Make right middle tap-hold extremely averted to a tap. */
@@ -225,15 +234,15 @@ smtd_resolution on_smtd_action(
 ) {
   switch (keycode) {
     /* Boo home-row mods. */
-    SMTD_MT(KC_A, KC_A, KC_LEFT_GUI)
-    SMTD_MT(KC_O, KC_O, KC_LEFT_ALT)
-    SMTD_LT(KC_E, KC_E, L_NUM_NAV)
-    SMTD_MT(KC_S, KC_S, KC_LEFT_CTRL)
+    SMTD_MT(KC_A, KC_LEFT_GUI)
+    SMTD_MT(KC_O, KC_LEFT_ALT)
+    SMTD_LT(KC_E, L_NUM_NAV)
+    SMTD_MT(KC_S, KC_LEFT_CTRL)
     //
-    SMTD_MT(KC_N, KC_N, KC_RIGHT_CTRL)
-    SMTD_LT(KC_T, KC_T, L_NUM_NAV)
-    SMTD_MT(KC_R, KC_R, KC_RIGHT_ALT)
-    SMTD_MT(KC_I, KC_I, KC_RIGHT_GUI)
+    SMTD_MT(KC_N, KC_RIGHT_CTRL)
+    SMTD_LT(KC_T, L_NUM_NAV)
+    SMTD_MT(KC_R, KC_RIGHT_ALT)
+    SMTD_MT(KC_I, KC_RIGHT_GUI)
 
     /* RU home-row mods. */
     SM_MU(RU_F, KC_LEFT_GUI)
@@ -258,26 +267,28 @@ smtd_resolution on_smtd_action(
     /* tap = ru, taptap = en, taphold = (↓en ↑ru)
        hold = fkeys */
     SMTD_DANCE(KK_RU,
-        NOTHING,
-        switch (tap_count) {
-          case 0: slava_set_language(Ru); break;
-          case 1: slava_set_language(En); break;
-          default: break;
-        },
-        switch (tap_count) {
-          case 0: layer_on(L_FKEYS_SYS); break;
-          case 1: slava_set_language(En); break;
-          default: break;
-        },
-        switch (tap_count) {
-          case 0:
-            layer_off(L_FKEYS_SYS);
-            break;
-          case 1:
-            slava_set_language(Ru);
-          default:
-            break;
-        })
+      NOTHING,
+      switch (tap_count) {
+        case 0: slava_set_language(Ru); break;
+        case 1: slava_set_language(En); break;
+        default: break;
+      },
+      switch (tap_count) {
+        case 0: layer_on(L_FKEYS_SYS); break;
+        case 1: slava_set_language(En); break;
+        default: break;
+      },
+      switch (tap_count) {
+        case 0:
+          layer_off(L_FKEYS_SYS);
+          break;
+        case 1:
+          slava_set_language(Ru);
+        default:
+          break;
+      }
+    )
+  }
 
   return SMTD_RESOLUTION_UNHANDLED;
 }
@@ -329,7 +340,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
            __ ,    KC_A,    KC_O,    KC_E,   KC_S,  KC_G,     KC_B,  KC_N,  KC_T,  KC_R,  KC_I,   KC_MINUS,
        KK_NOOP,      XX,    KC_X,  KC_DOT,   KC_W,  KC_Z,     KC_P,  KC_H,  KC_M,  KC_K,  KC_J,   KK_NOOP,
 
-                          KK_MOUSE , KK_SHIFT , KK_SYMBO,     KK_ENTER , KK_SPACE, KK_RU
+                          KK_MOUSE , KK_SHIFT , KK_SYMBO,     KC_ENTER , KC_SPACE, KK_RU
   ),
 
   /**
