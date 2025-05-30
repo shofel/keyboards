@@ -9,7 +9,6 @@
  * - leader key is shadowed : https://github.com/stasmarkin/sm_td/issues/29
  * - one-shot mods on an sm_td hold-layer
  * - caps-word is non-trivial
- * - hold tap-hold alt + hold tap-hold fsys + f4 => just f4, no alt
  *
  * Idea: one-word without home-row mods
  * - disable HRM on ctrl-w or ctrl+backspace : as if mod misfire detected
@@ -239,10 +238,10 @@ smtd_resolution on_smtd_action(
     SMTD_LT(KC_E, L_NUM_NAV)
     SMTD_MT(KC_S, KC_LEFT_CTRL)
     //
-    SMTD_MT(KC_N, KC_RIGHT_CTRL)
+    SMTD_MT(KC_N, KC_LEFT_CTRL)
     SMTD_LT(KC_T, L_NUM_NAV)
-    SMTD_MT(KC_R, KC_RIGHT_ALT)
-    SMTD_MT(KC_I, KC_RIGHT_GUI)
+    SMTD_MT(KC_R, KC_LEFT_ALT)
+    SMTD_MT(KC_I, KC_LEFT_GUI)
 
     /* RU home-row mods. */
     SM_MU(RU_F, KC_LEFT_GUI)
@@ -449,7 +448,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                              __  __  __     __  __  __
        */
         XX,  KC_F12,  KC_F7,  KC_F8,  KC_F9, UC_VIM,       XX, KC_BRIU,  KC_VOLU,  UC_LINX,  DB_TOGG, XX,
-        XX,  KC_F11,  KC_F4,  KC_F5,  KC_F6,     XX,       XX, KC_RCTL,  KC_RSFT,  KC_RALT,  KC_RGUI, XX,
+        XX,  KC_F11,  KC_F4,  KC_F5,  KC_F6,     XX,       XX, KC_LCTL,  KC_LSFT,  KC_LALT,  KC_RGUI, XX,
    QK_BOOT,  KC_F10,  KC_F1,  KC_F2,  KC_F3,     XX,       XX, KC_BRID,  KC_VOLD,  KC_MUTE,  XX, QK_BOOT,
                                 __ ,    __ ,   __ ,         __ ,   __ ,   __
   ),
