@@ -1018,9 +1018,6 @@ void smtd_execute_action(smtd_state *state, smtd_action action) {
     }
 
     uint8_t mods_on_restore = state->saved_mods;
-#else
-    uint8_t mods_on_start = get_mods();
-    uint8_t mods_on_restore = mods_on_start;
 #endif
 
     smtd_bypass = true;

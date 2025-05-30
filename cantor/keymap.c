@@ -53,31 +53,11 @@ enum my_keycodes {
   KK_NOT_EQUAL,
   KK_NOOP,
 
-  SMTD_KEYCODES_BEGIN,
-  // boo home-row mods
-  BH_A,
-  BH_O,
-  BH_E,
-  BH_S,
-  BH_N,
-  BH_T,
-  BH_R,
-  BH_I,
-  // ru home-row mods // RH = russian homerow
-  RH_F,
-  RH_Y,
-  RH_V,
-  RH_A,
-  RH_O,
-  RH_L,
-  RH_D,
-  RH_Z,
   // thumb keys
   KK_RU,
   KK_ENTER,
   KK_SPACE,
   KK_MOUSE,
-  SMTD_KEYCODES_END,
 };
 
 #include "sm_td.h"
@@ -135,8 +115,8 @@ const key_override_t *key_overrides[] = {
 
 /* Hit both middle thumb keys for esc. */
 const uint16_t PROGMEM esc_combo[]     = {KK_SHIFT, KK_SPACE, COMBO_END};
-const uint16_t PROGMEM ctl_esc_combo[] = {KK_SHIFT, BH_S, COMBO_END};
-const uint16_t PROGMEM alt_esc_combo[] = {KK_SHIFT, BH_O, COMBO_END};
+const uint16_t PROGMEM ctl_esc_combo[] = {KK_SHIFT, KC_S, COMBO_END};
+const uint16_t PROGMEM alt_esc_combo[] = {KK_SHIFT, KC_O, COMBO_END};
 /* Two outer bottom keys on a single half to get into bootloader. */
 const uint16_t PROGMEM boot_combo_left[]  = {KK_NOOP, KK_SYMBO, COMBO_END};
 const uint16_t PROGMEM boot_combo_right[] = {KK_ENTER, KK_NOOP, COMBO_END};
@@ -144,23 +124,23 @@ const uint16_t PROGMEM boot_combo_right[] = {KK_ENTER, KK_NOOP, COMBO_END};
 const uint16_t PROGMEM reset_combo_left[]  = {KK_NOOP, KK_SHIFT, COMBO_END};
 const uint16_t PROGMEM reset_combo_right[] = {KK_SPACE, KK_NOOP, COMBO_END};
 /* Digraphs */
-const uint16_t PROGMEM go_declaration_combo[]  = {KC_H, BH_I, COMBO_END}; // :=
+const uint16_t PROGMEM go_declaration_combo[]  = {KC_H, KC_I, COMBO_END}; // :=
 const uint16_t PROGMEM fat_right_arrow_combo[] = {KC_H, KC_M, COMBO_END}; // =>
 const uint16_t PROGMEM right_arrow_combo[]     = {KC_H, KC_K, COMBO_END}; // ->
 const uint16_t PROGMEM not_equal_combo[]       = {KC_H, KC_X, COMBO_END}; // !=
 /* [{(<>)}] */
-const uint16_t PROGMEM square_left_combo[]  = {BH_S, BH_O, COMBO_END};
-const uint16_t PROGMEM square_right_combo[] = {BH_N, BH_R, COMBO_END};
-const uint16_t PROGMEM brace_left_combo[]   = {BH_S, BH_A, COMBO_END};
-const uint16_t PROGMEM brace_right_combo[]  = {BH_N, BH_I, COMBO_END};
-const uint16_t PROGMEM curly_left_combo[]   = {BH_E, BH_A, COMBO_END};
-const uint16_t PROGMEM curly_right_combo[]  = {BH_T, BH_I, COMBO_END};
-const uint16_t PROGMEM angle_left_combo[]   = {KC_G, BH_E, COMBO_END};
-const uint16_t PROGMEM angle_right_combo[]  = {KC_B, BH_T, COMBO_END};
+const uint16_t PROGMEM square_left_combo[]  = {KC_S, KC_O, COMBO_END};
+const uint16_t PROGMEM square_right_combo[] = {KC_N, KC_R, COMBO_END};
+const uint16_t PROGMEM brace_left_combo[]   = {KC_S, KC_A, COMBO_END};
+const uint16_t PROGMEM brace_right_combo[]  = {KC_N, KC_I, COMBO_END};
+const uint16_t PROGMEM curly_left_combo[]   = {KC_E, KC_A, COMBO_END};
+const uint16_t PROGMEM curly_right_combo[]  = {KC_T, KC_I, COMBO_END};
+const uint16_t PROGMEM angle_left_combo[]   = {KC_G, KC_E, COMBO_END};
+const uint16_t PROGMEM angle_right_combo[]  = {KC_B, KC_T, COMBO_END};
 /* $ % ^  vertical combos */ // TODO ??remove??
-const uint16_t PROGMEM dollar_combo[]  = {BH_O, KC_X, COMBO_END};
-const uint16_t PROGMEM percent_combo[] = {BH_E, KC_DOT, COMBO_END};
-const uint16_t PROGMEM caret_combo[]   = {BH_S, KC_W, COMBO_END};
+const uint16_t PROGMEM dollar_combo[]  = {KC_O, KC_X, COMBO_END};
+const uint16_t PROGMEM percent_combo[] = {KC_E, KC_DOT, COMBO_END};
+const uint16_t PROGMEM caret_combo[]   = {KC_S, KC_W, COMBO_END};
 
 combo_t key_combos[] = {
   COMBO(esc_combo, KC_ESC),
@@ -230,7 +210,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 /* Make right middle tap-hold extremely averted to a tap. */
 uint32_t get_smtd_timeout(uint16_t keycode, smtd_timeout timeout) {
   switch (keycode) {
-    case BH_T:
+    case KC_T:
     case RU_L:
       if (timeout == SMTD_TIMEOUT_TAP) return SMTD_GLOBAL_TAP_TERM + 100;
       if (timeout == SMTD_TIMEOUT_RELEASE) return 5;
@@ -240,115 +220,66 @@ uint32_t get_smtd_timeout(uint16_t keycode, smtd_timeout timeout) {
   return get_smtd_timeout_default(timeout);
 }
 
-void on_smtd_action(uint16_t keycode, smtd_action action, uint8_t tap_count) {
+smtd_resolution on_smtd_action(
+    uint16_t keycode, smtd_action action, uint8_t tap_count
+) {
   switch (keycode) {
     /* Boo home-row mods. */
-    SMTD_MT(BH_A, KC_A, KC_LEFT_GUI)
-    SMTD_MT(BH_O, KC_O, KC_LEFT_ALT)
-    SMTD_LT(BH_E, KC_E, L_NUM_NAV)
-    SMTD_MT(BH_S, KC_S, KC_LEFT_CTRL)
+    SMTD_MT(KC_A, KC_A, KC_LEFT_GUI)
+    SMTD_MT(KC_O, KC_O, KC_LEFT_ALT)
+    SMTD_LT(KC_E, KC_E, L_NUM_NAV)
+    SMTD_MT(KC_S, KC_S, KC_LEFT_CTRL)
     //
-    SMTD_MT(BH_N, KC_N, KC_RIGHT_CTRL)
-    SMTD_LT(BH_T, KC_T, L_NUM_NAV)
-    SMTD_MT(BH_R, KC_R, KC_RIGHT_ALT)
-    SMTD_MT(BH_I, KC_I, KC_RIGHT_GUI)
+    SMTD_MT(KC_N, KC_N, KC_RIGHT_CTRL)
+    SMTD_LT(KC_T, KC_T, L_NUM_NAV)
+    SMTD_MT(KC_R, KC_R, KC_RIGHT_ALT)
+    SMTD_MT(KC_I, KC_I, KC_RIGHT_GUI)
 
     /* RU home-row mods. */
-    SM_MU(RH_F, RU_F, KC_LEFT_GUI)
-    SM_MU(RH_Y, RU_YERU, KC_LEFT_ALT)
-    SM_LU(RH_V, RU_V, L_NUM_NAV)
-    SM_MU(RH_A, RU_A, KC_LEFT_CTRL)
-    SM_MU(RH_O, RU_O, KC_LEFT_CTRL)
-    SM_LU(RH_L, RU_L, L_NUM_NAV)
-    SM_MU(RH_D, RU_D, KC_LEFT_ALT)
-    SM_MU(RH_Z, RU_ZH, KC_LEFT_GUI)
+    SM_MU(RU_F, KC_LEFT_GUI)
+    SM_MU(RU_YERU, KC_LEFT_ALT)
+    SM_LU(RU_V, L_NUM_NAV)
+    SM_MU(RU_A, KC_LEFT_CTRL)
+    SM_MU(RU_O, KC_LEFT_CTRL)
+    SM_LU(RU_L, L_NUM_NAV)
+    SM_MU(RU_D, KC_LEFT_ALT)
+    SM_MU(RU_ZH, KC_LEFT_GUI)
 
     // Thumb keys
-    SMTD_LT(KK_ENTER, KC_ENTER, L_SYMBOLS)
-    SMTD_LT(KK_SPACE, KC_SPACE, L_NUM_NAV)
+    SMTD_LT(KC_ENTER, L_SYMBOLS)
+    SMTD_LT(KC_SPACE, L_NUM_NAV)
     /* hold = mouse */
-    case KK_MOUSE:
-    {
-      switch (action) {
-        case SMTD_ACTION_TOUCH:
-          break;
+    SMTD_DANCE(KK_MOUSE,
+      NOTHING,
+      NOTHING,
+      layer_on(L_MOUSE),
+      layer_off(L_MOUSE))
 
-        case SMTD_ACTION_TAP:
-          break;
-
-        case SMTD_ACTION_HOLD:
-          switch (tap_count) {
-            case 0:
-              layer_on(L_MOUSE);
-              break;
-            default:
-              break;
-          }
-          break;
-
-        case SMTD_ACTION_RELEASE:
-          switch (tap_count) {
-            case 0:
-              layer_off(L_MOUSE);
-              break;
-            default:
-              break;
-          }
-          break;
-      }
-      break;
-    }
     /* tap = ru, taptap = en, taphold = (↓en ↑ru)
        hold = fkeys */
-    case KK_RU:
-    {
-      switch (action) {
-        case SMTD_ACTION_TOUCH:
-          break;
+    SMTD_DANCE(KK_RU,
+        NOTHING,
+        switch (tap_count) {
+          case 0: slava_set_language(Ru); break;
+          case 1: slava_set_language(En); break;
+          default: break;
+        },
+        switch (tap_count) {
+          case 0: layer_on(L_FKEYS_SYS); break;
+          case 1: slava_set_language(En); break;
+          default: break;
+        },
+        switch (tap_count) {
+          case 0:
+            layer_off(L_FKEYS_SYS);
+            break;
+          case 1:
+            slava_set_language(Ru);
+          default:
+            break;
+        })
 
-        case SMTD_ACTION_TAP:
-          switch (tap_count) {
-            case 0:
-              slava_set_language(Ru);
-              break;
-            case 1:
-              slava_set_language(En);
-              break;
-            case 2:
-              break;
-            default:
-              break;
-          }
-          break;
-
-        case SMTD_ACTION_HOLD:
-          switch (tap_count) {
-            case 0:
-              layer_on(L_FKEYS_SYS);
-              break;
-            case 1:
-              slava_set_language(En);
-              break;
-            default:
-              break;
-          }
-          break;
-
-        case SMTD_ACTION_RELEASE:
-          switch (tap_count) {
-            case 0:
-              layer_off(L_FKEYS_SYS);
-              break;
-            case 1:
-              slava_set_language(Ru);
-            default:
-              break;
-          }
-          break;
-      }
-      break;
-    }
-  }
+  return SMTD_RESOLUTION_UNHANDLED;
 }
 
 /**
@@ -395,7 +326,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                      MOUSE sft SYMBOLS          ret spc RU
        */
            __ , KC_QUOT, KC_COMM,    KC_U,   KC_C,  KC_V,     KC_Q,  KC_F,  KC_D,  KC_L,  KC_Y,   KC_SLASH,
-           __ ,    BH_A,    BH_O,    BH_E,   BH_S,  KC_G,     KC_B,  BH_N,  BH_T,  BH_R,  BH_I,   KC_MINUS,
+           __ ,    KC_A,    KC_O,    KC_E,   KC_S,  KC_G,     KC_B,  KC_N,  KC_T,  KC_R,  KC_I,   KC_MINUS,
        KK_NOOP,      XX,    KC_X,  KC_DOT,   KC_W,  KC_Z,     KC_P,  KC_H,  KC_M,  KC_K,  KC_J,   KK_NOOP,
 
                           KK_MOUSE , KK_SHIFT , KK_SYMBO,     KK_ENTER , KK_SPACE, KK_RU
@@ -419,7 +350,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
        ```
        */
          RU_YO,   RU_Y,    RU_TS,    RU_U,   RU_K,  RU_E,     RU_N,  RU_G,   RU_SH, RU_SHCH,RU_Z,   RU_H,
-           __ ,   RH_F,    RH_Y,     RH_V,   RH_A,  RU_P,     RU_R,  RH_O,   RH_L,  RH_D,   RH_Z,   RU_EE,
+           __ ,   RU_F,    RU_YERU,  RU_V,   RU_A,  RU_P,     RU_R,  RU_O,   RU_L,  RU_D,   RU_ZH,  RU_EE,
            __ ,   RU_YA,   RU_CH,    RU_S,   RU_M,  RU_I,     RU_T,  RU_SOFT,RU_B,  RU_YU,  RU_DOT, RU_HARD,
                                      __ ,    __ ,   __ ,       __ ,   __ ,   KK_RU
   ),

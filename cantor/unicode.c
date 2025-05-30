@@ -198,49 +198,26 @@ const uint32_t PROGMEM unicode_map[] = {
 #define EM_THNK UP(U_THINKING_FACE, U_FACE_WITH_MONOCLE)
 
 /* SM hold=layer tap=unicodemap */
-#define SM_LU(macro_key, unicode_i, layer)  \
-    case macro_key:                         \
-    {                                       \
-      switch (action) {                     \
-        case SMTD_ACTION_TOUCH:             \
-          break;                            \
-                                            \
-        case SMTD_ACTION_TAP:               \
-          register_unicodemap(unicodemap_index(unicode_i));   \
-          break;                            \
-                                            \
-        case SMTD_ACTION_HOLD:              \
-          layer_on(L_NUM_NAV);              \
-          break;                            \
-                                            \
-        case SMTD_ACTION_RELEASE:           \
-          layer_off(L_NUM_NAV);              \
-          break;                            \
-      }                                     \
-      break;                                \
-    }                                       \
+#define SM_LU(unicode_key, layer)           \
+  SMTD_DANCE(unicode_key,                   \
+      NOTHING,                              \
+      register_unicodemap(unicodemap_index(unicode_key)),   \
+      layer_on(L_NUM_NAV),                  \
+      layer_off(L_NUM_NAV)                  \
+  )                                         \
+
 /* SM hold=modifier tap=unicodemap */
-#define SM_MU(macro_key, unicode_i, mod)    \
-    case macro_key:                         \
-    {                                       \
-      switch (action) {                     \
-        case SMTD_ACTION_TOUCH:             \
-          break;                            \
-                                            \
-        case SMTD_ACTION_TAP:               \
-          register_unicodemap(unicodemap_index(unicode_i));   \
-          break;                            \
-                                            \
-        case SMTD_ACTION_HOLD:              \
+#define SM_MU(unicode_key, mod)             \
+    SMTD_DANCE(unicode_key,                 \
+        NOTHING,                            \
+        register_unicodemap(unicodemap_index(unicode_key)),   \
+        EXEC(                               \
           layer_off(L_RUSSIAN);             \
           register_mods(MOD_BIT(mod));      \
-          break;                            \
-                                            \
-        case SMTD_ACTION_RELEASE:           \
+        ),                                  \
+        EXEC(                               \
           layer_on(L_RUSSIAN);              \
           unregister_mods(MOD_BIT(mod));    \
-          break;                            \
-      }                                     \
-      break;                                \
-    }                                       \
+        )                                   \
+    )                                       \
 
