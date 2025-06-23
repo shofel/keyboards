@@ -109,8 +109,6 @@ const key_override_t *key_overrides[] = {
 
 /* Combos */
 
-#define COMBO_ONLY_FROM_LAYER 0
-
 /* Hit both middle thumb keys for esc. */
 const uint16_t PROGMEM esc_combo[]     = {KK_SHIFT, KC_SPACE, COMBO_END};
 const uint16_t PROGMEM ctl_esc_combo[] = {KK_SHIFT, KC_S, COMBO_END};
