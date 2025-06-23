@@ -57,6 +57,10 @@ enum my_keycodes {
   // thumb keys
   KK_RU,
   KK_MOUSE,
+
+  // Unicode modes
+  KK_VIM,
+  KK_LINX,
 };
 
 #include "unicode.c"
@@ -284,7 +288,27 @@ smtd_resolution on_smtd_action(
         default:
           break;
       }
-    )
+    );
+
+    SMTD_DANCE(KK_VIM,
+        EXEC(
+          set_unicode_input_mode(UNICODE_MODE_VIM);
+          slava_set_language(Ru);
+        ),
+        NOTHING,
+        NOTHING,
+        NOTHING
+    );
+
+    SMTD_DANCE(KK_LINX,
+        EXEC(
+          set_unicode_input_mode(UNICODE_MODE_LINUX);
+          slava_set_language(Ru);
+        ),
+        NOTHING,
+        NOTHING,
+        NOTHING
+    );
   }
 
   return SMTD_RESOLUTION_UNHANDLED;
@@ -445,7 +469,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
        bot F10  F1  F2  F3  __                       __  br↓ vl↓ vl0 __  bot
                              __  __  __     __  __  __
        */
-        XX,  KC_F12,  KC_F7,  KC_F8,  KC_F9, UC_VIM,       XX, KC_BRIU,  KC_VOLU,  UC_LINX,  DB_TOGG, XX,
+        XX,  KC_F12,  KC_F7,  KC_F8,  KC_F9, KK_VIM,       XX, KC_BRIU,  KC_VOLU,  KK_LINX,  DB_TOGG, XX,
         XX,  KC_F11,  KC_F4,  KC_F5,  KC_F6,     XX,       XX, KC_LCTL,  KC_LSFT,  KC_LALT,  KC_RGUI, XX,
    QK_BOOT,  KC_F10,  KC_F1,  KC_F2,  KC_F3,     XX,       XX, KC_BRID,  KC_VOLD,  KC_MUTE,  XX, QK_BOOT,
                                 __ ,    __ ,   __ ,         __ ,   __ ,   __
