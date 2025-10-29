@@ -232,6 +232,12 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     case KC_LALT: return true;
     case KC_LGUI: return true;
 
+    case OSM_SFT: return true;
+    case OSM_ALT: return true;
+    case OSM_CTL: return true;
+    case OSM_GUI: return true;
+    case KK_SYMBO: return true;
+
     default:
       break;
   }
