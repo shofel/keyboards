@@ -142,9 +142,11 @@ const uint16_t PROGMEM angle_left_combo[]   = {KC_G, KC_E, COMBO_END};
 const uint16_t PROGMEM angle_right_combo[]  = {KC_B, KC_T, COMBO_END};
 /* Vertical combos for mods */
 const uint16_t PROGMEM lctl_combo[] = {KC_S, KC_C, COMBO_END};
+const uint16_t PROGMEM llt2_combo[] = {KC_E, KC_U, COMBO_END};
 const uint16_t PROGMEM lalt_combo[] = {KC_O, KC_SCLN, COMBO_END};
 const uint16_t PROGMEM lgui_combo[] = {KC_A, KC_QUOT, COMBO_END};
 const uint16_t PROGMEM rctl_combo[] = {KC_N, KC_F, COMBO_END};
+const uint16_t PROGMEM rlt2_combo[] = {KC_T, KC_D, COMBO_END};
 const uint16_t PROGMEM ralt_combo[] = {KC_R, KC_L, COMBO_END};
 const uint16_t PROGMEM rgui_combo[] = {KC_I, KC_Y, COMBO_END};
 
@@ -174,9 +176,11 @@ combo_t key_combos[] = {
   COMBO(angle_right_combo, KC_RABK),
 
   COMBO(lctl_combo, KC_LCTL),
+  COMBO(llt2_combo, OSL(L_NUM_NAV)),
   COMBO(lalt_combo, KC_LALT),
   COMBO(lgui_combo, KC_LGUI),
   COMBO(rctl_combo, KC_LCTL),
+  COMBO(rlt2_combo, OSL(L_NUM_NAV)),
   COMBO(ralt_combo, KC_LALT),
   COMBO(rgui_combo, KC_LGUI),
 };
@@ -224,6 +228,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     case KC_RABK: return true;
 
     case KC_LCTL: return true;
+    case OSL(L_NUM_NAV): return true;
     case KC_LALT: return true;
     case KC_LGUI: return true;
 
