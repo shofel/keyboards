@@ -78,6 +78,8 @@ enum unicode_names {
   U_QSTN,
   U_THINKING_FACE,
   U_FACE_WITH_MONOCLE,
+  U_TULIP,
+  U_SUNFLOWER,
 };
 
 const uint32_t PROGMEM unicode_map[] = {
@@ -157,6 +159,8 @@ const uint32_t PROGMEM unicode_map[] = {
   [U_QSTN] = 0x03F,
   [U_THINKING_FACE] = 0x1F914,
   [U_FACE_WITH_MONOCLE] = 0x1F9D0,
+  [U_TULIP] = 0x1F337,
+  [U_SUNFLOWER] = 0x1F33B,
 };
 
 // Combine lower and upper case letter as a single `unicode pair` key
@@ -194,8 +198,8 @@ const uint32_t PROGMEM unicode_map[] = {
 #define RU_YU UP(RU_LC_YU, RU_UC_YU)
 #define RU_YA UP(RU_LC_YA, RU_UC_YA)
 #define RU_DOT UP(U_DOT, U_COMMA)
-
 #define EM_THNK UP(U_THINKING_FACE, U_FACE_WITH_MONOCLE)
+#define EM_FLWR UP(U_TULIP, U_SUNFLOWER)
 
 /* SM hold=layer tap=unicodemap */
 #define SM_LU(unicode_key, layer)           \
