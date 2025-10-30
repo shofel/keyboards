@@ -1,9 +1,10 @@
-#include QMK_KEYBOARD_H
+#include "quantum.h"
 #include "ru_manager.h"
 
 static uint8_t ru_suspend_depth = 0;
 
-void ru_suspend(uint8_t layer) {
+void ru_suspend(int layer) {
+  if (layer < 0) return;
   if (ru_suspend_depth == 0 && layer_state_is(layer)) {
     layer_off(layer);
     ru_suspend_depth = 1;
@@ -12,7 +13,8 @@ void ru_suspend(uint8_t layer) {
   if (ru_suspend_depth > 0) ru_suspend_depth++;
 }
 
-void ru_resume(uint8_t layer) {
+void ru_resume(int layer) {
+  if (layer < 0) return;
   if (ru_suspend_depth == 0) return;
   ru_suspend_depth--;
   if (ru_suspend_depth == 0) {
@@ -20,8 +22,8 @@ void ru_resume(uint8_t layer) {
   }
 }
 
-int ru_suspended(uint8_t layer) {
-  (void)layer;
+int ru_suspended(int layer) {
+  if (layer < 0) return 0;
   return ru_suspend_depth > 0;
 }
 

@@ -1,4 +1,4 @@
-#include QMK_KEYBOARD_H
+#include "quantum.h"
 #include "ru_manager.h"
 #include "oneshot_engine.h"
 
@@ -27,7 +27,7 @@ void update_oneshot_generic(
   if (keycode == trigger) {
     if (record->event.pressed) {
       if (*state == os_up_unqueued) {
-        if (ru_layer >= 0) ru_suspend((uint8_t)ru_layer);
+        ru_suspend(ru_layer);
         if (ops && ops->on_press) ops->on_press(ctx);
       }
       *state = os_down_unused;
@@ -39,7 +39,7 @@ void update_oneshot_generic(
           break;
         case os_down_used:
           if (ops && ops->on_release) ops->on_release(ctx);
-          if (ru_layer >= 0) ru_resume((uint8_t)ru_layer);
+          ru_resume(ru_layer);
           *state = os_up_unqueued;
           break;
         default:
@@ -54,7 +54,7 @@ void update_oneshot_generic(
         } else {
           if (ops && ops->on_release) ops->on_release(ctx);
         }
-        if (ru_layer >= 0) ru_resume((uint8_t)ru_layer);
+        ru_resume(ru_layer);
         *state = os_up_unqueued;
       }
     } else {
@@ -65,7 +65,7 @@ void update_oneshot_generic(
             break;
           case os_up_queued:
             if (ops && ops->on_queue_end) ops->on_queue_end(ctx);
-            if (ru_layer >= 0) ru_resume((uint8_t)ru_layer);
+            ru_resume(ru_layer);
             *state = os_up_unqueued;
             break;
           default:

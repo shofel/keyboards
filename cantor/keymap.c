@@ -240,7 +240,6 @@ combo_t key_combos[] = {
   [CMB_RALT]       = COMBO(ralt_combo, KK_OSM_RALT),
   [CMB_RGUI]       = COMBO(rgui_combo, KK_OSM_RGUI),
 };
-/* No custom process_combo_event needed; combos emit trigger keycodes */
 
 /* */
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
