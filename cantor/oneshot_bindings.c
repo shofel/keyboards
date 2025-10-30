@@ -24,7 +24,8 @@ static void ops_layer_on_release(void *ctx) { layer_off((uint8_t)(uintptr_t)ctx)
 static void ops_layer_on_queue_begin(void *ctx) {
   uint8_t layer = (uint8_t)(uintptr_t)ctx;
   layer_off(layer);
-  set_oneshot_layer(layer, ONESHOT_START);
+  /* Use OSL tap to arm next-key oneshot reliably */
+  tap_code16(OSL(layer));
 }
 static void ops_layer_on_queue_end(void *ctx) { (void)ctx; }
 const oneshot_ops OSL_OPS = {

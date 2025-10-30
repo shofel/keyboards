@@ -1,6 +1,9 @@
 /**
  * A layout for the Cantor Keyboard.
  *
+ * Next:
+ * - employ leader key for unicode method
+ *
  * When I return later, then I'll
  * - rewrite sm_td to replicate behaviour, but make it cleaner
  * - make a slim firmware ground-up with zig
@@ -26,8 +29,6 @@
 
 #include QMK_KEYBOARD_H
 
-// #define SMTD_DEBUG_ENABLED
-#include "sm_td.h"
 #include "ru_manager.h"
 #include "oneshot_engine.h"
 #include "oneshot_bindings.h"
@@ -65,7 +66,6 @@ enum my_keycodes {
 
   // thumb keys
   KK_RU,
-  KK_MOUSE,
 
   // Unicode modes
   KK_VIM,
@@ -87,6 +87,7 @@ enum my_layer_names {
 /* Simple thumb keys. */
 #define KK_SHIFT OSM(MOD_LSFT)
 #define KK_SYMBO OSL(L_SYMBOLS)
+#define KK_MOUSE MO(L_MOUSE)
 
 /* One-shot modifiers, to place on L_MOUSE and L_FKEYS_SYS */
 #define OSM_SFT OSM(MOD_LSFT)
@@ -152,7 +153,7 @@ const uint16_t PROGMEM angle_right_combo[]  = {KC_B, KC_T, COMBO_END};
 /* Vertical combos for mods */
 const uint16_t PROGMEM lctl_combo[] = {KC_S, KC_C, COMBO_END};
 const uint16_t PROGMEM llt2_combo[] = {KC_E, KC_U, COMBO_END};
-const uint16_t PROGMEM lalt_combo[] = {KC_O, KC_SCLN, COMBO_END};
+const uint16_t PROGMEM lalt_combo[] = {KC_O, KC_COMM, COMBO_END};
 const uint16_t PROGMEM lgui_combo[] = {KC_A, KC_QUOT, COMBO_END};
 const uint16_t PROGMEM rctl_combo[] = {KC_N, KC_F, COMBO_END};
 const uint16_t PROGMEM rlt2_combo[] = {KC_T, KC_D, COMBO_END};
@@ -231,20 +232,71 @@ combo_t key_combos[] = {
   [CMB_ANG_L]      = COMBO(angle_left_combo, KC_LABK),
   [CMB_ANG_R]      = COMBO(angle_right_combo, KC_RABK),
 
-  [CMB_LCTL]       = COMBO(lctl_combo, KK_OSM_LCTL),
-  [CMB_LLT2]       = COMBO(llt2_combo, KK_OSL_NUMNAV_L),
-  [CMB_LALT]       = COMBO(lalt_combo, KK_OSM_LALT),
-  [CMB_LGUI]       = COMBO(lgui_combo, KK_OSM_LGUI),
-  [CMB_RCTL]       = COMBO(rctl_combo, KK_OSM_RCTL),
-  [CMB_RLT2]       = COMBO(rlt2_combo, KK_OSL_NUMNAV_R),
-  [CMB_RALT]       = COMBO(ralt_combo, KK_OSM_RALT),
-  [CMB_RGUI]       = COMBO(rgui_combo, KK_OSM_RGUI),
+  [CMB_LCTL]       = COMBO_ACTION(lctl_combo),
+  [CMB_LLT2]       = COMBO_ACTION(llt2_combo),
+  [CMB_LALT]       = COMBO_ACTION(lalt_combo),
+  [CMB_LGUI]       = COMBO_ACTION(lgui_combo),
+  [CMB_RCTL]       = COMBO_ACTION(rctl_combo),
+  [CMB_RLT2]       = COMBO_ACTION(rlt2_combo),
+  [CMB_RALT]       = COMBO_ACTION(ralt_combo),
+  [CMB_RGUI]       = COMBO_ACTION(rgui_combo),
 };
+/* Track active/used state for vertical combos */
+static bool mu_lctl_active=false, mu_lctl_used=false;
+static bool mu_lalt_active=false, mu_lalt_used=false;
+static bool mu_lgui_active=false, mu_lgui_used=false;
+static bool mu_rctl_active=false, mu_rctl_used=false;
+static bool mu_ralt_active=false, mu_ralt_used=false;
+static bool mu_rgui_active=false, mu_rgui_used=false;
+static uint8_t lt2_active_cnt=0; static bool lt2_used=false;
+
+void process_combo_event(uint16_t combo_index, bool pressed) {
+  switch (combo_index) {
+    case CMB_LCTL:
+      if (pressed) { ru_suspend(L_RUSSIAN); mu_lctl_active=true; mu_lctl_used=false; register_mods(MOD_BIT(KC_LCTL)); }
+      else { unregister_mods(MOD_BIT(KC_LCTL)); if (!mu_lctl_used) set_oneshot_mods(get_oneshot_mods()|MOD_BIT(KC_LCTL)); mu_lctl_active=false; ru_resume(L_RUSSIAN);} break;
+    case CMB_LALT:
+      if (pressed) { ru_suspend(L_RUSSIAN); mu_lalt_active=true; mu_lalt_used=false; register_mods(MOD_LALT); }
+      else { unregister_mods(MOD_LALT); if (!mu_lalt_used) set_oneshot_mods(get_oneshot_mods()|MOD_LALT); mu_lalt_active=false; ru_resume(L_RUSSIAN);} break;
+    case CMB_LGUI:
+      if (pressed) { ru_suspend(L_RUSSIAN); mu_lgui_active=true; mu_lgui_used=false; register_mods(MOD_BIT(KC_LGUI)); }
+      else { unregister_mods(MOD_BIT(KC_LGUI)); if (!mu_lgui_used) set_oneshot_mods(get_oneshot_mods()|MOD_BIT(KC_LGUI)); mu_lgui_active=false; ru_resume(L_RUSSIAN);} break;
+    case CMB_RCTL:
+      if (pressed) { ru_suspend(L_RUSSIAN); mu_rctl_active=true; mu_rctl_used=false; register_mods(MOD_BIT(KC_LCTL)); }
+      else { unregister_mods(MOD_BIT(KC_LCTL)); if (!mu_rctl_used) set_oneshot_mods(get_oneshot_mods()|MOD_BIT(KC_LCTL)); mu_rctl_active=false; ru_resume(L_RUSSIAN);} break;
+    case CMB_RALT:
+      if (pressed) { ru_suspend(L_RUSSIAN); mu_ralt_active=true; mu_ralt_used=false; register_mods(MOD_LALT); }
+      else { unregister_mods(MOD_LALT); if (!mu_ralt_used) set_oneshot_mods(get_oneshot_mods()|MOD_LALT); mu_ralt_active=false; ru_resume(L_RUSSIAN);} break;
+    case CMB_RGUI:
+      if (pressed) { ru_suspend(L_RUSSIAN); mu_rgui_active=true; mu_rgui_used=false; register_mods(MOD_BIT(KC_LGUI)); }
+      else { unregister_mods(MOD_BIT(KC_LGUI)); if (!mu_rgui_used) set_oneshot_mods(get_oneshot_mods()|MOD_BIT(KC_LGUI)); mu_rgui_active=false; ru_resume(L_RUSSIAN);} break;
+    case CMB_LLT2:
+    case CMB_RLT2:
+      if (pressed) { ru_suspend(L_RUSSIAN); if (lt2_active_cnt==0) lt2_used=false; lt2_active_cnt++; layer_on(L_NUM_NAV); }
+      else { if (lt2_active_cnt>0) lt2_active_cnt--; layer_off(L_NUM_NAV); if (lt2_active_cnt==0 && !lt2_used) set_oneshot_layer(L_NUM_NAV, ONESHOT_START); ru_resume(L_RUSSIAN);} break;
+  }
+}
 
 /* */
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+  if (record->event.pressed) {
+    if (mu_lctl_active) mu_lctl_used = true;
+    if (mu_lalt_active) mu_lalt_used = true;
+    if (mu_lgui_active) mu_lgui_used = true;
+    if (mu_rctl_active) mu_rctl_used = true;
+    if (mu_ralt_active) mu_ralt_used = true;
+    if (mu_rgui_active) mu_rgui_used = true;
+    if (lt2_active_cnt > 0) lt2_used = true;
+  }
   /* Route oneshot triggers first */
   switch (keycode) {
+    case KK_RU:
+      if (record->event.pressed) {
+        layer_on(L_RUSSIAN);
+      } else {
+        layer_off(L_RUSSIAN);
+      }
+      return false;
     case KK_OSM_LCTL:
       update_oneshot_generic(&osm_lctl, KK_OSM_LCTL, keycode, record, &OSM_OPS, (void*)(uintptr_t)MOD_BIT(KC_LCTL), L_RUSSIAN);
       return false;
@@ -325,108 +377,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
       break;
   }
 
-  if (!process_smtd(keycode, record)) {
-    return false;
-  }
-
   return true;
-}
-
-/* Make right middle tap-hold extremely averted to a tap. */
-uint32_t get_smtd_timeout(uint16_t keycode, smtd_timeout timeout) {
-  switch (keycode) {
-    case KC_T:
-    case RU_L:
-      if (timeout == SMTD_TIMEOUT_TAP) return SMTD_GLOBAL_TAP_TERM + 100;
-      if (timeout == SMTD_TIMEOUT_RELEASE) return 5;
-      break;
-  }
-
-  return get_smtd_timeout_default(timeout);
-}
-
-smtd_resolution on_smtd_action(
-    uint16_t keycode, smtd_action action, uint8_t tap_count
-) {
-  switch (keycode) {
-    /* Boo home-row mods. */
-    SMTD_MT(KC_A, KC_LEFT_GUI)
-    SMTD_MT(KC_O, KC_LEFT_ALT)
-    SMTD_LT(KC_E, L_NUM_NAV)
-    SMTD_MT(KC_S, KC_LEFT_CTRL)
-    //
-    SMTD_MT(KC_N, KC_LEFT_CTRL)
-    SMTD_LT(KC_T, L_NUM_NAV)
-    SMTD_MT(KC_R, KC_LEFT_ALT)
-    SMTD_MT(KC_I, KC_LEFT_GUI)
-
-    /* RU home-row mods. */
-    SM_MU(RU_F, KC_LEFT_GUI)
-    SM_MU(RU_YERU, KC_LEFT_ALT)
-    SM_LU(RU_V, L_NUM_NAV)
-    SM_MU(RU_A, KC_LEFT_CTRL)
-    SM_MU(RU_O, KC_LEFT_CTRL)
-    SM_LU(RU_L, L_NUM_NAV)
-    SM_MU(RU_D, KC_LEFT_ALT)
-    SM_MU(RU_ZH, KC_LEFT_GUI)
-
-    // Thumb keys
-    SMTD_LT(KC_ENTER, L_SYMBOLS)
-    SMTD_LT(KC_SPACE, L_NUM_NAV)
-    /* hold = mouse */
-    SMTD_DANCE(KK_MOUSE,
-      NOTHING,
-      NOTHING,
-      layer_on(L_MOUSE),
-      layer_off(L_MOUSE))
-
-    /* tap = ru, taptap = en, taphold = (↓en ↑ru)
-       hold = fkeys */
-    SMTD_DANCE(KK_RU,
-      NOTHING,
-      switch (tap_count) {
-        case 0: slava_set_language(Ru); break;
-        case 1: slava_set_language(En); break;
-        default: break;
-      },
-      switch (tap_count) {
-        case 0: layer_on(L_FKEYS_SYS); break;
-        case 1: slava_set_language(En); break;
-        default: break;
-      },
-      switch (tap_count) {
-        case 0:
-          layer_off(L_FKEYS_SYS);
-          break;
-        case 1:
-          slava_set_language(Ru);
-        default:
-          break;
-      }
-    );
-
-    SMTD_DANCE(KK_VIM,
-        EXEC(
-          set_unicode_input_mode(UNICODE_MODE_VIM);
-          slava_set_language(Ru);
-        ),
-        NOTHING,
-        NOTHING,
-        NOTHING
-    );
-
-    SMTD_DANCE(KK_LINX,
-        EXEC(
-          set_unicode_input_mode(UNICODE_MODE_LINUX);
-          slava_set_language(Ru);
-        ),
-        NOTHING,
-        NOTHING,
-        NOTHING
-    );
-  }
-
-  return SMTD_RESOLUTION_UNHANDLED;
 }
 
 /**
