@@ -10,10 +10,6 @@
  * - one-shot mods on an sm_td hold-layer
  * - caps-word is non-trivial
  *
- * Idea: one-word without home-row mods
- * - disable HRM on ctrl-w or ctrl+backspace : as if mod misfire detected
- * - enable HRM back on space : as if a problem word was successfully typed
- *
  * Idea: One-word layer
  * It can also be a mod-layer
  * Contra: I don't mind holding a layer key, since all of them are on thumb keys
@@ -32,6 +28,9 @@
 
 // #define SMTD_DEBUG_ENABLED
 #include "sm_td.h"
+#include "ru_manager.h"
+#include "oneshot_engine.h"
+#include "oneshot_bindings.h"
 
 void keyboard_post_init_user(void) {
   // Customise these values to desired behaviour
@@ -53,6 +52,16 @@ enum my_keycodes {
   KK_FAT_RIGHT_ARROW,
   KK_NOT_EQUAL,
   KK_NOOP,
+
+  /* One-shot triggers (combos will emit these) */
+  KK_OSM_LCTL,
+  KK_OSM_LALT,
+  KK_OSM_LGUI,
+  KK_OSM_RCTL,
+  KK_OSM_RALT,
+  KK_OSM_RGUI,
+  KK_OSL_NUMNAV_L,
+  KK_OSL_NUMNAV_R,
 
   // thumb keys
   KK_RU,
@@ -186,8 +195,16 @@ enum combos {
   CMB_RGUI,
 };
 
-/* Track temporary RU disables across overlapping mod-combos */
-static uint8_t ru_combo_depth = 0;
+
+/* Per-trigger states */
+static oneshot_state osm_lctl = os_up_unqueued;
+static oneshot_state osm_lalt = os_up_unqueued;
+static oneshot_state osm_lgui = os_up_unqueued;
+static oneshot_state osm_rctl = os_up_unqueued;
+static oneshot_state osm_ralt = os_up_unqueued;
+static oneshot_state osm_rgui = os_up_unqueued;
+static oneshot_state osl_num_l = os_up_unqueued;
+static oneshot_state osl_num_r = os_up_unqueued;
 
 combo_t key_combos[] = {
   [CMB_ESC]        = COMBO(esc_combo, KC_ESC),
@@ -214,77 +231,46 @@ combo_t key_combos[] = {
   [CMB_ANG_L]      = COMBO(angle_left_combo, KC_LABK),
   [CMB_ANG_R]      = COMBO(angle_right_combo, KC_RABK),
 
-  [CMB_LCTL]       = COMBO_ACTION(lctl_combo),
-  [CMB_LLT2]       = COMBO(llt2_combo, OSL(L_NUM_NAV)),
-  [CMB_LALT]       = COMBO_ACTION(lalt_combo),
-  [CMB_LGUI]       = COMBO_ACTION(lgui_combo),
-  [CMB_RCTL]       = COMBO_ACTION(rctl_combo),
-  [CMB_RLT2]       = COMBO(rlt2_combo, OSL(L_NUM_NAV)),
-  [CMB_RALT]       = COMBO_ACTION(ralt_combo),
-  [CMB_RGUI]       = COMBO_ACTION(rgui_combo),
+  [CMB_LCTL]       = COMBO(lctl_combo, KK_OSM_LCTL),
+  [CMB_LLT2]       = COMBO(llt2_combo, KK_OSL_NUMNAV_L),
+  [CMB_LALT]       = COMBO(lalt_combo, KK_OSM_LALT),
+  [CMB_LGUI]       = COMBO(lgui_combo, KK_OSM_LGUI),
+  [CMB_RCTL]       = COMBO(rctl_combo, KK_OSM_RCTL),
+  [CMB_RLT2]       = COMBO(rlt2_combo, KK_OSL_NUMNAV_R),
+  [CMB_RALT]       = COMBO(ralt_combo, KK_OSM_RALT),
+  [CMB_RGUI]       = COMBO(rgui_combo, KK_OSM_RGUI),
 };
-
-void process_combo_event(uint16_t combo_index, bool pressed) {
-  switch (combo_index) {
-    case CMB_LCTL:
-      if (pressed) {
-        if (layer_state_is(L_RUSSIAN)) { ru_combo_depth++; layer_off(L_RUSSIAN); }
-        register_mods(MOD_BIT(KC_LCTL));
-      } else {
-        unregister_mods(MOD_BIT(KC_LCTL));
-        if (ru_combo_depth) { ru_combo_depth--; if (!ru_combo_depth) layer_on(L_RUSSIAN); }
-      }
-      break;
-    case CMB_LALT:
-      if (pressed) {
-        if (layer_state_is(L_RUSSIAN)) { ru_combo_depth++; layer_off(L_RUSSIAN); }
-        register_mods(MOD_BIT(KC_LALT));
-      } else {
-        unregister_mods(MOD_BIT(KC_LALT));
-        if (ru_combo_depth) { ru_combo_depth--; if (!ru_combo_depth) layer_on(L_RUSSIAN); }
-      }
-      break;
-    case CMB_LGUI:
-      if (pressed) {
-        if (layer_state_is(L_RUSSIAN)) { ru_combo_depth++; layer_off(L_RUSSIAN); }
-        register_mods(MOD_BIT(KC_LGUI));
-      } else {
-        unregister_mods(MOD_BIT(KC_LGUI));
-        if (ru_combo_depth) { ru_combo_depth--; if (!ru_combo_depth) layer_on(L_RUSSIAN); }
-      }
-      break;
-    case CMB_RCTL:
-      if (pressed) {
-        if (layer_state_is(L_RUSSIAN)) { ru_combo_depth++; layer_off(L_RUSSIAN); }
-        register_mods(MOD_BIT(KC_LCTL));
-      } else {
-        unregister_mods(MOD_BIT(KC_LCTL));
-        if (ru_combo_depth) { ru_combo_depth--; if (!ru_combo_depth) layer_on(L_RUSSIAN); }
-      }
-      break;
-    case CMB_RALT:
-      if (pressed) {
-        if (layer_state_is(L_RUSSIAN)) { ru_combo_depth++; layer_off(L_RUSSIAN); }
-        register_mods(MOD_BIT(KC_LALT));
-      } else {
-        unregister_mods(MOD_BIT(KC_LALT));
-        if (ru_combo_depth) { ru_combo_depth--; if (!ru_combo_depth) layer_on(L_RUSSIAN); }
-      }
-      break;
-    case CMB_RGUI:
-      if (pressed) {
-        if (layer_state_is(L_RUSSIAN)) { ru_combo_depth++; layer_off(L_RUSSIAN); }
-        register_mods(MOD_BIT(KC_LGUI));
-      } else {
-        unregister_mods(MOD_BIT(KC_LGUI));
-        if (ru_combo_depth) { ru_combo_depth--; if (!ru_combo_depth) layer_on(L_RUSSIAN); }
-      }
-      break;
-  }
-}
+/* No custom process_combo_event needed; combos emit trigger keycodes */
 
 /* */
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+  /* Route oneshot triggers first */
+  switch (keycode) {
+    case KK_OSM_LCTL:
+      update_oneshot_generic(&osm_lctl, KK_OSM_LCTL, keycode, record, &OSM_OPS, (void*)(uintptr_t)MOD_BIT(KC_LCTL), L_RUSSIAN);
+      return false;
+    case KK_OSM_LALT:
+      update_oneshot_generic(&osm_lalt, KK_OSM_LALT, keycode, record, &OSM_OPS, (void*)(uintptr_t)MOD_BIT(KC_LALT), L_RUSSIAN);
+      return false;
+    case KK_OSM_LGUI:
+      update_oneshot_generic(&osm_lgui, KK_OSM_LGUI, keycode, record, &OSM_OPS, (void*)(uintptr_t)MOD_BIT(KC_LGUI), L_RUSSIAN);
+      return false;
+    case KK_OSM_RCTL:
+      update_oneshot_generic(&osm_rctl, KK_OSM_RCTL, keycode, record, &OSM_OPS, (void*)(uintptr_t)MOD_BIT(KC_LCTL), L_RUSSIAN);
+      return false;
+    case KK_OSM_RALT:
+      update_oneshot_generic(&osm_ralt, KK_OSM_RALT, keycode, record, &OSM_OPS, (void*)(uintptr_t)MOD_BIT(KC_LALT), L_RUSSIAN);
+      return false;
+    case KK_OSM_RGUI:
+      update_oneshot_generic(&osm_rgui, KK_OSM_RGUI, keycode, record, &OSM_OPS, (void*)(uintptr_t)MOD_BIT(KC_LGUI), L_RUSSIAN);
+      return false;
+    case KK_OSL_NUMNAV_L:
+      update_oneshot_generic(&osl_num_l, KK_OSL_NUMNAV_L, keycode, record, &OSL_OPS, (void*)(uintptr_t)L_NUM_NAV, L_RUSSIAN);
+      return false;
+    case KK_OSL_NUMNAV_R:
+      update_oneshot_generic(&osl_num_r, KK_OSL_NUMNAV_R, keycode, record, &OSL_OPS, (void*)(uintptr_t)L_NUM_NAV, L_RUSSIAN);
+      return false;
+  }
   switch (keycode) {
     case KC_ESC: /* Switch language in vim. */
       slava_set_language(En);

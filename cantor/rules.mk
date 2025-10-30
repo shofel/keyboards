@@ -21,3 +21,8 @@ KEY_OVERRIDE_ENABLE = yes
 
 UNICODE_COMMON = yes
 UNICODEMAP_ENABLE = yes
+
+# Additional keymap sources
+SRC += ru_manager.c
+SRC += oneshot_engine.c
+SRC += oneshot_bindings.c
