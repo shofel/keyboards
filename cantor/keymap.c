@@ -150,40 +150,138 @@ const uint16_t PROGMEM rlt2_combo[] = {KC_T, KC_D, COMBO_END};
 const uint16_t PROGMEM ralt_combo[] = {KC_R, KC_L, COMBO_END};
 const uint16_t PROGMEM rgui_combo[] = {KC_I, KC_Y, COMBO_END};
 
-combo_t key_combos[] = {
-  COMBO(esc_combo, KC_ESC),
-  COMBO(ctl_esc_combo, LCTL(KC_ESC)),
-  COMBO(alt_esc_combo, LALT(KC_ESC)),
+/* Indices for all combos (designated initializers) */
+enum combos {
+  CMB_ESC,
+  CMB_CTL_ESC,
+  CMB_ALT_ESC,
 
-  COMBO(boot_combo_left,  QK_BOOT),
-  COMBO(boot_combo_right, QK_BOOT),
+  CMB_BOOT_L,
+  CMB_BOOT_R,
 
-  COMBO(reset_combo_left,  QK_REBOOT),
-  COMBO(reset_combo_right, QK_REBOOT),
+  CMB_RESET_L,
+  CMB_RESET_R,
 
-  COMBO(go_declaration_combo, KK_GO_DECLARATION),
-  COMBO(fat_right_arrow_combo, KK_FAT_RIGHT_ARROW),
-  COMBO(right_arrow_combo, KK_RIGHT_ARROW),
-  COMBO(not_equal_combo, KK_NOT_EQUAL),
+  CMB_GO_DECL,
+  CMB_FAT_ARROW,
+  CMB_RIGHT_ARROW,
+  CMB_NOT_EQUAL,
 
-  COMBO(square_left_combo , KC_LBRC),
-  COMBO(square_right_combo, KC_RBRC),
-  COMBO(brace_left_combo, KC_LPRN),
-  COMBO(brace_right_combo, KC_RPRN),
-  COMBO(curly_left_combo, KC_LCBR),
-  COMBO(curly_right_combo, KC_RCBR),
-  COMBO(angle_left_combo, KC_LABK),
-  COMBO(angle_right_combo, KC_RABK),
+  CMB_SQ_L,
+  CMB_SQ_R,
+  CMB_BR_L,
+  CMB_BR_R,
+  CMB_CU_L,
+  CMB_CU_R,
+  CMB_ANG_L,
+  CMB_ANG_R,
 
-  COMBO(lctl_combo, KC_LCTL),
-  COMBO(llt2_combo, OSL(L_NUM_NAV)),
-  COMBO(lalt_combo, KC_LALT),
-  COMBO(lgui_combo, KC_LGUI),
-  COMBO(rctl_combo, KC_LCTL),
-  COMBO(rlt2_combo, OSL(L_NUM_NAV)),
-  COMBO(ralt_combo, KC_LALT),
-  COMBO(rgui_combo, KC_LGUI),
+  CMB_LCTL,
+  CMB_LLT2,
+  CMB_LALT,
+  CMB_LGUI,
+  CMB_RCTL,
+  CMB_RLT2,
+  CMB_RALT,
+  CMB_RGUI,
 };
+
+/* Track temporary RU disables across overlapping mod-combos */
+static uint8_t ru_combo_depth = 0;
+
+combo_t key_combos[] = {
+  [CMB_ESC]        = COMBO(esc_combo, KC_ESC),
+  [CMB_CTL_ESC]    = COMBO(ctl_esc_combo, LCTL(KC_ESC)),
+  [CMB_ALT_ESC]    = COMBO(alt_esc_combo, LALT(KC_ESC)),
+
+  [CMB_BOOT_L]     = COMBO(boot_combo_left,  QK_BOOT),
+  [CMB_BOOT_R]     = COMBO(boot_combo_right, QK_BOOT),
+
+  [CMB_RESET_L]    = COMBO(reset_combo_left,  QK_REBOOT),
+  [CMB_RESET_R]    = COMBO(reset_combo_right, QK_REBOOT),
+
+  [CMB_GO_DECL]    = COMBO(go_declaration_combo, KK_GO_DECLARATION),
+  [CMB_FAT_ARROW]  = COMBO(fat_right_arrow_combo, KK_FAT_RIGHT_ARROW),
+  [CMB_RIGHT_ARROW]= COMBO(right_arrow_combo, KK_RIGHT_ARROW),
+  [CMB_NOT_EQUAL]  = COMBO(not_equal_combo, KK_NOT_EQUAL),
+
+  [CMB_SQ_L]       = COMBO(square_left_combo , KC_LBRC),
+  [CMB_SQ_R]       = COMBO(square_right_combo, KC_RBRC),
+  [CMB_BR_L]       = COMBO(brace_left_combo, KC_LPRN),
+  [CMB_BR_R]       = COMBO(brace_right_combo, KC_RPRN),
+  [CMB_CU_L]       = COMBO(curly_left_combo, KC_LCBR),
+  [CMB_CU_R]       = COMBO(curly_right_combo, KC_RCBR),
+  [CMB_ANG_L]      = COMBO(angle_left_combo, KC_LABK),
+  [CMB_ANG_R]      = COMBO(angle_right_combo, KC_RABK),
+
+  [CMB_LCTL]       = COMBO_ACTION(lctl_combo),
+  [CMB_LLT2]       = COMBO(llt2_combo, OSL(L_NUM_NAV)),
+  [CMB_LALT]       = COMBO_ACTION(lalt_combo),
+  [CMB_LGUI]       = COMBO_ACTION(lgui_combo),
+  [CMB_RCTL]       = COMBO_ACTION(rctl_combo),
+  [CMB_RLT2]       = COMBO(rlt2_combo, OSL(L_NUM_NAV)),
+  [CMB_RALT]       = COMBO_ACTION(ralt_combo),
+  [CMB_RGUI]       = COMBO_ACTION(rgui_combo),
+};
+
+void process_combo_event(uint16_t combo_index, bool pressed) {
+  switch (combo_index) {
+    case CMB_LCTL:
+      if (pressed) {
+        if (layer_state_is(L_RUSSIAN)) { ru_combo_depth++; layer_off(L_RUSSIAN); }
+        register_mods(MOD_BIT(KC_LCTL));
+      } else {
+        unregister_mods(MOD_BIT(KC_LCTL));
+        if (ru_combo_depth) { ru_combo_depth--; if (!ru_combo_depth) layer_on(L_RUSSIAN); }
+      }
+      break;
+    case CMB_LALT:
+      if (pressed) {
+        if (layer_state_is(L_RUSSIAN)) { ru_combo_depth++; layer_off(L_RUSSIAN); }
+        register_mods(MOD_BIT(KC_LALT));
+      } else {
+        unregister_mods(MOD_BIT(KC_LALT));
+        if (ru_combo_depth) { ru_combo_depth--; if (!ru_combo_depth) layer_on(L_RUSSIAN); }
+      }
+      break;
+    case CMB_LGUI:
+      if (pressed) {
+        if (layer_state_is(L_RUSSIAN)) { ru_combo_depth++; layer_off(L_RUSSIAN); }
+        register_mods(MOD_BIT(KC_LGUI));
+      } else {
+        unregister_mods(MOD_BIT(KC_LGUI));
+        if (ru_combo_depth) { ru_combo_depth--; if (!ru_combo_depth) layer_on(L_RUSSIAN); }
+      }
+      break;
+    case CMB_RCTL:
+      if (pressed) {
+        if (layer_state_is(L_RUSSIAN)) { ru_combo_depth++; layer_off(L_RUSSIAN); }
+        register_mods(MOD_BIT(KC_LCTL));
+      } else {
+        unregister_mods(MOD_BIT(KC_LCTL));
+        if (ru_combo_depth) { ru_combo_depth--; if (!ru_combo_depth) layer_on(L_RUSSIAN); }
+      }
+      break;
+    case CMB_RALT:
+      if (pressed) {
+        if (layer_state_is(L_RUSSIAN)) { ru_combo_depth++; layer_off(L_RUSSIAN); }
+        register_mods(MOD_BIT(KC_LALT));
+      } else {
+        unregister_mods(MOD_BIT(KC_LALT));
+        if (ru_combo_depth) { ru_combo_depth--; if (!ru_combo_depth) layer_on(L_RUSSIAN); }
+      }
+      break;
+    case CMB_RGUI:
+      if (pressed) {
+        if (layer_state_is(L_RUSSIAN)) { ru_combo_depth++; layer_off(L_RUSSIAN); }
+        register_mods(MOD_BIT(KC_LGUI));
+      } else {
+        unregister_mods(MOD_BIT(KC_LGUI));
+        if (ru_combo_depth) { ru_combo_depth--; if (!ru_combo_depth) layer_on(L_RUSSIAN); }
+      }
+      break;
+  }
+}
 
 /* */
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
