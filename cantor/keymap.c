@@ -29,9 +29,6 @@
 
 #include QMK_KEYBOARD_H
 
-#include "ru_manager.h"
-#include "oneshot_engine.h"
-#include "oneshot_bindings.h"
 
 void keyboard_post_init_user(void) {
   // Customise these values to desired behaviour
@@ -196,17 +193,6 @@ enum combos {
   CMB_RGUI,
 };
 
-
-/* Per-trigger states */
-static oneshot_state osm_lctl = os_up_unqueued;
-static oneshot_state osm_lalt = os_up_unqueued;
-static oneshot_state osm_lgui = os_up_unqueued;
-static oneshot_state osm_rctl = os_up_unqueued;
-static oneshot_state osm_ralt = os_up_unqueued;
-static oneshot_state osm_rgui = os_up_unqueued;
-static oneshot_state osl_num_l = os_up_unqueued;
-static oneshot_state osl_num_r = os_up_unqueued;
-
 combo_t key_combos[] = {
   [CMB_ESC]        = COMBO(esc_combo, KC_ESC),
   [CMB_CTL_ESC]    = COMBO(ctl_esc_combo, LCTL(KC_ESC)),
@@ -232,62 +218,18 @@ combo_t key_combos[] = {
   [CMB_ANG_L]      = COMBO(angle_left_combo, KC_LABK),
   [CMB_ANG_R]      = COMBO(angle_right_combo, KC_RABK),
 
-  [CMB_LCTL]       = COMBO_ACTION(lctl_combo),
-  [CMB_LLT2]       = COMBO_ACTION(llt2_combo),
-  [CMB_LALT]       = COMBO_ACTION(lalt_combo),
-  [CMB_LGUI]       = COMBO_ACTION(lgui_combo),
-  [CMB_RCTL]       = COMBO_ACTION(rctl_combo),
-  [CMB_RLT2]       = COMBO_ACTION(rlt2_combo),
-  [CMB_RALT]       = COMBO_ACTION(ralt_combo),
-  [CMB_RGUI]       = COMBO_ACTION(rgui_combo),
+  [CMB_LCTL]       = COMBO(lctl_combo, KC_LCTL),
+  [CMB_LLT2]       = COMBO(llt2_combo, OSL(L_NUM_NAV)),
+  [CMB_LALT]       = COMBO(lalt_combo, KC_LALT),
+  [CMB_LGUI]       = COMBO(lgui_combo, KC_LGUI),
+  [CMB_RCTL]       = COMBO(rctl_combo, KC_LCTL),
+  [CMB_RLT2]       = COMBO(rlt2_combo, OSL(L_NUM_NAV)),
+  [CMB_RALT]       = COMBO(ralt_combo, KC_LALT),
+  [CMB_RGUI]       = COMBO(rgui_combo, KC_LGUI),
 };
-/* Track active/used state for vertical combos */
-static bool mu_lctl_active=false, mu_lctl_used=false;
-static bool mu_lalt_active=false, mu_lalt_used=false;
-static bool mu_lgui_active=false, mu_lgui_used=false;
-static bool mu_rctl_active=false, mu_rctl_used=false;
-static bool mu_ralt_active=false, mu_ralt_used=false;
-static bool mu_rgui_active=false, mu_rgui_used=false;
-static uint8_t lt2_active_cnt=0; static bool lt2_used=false;
-
-void process_combo_event(uint16_t combo_index, bool pressed) {
-  switch (combo_index) {
-    case CMB_LCTL:
-      if (pressed) { ru_suspend(L_RUSSIAN); mu_lctl_active=true; mu_lctl_used=false; register_mods(MOD_BIT(KC_LCTL)); }
-      else { unregister_mods(MOD_BIT(KC_LCTL)); if (!mu_lctl_used) set_oneshot_mods(get_oneshot_mods()|MOD_BIT(KC_LCTL)); mu_lctl_active=false; ru_resume(L_RUSSIAN);} break;
-    case CMB_LALT:
-      if (pressed) { ru_suspend(L_RUSSIAN); mu_lalt_active=true; mu_lalt_used=false; register_mods(MOD_LALT); }
-      else { unregister_mods(MOD_LALT); if (!mu_lalt_used) set_oneshot_mods(get_oneshot_mods()|MOD_LALT); mu_lalt_active=false; ru_resume(L_RUSSIAN);} break;
-    case CMB_LGUI:
-      if (pressed) { ru_suspend(L_RUSSIAN); mu_lgui_active=true; mu_lgui_used=false; register_mods(MOD_BIT(KC_LGUI)); }
-      else { unregister_mods(MOD_BIT(KC_LGUI)); if (!mu_lgui_used) set_oneshot_mods(get_oneshot_mods()|MOD_BIT(KC_LGUI)); mu_lgui_active=false; ru_resume(L_RUSSIAN);} break;
-    case CMB_RCTL:
-      if (pressed) { ru_suspend(L_RUSSIAN); mu_rctl_active=true; mu_rctl_used=false; register_mods(MOD_BIT(KC_LCTL)); }
-      else { unregister_mods(MOD_BIT(KC_LCTL)); if (!mu_rctl_used) set_oneshot_mods(get_oneshot_mods()|MOD_BIT(KC_LCTL)); mu_rctl_active=false; ru_resume(L_RUSSIAN);} break;
-    case CMB_RALT:
-      if (pressed) { ru_suspend(L_RUSSIAN); mu_ralt_active=true; mu_ralt_used=false; register_mods(MOD_LALT); }
-      else { unregister_mods(MOD_LALT); if (!mu_ralt_used) set_oneshot_mods(get_oneshot_mods()|MOD_LALT); mu_ralt_active=false; ru_resume(L_RUSSIAN);} break;
-    case CMB_RGUI:
-      if (pressed) { ru_suspend(L_RUSSIAN); mu_rgui_active=true; mu_rgui_used=false; register_mods(MOD_BIT(KC_LGUI)); }
-      else { unregister_mods(MOD_BIT(KC_LGUI)); if (!mu_rgui_used) set_oneshot_mods(get_oneshot_mods()|MOD_BIT(KC_LGUI)); mu_rgui_active=false; ru_resume(L_RUSSIAN);} break;
-    case CMB_LLT2:
-    case CMB_RLT2:
-      if (pressed) { ru_suspend(L_RUSSIAN); if (lt2_active_cnt==0) lt2_used=false; lt2_active_cnt++; layer_on(L_NUM_NAV); }
-      else { if (lt2_active_cnt>0) lt2_active_cnt--; layer_off(L_NUM_NAV); if (lt2_active_cnt==0 && !lt2_used) set_oneshot_layer(L_NUM_NAV, ONESHOT_START); ru_resume(L_RUSSIAN);} break;
-  }
-}
 
 /* */
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
-  if (record->event.pressed) {
-    if (mu_lctl_active) mu_lctl_used = true;
-    if (mu_lalt_active) mu_lalt_used = true;
-    if (mu_lgui_active) mu_lgui_used = true;
-    if (mu_rctl_active) mu_rctl_used = true;
-    if (mu_ralt_active) mu_ralt_used = true;
-    if (mu_rgui_active) mu_rgui_used = true;
-    if (lt2_active_cnt > 0) lt2_used = true;
-  }
   /* Route oneshot triggers first */
   switch (keycode) {
     case KK_RU:
@@ -296,30 +238,6 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
       } else {
         layer_off(L_RUSSIAN);
       }
-      return false;
-    case KK_OSM_LCTL:
-      update_oneshot_generic(&osm_lctl, KK_OSM_LCTL, keycode, record, &OSM_OPS, (void*)(uintptr_t)MOD_BIT(KC_LCTL), L_RUSSIAN);
-      return false;
-    case KK_OSM_LALT:
-      update_oneshot_generic(&osm_lalt, KK_OSM_LALT, keycode, record, &OSM_OPS, (void*)(uintptr_t)MOD_BIT(KC_LALT), L_RUSSIAN);
-      return false;
-    case KK_OSM_LGUI:
-      update_oneshot_generic(&osm_lgui, KK_OSM_LGUI, keycode, record, &OSM_OPS, (void*)(uintptr_t)MOD_BIT(KC_LGUI), L_RUSSIAN);
-      return false;
-    case KK_OSM_RCTL:
-      update_oneshot_generic(&osm_rctl, KK_OSM_RCTL, keycode, record, &OSM_OPS, (void*)(uintptr_t)MOD_BIT(KC_LCTL), L_RUSSIAN);
-      return false;
-    case KK_OSM_RALT:
-      update_oneshot_generic(&osm_ralt, KK_OSM_RALT, keycode, record, &OSM_OPS, (void*)(uintptr_t)MOD_BIT(KC_LALT), L_RUSSIAN);
-      return false;
-    case KK_OSM_RGUI:
-      update_oneshot_generic(&osm_rgui, KK_OSM_RGUI, keycode, record, &OSM_OPS, (void*)(uintptr_t)MOD_BIT(KC_LGUI), L_RUSSIAN);
-      return false;
-    case KK_OSL_NUMNAV_L:
-      update_oneshot_generic(&osl_num_l, KK_OSL_NUMNAV_L, keycode, record, &OSL_OPS, (void*)(uintptr_t)L_NUM_NAV, L_RUSSIAN);
-      return false;
-    case KK_OSL_NUMNAV_R:
-      update_oneshot_generic(&osl_num_r, KK_OSL_NUMNAV_R, keycode, record, &OSL_OPS, (void*)(uintptr_t)L_NUM_NAV, L_RUSSIAN);
       return false;
   }
   switch (keycode) {
@@ -346,33 +264,6 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         SEND_STRING("!=");
       }
       return false;
-
-    case LCTL(KC_ESC): return true;
-    case LALT(KC_ESC): return true;
-
-    case QK_BOOT: return true;
-    case QK_REBOOT: return true;
-
-    case KC_LBRC: return true;
-    case KC_RBRC: return true;
-    case KC_LPRN: return true;
-    case KC_RPRN: return true;
-    case KC_LCBR: return true;
-    case KC_RCBR: return true;
-    case KC_LABK: return true;
-    case KC_RABK: return true;
-
-    case KC_LCTL: return true;
-    case OSL(L_NUM_NAV): return true;
-    case KC_LALT: return true;
-    case KC_LGUI: return true;
-
-    case OSM_SFT: return true;
-    case OSM_ALT: return true;
-    case OSM_CTL: return true;
-    case OSM_GUI: return true;
-    case KK_SYMBO: return true;
-
     default:
       break;
   }
