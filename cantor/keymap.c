@@ -1,6 +1,14 @@
 /**
  * A layout for the Cantor Keyboard.
  *
+ * 2025.11.04
+ * There are some misfirings with sm_td home-row mods. Mainly when mod and
+ *   a key is on the same hand.
+ * Options for solution:
+ *  1. replace home-row mods with vertical combos
+ *  2. filter-out same-hand mods
+ *
+ *
  * When I return later, then I'll
  * - rewrite sm_td to replicate behaviour, but make it cleaner
  * - make a slim firmware ground-up with zig
@@ -40,6 +48,97 @@ void keyboard_post_init_user(void) {
   debug_keyboard = false;
   debug_mouse = false;
 }
+
+/**
+ * Callum One-shot
+ * @see https://github.com/callum-oakley/qmk_firmware/blob/master/users/callum/oneshot.c
+ */
+
+// Represents the four states a oneshot key can be in
+typedef enum {
+    os_up_unqueued,
+    os_up_queued,
+    os_down_unused,
+    os_down_used,
+} oneshot_state;
+
+// Custom oneshot mod implementation that doesn't rely on timers. If a mod is
+// used while it is held it will be unregistered on keyup as normal, otherwise
+// it will be queued and only released after the next non-mod keyup.
+void update_oneshot(
+    oneshot_state *state,
+    uint16_t mod,
+    uint16_t trigger,
+    uint16_t keycode,
+    keyrecord_t *record
+);
+
+// To be implemented by the consumer. Defines keys to cancel oneshot mods.
+bool is_oneshot_cancel_key(uint16_t keycode);
+
+// To be implemented by the consumer. Defines keys to ignore when determining
+// whether a oneshot mod has been used. Setting this to modifiers and layer
+// change keys allows stacking multiple oneshot modifiers, and carrying them
+// between layers.
+bool is_oneshot_ignored_key(uint16_t keycode);
+
+void update_oneshot(
+    oneshot_state *state,
+    uint16_t mod,
+    uint16_t trigger,
+    uint16_t keycode,
+    keyrecord_t *record
+) {
+    if (keycode == trigger) {
+        if (record->event.pressed) {
+            // Trigger keydown
+            if (*state == os_up_unqueued) {
+                register_code(mod);
+            }
+            *state = os_down_unused;
+        } else {
+            // Trigger keyup
+            switch (*state) {
+            case os_down_unused:
+                // If we didn't use the mod while trigger was held, queue it.
+                *state = os_up_queued;
+                break;
+            case os_down_used:
+                // If we did use the mod while trigger was held, unregister it.
+                *state = os_up_unqueued;
+                unregister_code(mod);
+                break;
+            default:
+                break;
+            }
+        }
+    } else /* Not a trigger */ {
+        if (record->event.pressed) {
+            if (is_oneshot_cancel_key(keycode) && *state != os_up_unqueued) {
+                // Cancel oneshot on designated cancel keydown.
+                *state = os_up_unqueued;
+                unregister_code(mod);
+            }
+        } else {
+            if (!is_oneshot_ignored_key(keycode)) {
+                // On non-ignored keyup, consider the oneshot used.
+                switch (*state) {
+                case os_down_unused:
+                    *state = os_down_used;
+                    break;
+                case os_up_queued:
+                    *state = os_up_unqueued;
+                    unregister_code(mod);
+                    break;
+                default:
+                    break;
+                }
+            }
+        }
+    }
+}
+
+
 
 /* Fancy looking spare keys. */
 #define __ KC_TRNS
@@ -85,21 +184,6 @@ enum my_layer_names {
 #define OSM_CTL OSM(MOD_LCTL)
 #define OSM_GUI OSM(MOD_LGUI)
 
-/* Switch language */
-typedef enum {
-  Ru, En,
-} SlavaLang;
-void slava_set_language(SlavaLang l) {
-  switch (l) {
-    case Ru:
-      layer_on(L_RUSSIAN);
-      break;
-    case En:
-      layer_off(L_RUSSIAN);
-      break;
-  }
-}
-
 /* Key overrides */
 
 // Suppress < and > on the main layer
@@ -118,8 +202,6 @@ const key_override_t *key_overrides[] = {
 
 /* Hit both middle thumb keys for esc. */
 const uint16_t PROGMEM esc_combo[]     = {KK_SHIFT, KC_SPACE, COMBO_END};
-const uint16_t PROGMEM ctl_esc_combo[] = {KK_SHIFT, KC_S, COMBO_END};
-const uint16_t PROGMEM alt_esc_combo[] = {KK_SHIFT, KC_O, COMBO_END};
 /* Two outer bottom keys on a single half to get into bootloader. */
 const uint16_t PROGMEM boot_combo_left[]  = {KK_NOOP, KK_SYMBO, COMBO_END};
 const uint16_t PROGMEM boot_combo_right[] = {KC_ENTER, KK_NOOP, COMBO_END};
