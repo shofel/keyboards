@@ -1,26 +1,25 @@
 /**
  * A layout for the Cantor Keyboard.
  *
- * 2025.11.04
- * There are some misfirings with sm_td home-row mods. Mainly when mod and
- *   a key is on the same hand.
- * Options for solution:
- *  1. replace home-row mods with vertical combos
- *  2. filter-out same-hand mods
+ * Next:
+ * - replace home-row mods:
+ *   - activate with vertical combos
+ *   - make them oneshot
+ *   - suspend Ru when a mod registered
+ *   - extra: make a runtime switch between sm_td HRM and vertcombos
+ * - employ leader key for unicode method
  *
- *
- * When I return later, then I'll
- * - rewrite sm_td to replicate behaviour, but make it cleaner
- * - make a slim firmware ground-up with zig
+ * Big dream: employ zig
+ * - implement modules for keymap in zig
+ * - make the whole keymap in zig
+ * - from QMK use only low-level (keyboard support and matrix poll)
+ *   - the rest features and a keymap implement in zig
+ * - ? replace gcc with zig.build
  *
  * problems with sm_td:
  * - leader key is shadowed : https://github.com/stasmarkin/sm_td/issues/29
  * - one-shot mods on an sm_td hold-layer
  * - caps-word is non-trivial
- *
- * Idea: one-word without home-row mods
- * - disable HRM on ctrl-w or ctrl+backspace : as if mod misfire detected
- * - enable HRM back on space : as if a problem word was successfully typed
  *
  * Idea: One-word layer
  * It can also be a mod-layer
