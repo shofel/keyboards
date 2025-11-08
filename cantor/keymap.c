@@ -4,10 +4,24 @@
  * Next:
  * - replace home-row mods:
  *   - activate with vertical combos
+ *   - cleanup: rename combos to OS_
  *   - make them oneshot
+ *     - employ callum oneshot
+ *       - make a single key with a single state
+ *       - many triggers many states
+ *     - transparent for layers and mods
+ *     - cancel with a dedicated key
+ *     - cleanup: rename oneshot_state{,t}
  *   - suspend Ru when a mod registered
  *   - extra: make a runtime switch between sm_td HRM and vertcombos
+ *   - cleanup: cleanup after sm_td
+ *   - cleanup: remove mod+esc combos
+ *   - cleanup: remove mods from mouse layer
+ *   - extra: ? combos for mod+Lnum
  * - employ leader key for unicode method
+ * - combos
+ *   - extract combos to a def-file
+ *   - name keys in combos as hand_finger_row and hand_thumb_{left,middle,right}
  *
  * Big dream: employ zig
  * - implement modules for keymap in zig
