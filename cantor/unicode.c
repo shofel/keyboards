@@ -1,3 +1,5 @@
+#include QMK_KEYBOARD_H
+
 /* Unicode */
 
 // LC is for lowercase
@@ -196,28 +198,3 @@ const uint32_t PROGMEM unicode_map[] = {
 #define RU_DOT UP(U_DOT, U_COMMA)
 
 #define EM_THNK UP(U_THINKING_FACE, U_FACE_WITH_MONOCLE)
-
-/* SM hold=layer tap=unicodemap */
-#define SM_LU(unicode_key, layer)           \
-  SMTD_DANCE(unicode_key,                   \
-      NOTHING,                              \
-      register_unicodemap(unicodemap_index(unicode_key)),   \
-      layer_on(L_NUM_NAV),                  \
-      layer_off(L_NUM_NAV)                  \
-  )                                         \
-
-/* SM hold=modifier tap=unicodemap */
-#define SM_MU(unicode_key, mod)             \
-    SMTD_DANCE(unicode_key,                 \
-        NOTHING,                            \
-        register_unicodemap(unicodemap_index(unicode_key)),   \
-        EXEC(                               \
-          layer_off(L_RUSSIAN);             \
-          register_mods(MOD_BIT(mod));      \
-        ),                                  \
-        EXEC(                               \
-          layer_on(L_RUSSIAN);              \
-          unregister_mods(MOD_BIT(mod));    \
-        )                                   \
-    )                                       \
-
