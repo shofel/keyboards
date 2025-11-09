@@ -1,3 +1,5 @@
+#include QMK_KEYBOARD_H
+
 /* Unicode */
 
 // LC is for lowercase

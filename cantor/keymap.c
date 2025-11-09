@@ -8,6 +8,7 @@
  *   - make them oneshot
  *     - employ callum oneshot
  *       - make a single key with a single state
+ *       - debug output with SEND_STRING
  *       - many triggers many states
  *     - transparent for layers and mods
  *     - cancel with a dedicated key
@@ -22,6 +23,9 @@
  * - combos
  *   - extract combos to a def-file
  *   - name keys in combos as hand_finger_row and hand_thumb_{left,middle,right}
+ *   - idea: sticky mod + combo
+ * - mouse
+ *   - sticky mouse layer
  *
  * Big dream: employ zig
  * - implement modules for keymap in zig
@@ -51,8 +55,8 @@
 
 #include QMK_KEYBOARD_H
 
-// #define SMTD_DEBUG_ENABLED
-#include "sm_td.h"
+#include "unicode.c"
+#include "oneshot.h"
 
 void keyboard_post_init_user(void) {
   // Customise these values to desired behaviour
@@ -61,97 +65,6 @@ void keyboard_post_init_user(void) {
   debug_keyboard = false;
   debug_mouse = false;
 }
-
-/**
- * Callum One-shot
- * @see https://github.com/callum-oakley/qmk_firmware/blob/master/users/callum/oneshot.c
- */
-
-// Represents the four states a oneshot key can be in
-typedef enum {
-    os_up_unqueued,
-    os_up_queued,
-    os_down_unused,
-    os_down_used,
-} oneshot_state;
-
-// Custom oneshot mod implementation that doesn't rely on timers. If a mod is
-// used while it is held it will be unregistered on keyup as normal, otherwise
-// it will be queued and only released after the next non-mod keyup.
-void update_oneshot(
-    oneshot_state *state,
-    uint16_t mod,
-    uint16_t trigger,
-    uint16_t keycode,
-    keyrecord_t *record
-);
-
-// To be implemented by the consumer. Defines keys to cancel oneshot mods.
-bool is_oneshot_cancel_key(uint16_t keycode);
-
-// To be implemented by the consumer. Defines keys to ignore when determining
-// whether a oneshot mod has been used. Setting this to modifiers and layer
-// change keys allows stacking multiple oneshot modifiers, and carrying them
-// between layers.
-bool is_oneshot_ignored_key(uint16_t keycode);
-
-void update_oneshot(
-    oneshot_state *state,
-    uint16_t mod,
-    uint16_t trigger,
-    uint16_t keycode,
-    keyrecord_t *record
-) {
-    if (keycode == trigger) {
-        if (record->event.pressed) {
-            // Trigger keydown
-            if (*state == os_up_unqueued) {
-                register_code(mod);
-            }
-            *state = os_down_unused;
-        } else {
-            // Trigger keyup
-            switch (*state) {
-            case os_down_unused:
-                // If we didn't use the mod while trigger was held, queue it.
-                *state = os_up_queued;
-                break;
-            case os_down_used:
-                // If we did use the mod while trigger was held, unregister it.
-                *state = os_up_unqueued;
-                unregister_code(mod);
-                break;
-            default:
-                break;
-            }
-        }
-    } else /* Not a trigger */ {
-        if (record->event.pressed) {
-            if (is_oneshot_cancel_key(keycode) && *state != os_up_unqueued) {
-                // Cancel oneshot on designated cancel keydown.
-                *state = os_up_unqueued;
-                unregister_code(mod);
-            }
-        } else {
-            if (!is_oneshot_ignored_key(keycode)) {
-                // On non-ignored keyup, consider the oneshot used.
-                switch (*state) {
-                case os_down_unused:
-                    *state = os_down_used;
-                    break;
-                case os_up_queued:
-                    *state = os_up_unqueued;
-                    unregister_code(mod);
-                    break;
-                default:
-                    break;
-                }
-            }
-        }
-    }
-}
-
-
 
 /* Fancy looking spare keys. */
 #define __ KC_TRNS
@@ -166,16 +79,20 @@ enum my_keycodes {
   KK_NOT_EQUAL,
   KK_NOOP,
 
+  /* One-shot triggers (combos will emit these) */
+  OS_CTL,
+  OS_ALT,
+  OS_GUI,
+  OS_NUMNAV,
+  OS_SYM,
+
   // thumb keys
   KK_RU,
-  KK_MOUSE,
 
   // Unicode modes
   KK_VIM,
   KK_LINX,
 };
-
-#include "unicode.c"
 
 /* Layer names */
 enum my_layer_names {
@@ -190,16 +107,31 @@ enum my_layer_names {
 /* Simple thumb keys. */
 #define KK_SHIFT OSM(MOD_LSFT)
 #define KK_SYMBO OSL(L_SYMBOLS)
+#define KK_MOUSE MO(L_MOUSE)
 
-/* One-shot modifiers, to place on L_MOUSE and L_FKEYS_SYS */
-#define OSM_SFT OSM(MOD_LSFT)
-#define OSM_ALT OSM(MOD_LALT)
-#define OSM_CTL OSM(MOD_LCTL)
-#define OSM_GUI OSM(MOD_LGUI)
+/* Switch language */
+
+typedef enum {
+  Ru, En,
+} SlavaLang;
+
+void slava_set_language(SlavaLang l) {
+  switch (l) {
+    case Ru:
+      layer_on(L_RUSSIAN);
+      break;
+    case En:
+      layer_off(L_RUSSIAN);
+      break;
+  }
+}
+
+//TODO suspend_ru with a depth counter
 
 /* Key overrides */
 
-// Suppress < and > on the main layer
+// Make pairs: ,; .:
+// TODO  I don't use these ones. How else can they be useful?
 const key_override_t labk_override = ko_make_basic(MOD_MASK_SHIFT, KC_COMMA, KC_SEMICOLON);
 const key_override_t rabk_override = ko_make_basic(MOD_MASK_SHIFT, KC_DOT,   KC_COLON);
 
@@ -215,6 +147,8 @@ const key_override_t *key_overrides[] = {
 
 /* Hit both middle thumb keys for esc. */
 const uint16_t PROGMEM esc_combo[]     = {KK_SHIFT, KC_SPACE, COMBO_END};
+const uint16_t PROGMEM ctl_esc_combo[] = {KK_SHIFT, KC_S, COMBO_END};
+const uint16_t PROGMEM alt_esc_combo[] = {KK_SHIFT, KC_O, COMBO_END};
 /* Two outer bottom keys on a single half to get into bootloader. */
 const uint16_t PROGMEM boot_combo_left[]  = {KK_NOOP, KK_SYMBO, COMBO_END};
 const uint16_t PROGMEM boot_combo_right[] = {KC_ENTER, KK_NOOP, COMBO_END};
@@ -380,7 +314,18 @@ void process_combo_event(uint16_t combo_index, bool pressed) {
 
 /* */
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+
+  /* Route oneshot triggers first. So that combos absorb the oneshot. */
+  oneshot_process_record(oneshot_state_entries, keycode, record);
+
   switch (keycode) {
+    case KK_RU:
+      if (record->event.pressed) {
+        layer_on(L_RUSSIAN);
+      } else {
+        layer_off(L_RUSSIAN);
+      }
+      return false;
     case KC_ESC: /* Switch language in vim. */
       slava_set_language(En);
       return true;
@@ -435,108 +380,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
       break;
   }
 
-  if (!process_smtd(keycode, record)) {
-    return false;
-  }
-
   return true;
-}
-
-/* Make right middle tap-hold extremely averted to a tap. */
-uint32_t get_smtd_timeout(uint16_t keycode, smtd_timeout timeout) {
-  switch (keycode) {
-    case KC_T:
-    case RU_L:
-      if (timeout == SMTD_TIMEOUT_TAP) return SMTD_GLOBAL_TAP_TERM + 100;
-      if (timeout == SMTD_TIMEOUT_RELEASE) return 5;
-      break;
-  }
-
-  return get_smtd_timeout_default(timeout);
-}
-
-smtd_resolution on_smtd_action(
-    uint16_t keycode, smtd_action action, uint8_t tap_count
-) {
-  switch (keycode) {
-    /* Boo home-row mods. */
-    SMTD_MT(KC_A, KC_LEFT_GUI)
-    SMTD_MT(KC_O, KC_LEFT_ALT)
-    SMTD_LT(KC_E, L_NUM_NAV)
-    SMTD_MT(KC_S, KC_LEFT_CTRL)
-    //
-    SMTD_MT(KC_N, KC_LEFT_CTRL)
-    SMTD_LT(KC_T, L_NUM_NAV)
-    SMTD_MT(KC_R, KC_LEFT_ALT)
-    SMTD_MT(KC_I, KC_LEFT_GUI)
-
-    /* RU home-row mods. */
-    SM_MU(RU_F, KC_LEFT_GUI)
-    SM_MU(RU_YERU, KC_LEFT_ALT)
-    SM_LU(RU_V, L_NUM_NAV)
-    SM_MU(RU_A, KC_LEFT_CTRL)
-    SM_MU(RU_O, KC_LEFT_CTRL)
-    SM_LU(RU_L, L_NUM_NAV)
-    SM_MU(RU_D, KC_LEFT_ALT)
-    SM_MU(RU_ZH, KC_LEFT_GUI)
-
-    // Thumb keys
-    SMTD_LT(KC_ENTER, L_SYMBOLS)
-    SMTD_LT(KC_SPACE, L_NUM_NAV)
-    /* hold = mouse */
-    SMTD_DANCE(KK_MOUSE,
-      NOTHING,
-      NOTHING,
-      layer_on(L_MOUSE),
-      layer_off(L_MOUSE))
-
-    /* tap = ru, taptap = en, taphold = (↓en ↑ru)
-       hold = fkeys */
-    SMTD_DANCE(KK_RU,
-      NOTHING,
-      switch (tap_count) {
-        case 0: slava_set_language(Ru); break;
-        case 1: slava_set_language(En); break;
-        default: break;
-      },
-      switch (tap_count) {
-        case 0: layer_on(L_FKEYS_SYS); break;
-        case 1: slava_set_language(En); break;
-        default: break;
-      },
-      switch (tap_count) {
-        case 0:
-          layer_off(L_FKEYS_SYS);
-          break;
-        case 1:
-          slava_set_language(Ru);
-        default:
-          break;
-      }
-    );
-
-    SMTD_DANCE(KK_VIM,
-        EXEC(
-          set_unicode_input_mode(UNICODE_MODE_VIM);
-          slava_set_language(Ru);
-        ),
-        NOTHING,
-        NOTHING,
-        NOTHING
-    );
-
-    SMTD_DANCE(KK_LINX,
-        EXEC(
-          set_unicode_input_mode(UNICODE_MODE_LINUX);
-          slava_set_language(Ru);
-        ),
-        NOTHING,
-        NOTHING,
-        NOTHING
-    );
-  }
-
-  return SMTD_RESOLUTION_UNHANDLED;
 }
 
 /**
@@ -584,7 +428,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
        */
            __ , KC_QUOT, KC_COMM,    KC_U,   KC_C,  KC_V,     KC_Q,  KC_F,  KC_D,  KC_L,  KC_Y,   KC_SLASH,
            __ ,    KC_A,    KC_O,    KC_E,   KC_S,  KC_G,     KC_B,  KC_N,  KC_T,  KC_R,  KC_I,   KC_MINUS,
-       KK_NOOP,      XX,    KC_X,  KC_DOT,   KC_W,  KC_Z,     KC_P,  KC_H,  KC_M,  KC_K,  KC_J,   KK_NOOP,
+       KK_NOOP,     __ ,    KC_X,  KC_DOT,   KC_W,  KC_Z,     KC_P,  KC_H,  KC_M,  KC_K,  KC_J,   KK_NOOP,
 
                           KK_MOUSE , KK_SHIFT , KK_SYMBO,     KC_ENTER , KC_SPACE, KK_RU
   ),
@@ -715,14 +559,14 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    * Idea: my dream is to implement mouse bisection (with every step you choose direction to finally get the destination point. Like in binary search.). It's even possible and easy with [digitizer](https://docs.qmk.fm/features/digitizer). But unfortunately digitizer doesn't work on my Linux.
    */
   [L_MOUSE] = LAYOUT_split_3x6_3(/*
-        __  __  __  __  __  __                       __  w↑  ↑  w↓  b3  __
-        __  gui alt sft ctl __                       __  <-  c  ->  b2  __
-        __  __  __  __  b1  __                       __  __  ↓  __  __  __
+        __  a2  __  __  __  __                       __  w↑  ↑  w↓  b3  __
+        __  a1  __  __  __  __                       __  <-  c  ->  b2  __
+        __  a0  __  __  __  __                       __  __  ↓  __  __  __
                              __  __  __     b1  b2  b3
        */
         XX, MS_ACL2,        XX,       XX,      XX,  XX,       XX, KC_WH_U,  KC_MS_U,  KC_WH_D, KC_BTN3,  XX,
-   OSM_GUI, MS_ACL1,   OSM_ALT,  OSM_SFT, OSM_CTL,  XX,       XX, KC_MS_L,  KC_BTN1,  KC_MS_R, KC_BTN2,  XX,
-        XX, MS_ACL0,        XX,       XX, KC_BTN1,  XX,       XX,      XX,  KC_MS_D,       XX,      XX,  XX,
+        XX, MS_ACL1,        XX,       XX,      XX,  XX,       XX, KC_MS_L,  KC_BTN1,  KC_MS_R, KC_BTN2,  XX,
+        XX, MS_ACL0,        XX,       XX,      XX,  XX,       XX,      XX,  KC_MS_D,       XX,      XX,  XX,
 
                                    __ ,    __ ,   __ ,     KC_BTN1, KC_BTN3, KC_BTN2
   ),
