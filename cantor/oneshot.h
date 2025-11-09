@@ -1,6 +1,8 @@
 #pragma once
 
-#inlude QMK_KEYBOARD_H
+#include QMK_KEYBOARD_H
+
+#define ONESHOT_STATE_SIZE 10
 
 /**
  * State of a oneshot trigger
@@ -21,23 +23,31 @@ typedef enum {
 /* A trigger and its state */
 typedef struct {
   uint16_t trigger;
-  oneshot_state *state;
+  oneshot_state_t *state; // TODO ptr or a value?
 } oneshot_state_entry_t;
 
 /* */
-void oneshot_update_state(
-    uint16_t trigger,
+
+void oneshot_process_record(
+    oneshot_state_entry_t state_entries[],
     uint16_t keycode,
     keyrecord_t *record
+);
+
+void oneshot_process_record_single(
+    uint16_t trigger,       // oneshot key
+    oneshot_state_t *state, // oneshot key's state
+    uint16_t keycode, // event key
+    keyrecord_t *record // event details
 );
 
 /* Interface. These are to be defined by consumer. */
 
 // State of all oneshots
-oneshot_state_entry_t oneshot_state_entries[];
+oneshot_state_entry_t oneshot_state_entries[ONESHOT_STATE_SIZE];
 
 // Handle change of state
-void process_oneshot_event(uint16_t trigger, oneshot_state *state)
+bool oneshot_process_event(uint16_t trigger, oneshot_state_t state);
 
 // Defines keys to cancel oneshot mods.
 bool is_oneshot_cancel_key(uint16_t keycode);

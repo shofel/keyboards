@@ -11,36 +11,33 @@
 #include QMK_KEYBOARD_H
 #include "oneshot.h"
 
-size_t size = sizeof(oneshot_state_entries) / sizeof(oneshot_state_entries[0])
-
-oneshot_state_t* oneshot_get_state(uint16_t trigger) {
-  for (size_t i = 0; i < size; i++) {
-    oneshot_state_entry_t *entry = &oneshot_state_entries[i]
-
-    if (entry->trigger == trigger) {
-      return entry
-    }
+/* Process record against all triggers, one by one. */
+void oneshot_process_record(
+    oneshot_state_entry_t state_entries[],
+    uint16_t keycode,
+    keyrecord_t *record
+) {
+  for (size_t i = 0; i < ONESHOT_STATE_SIZE; i++) {
+    oneshot_state_entry_t *entry = &oneshot_state_entries[i];
+    oneshot_process_record_single(entry->trigger, entry->state, keycode, record);
   }
+  return;
 }
 
-void oneshot_update_state(
-    uint16_t trigger, // oneshot key
+/* Process record against a single given oneshot trigger. */
+void oneshot_process_record_single(
+    uint16_t trigger,       // oneshot key
+    oneshot_state_t *state, // oneshot key's state
     uint16_t keycode, // event key
     keyrecord_t *record // event details
 ) {
-    // Get state for `trigger`
-    oneshot_state_entry_t *state = oneshot_get_state(trigger)
-    if (state == NULL) return;
-
     if (keycode == trigger) {
-        if (record->event.pressed) {
-            // Trigger keydown
-            if (*state == os_up_unqueued) {
-            os_trigger_down(trigger)
+        if (record->event.pressed) { // Trigger keydown
+            // TODO what if two physical keys represent the same trigger?
+            if (*state == os_up_unqueued) { // TODO ? redundant check ?
+              *state = os_down_unused;
             }
-            *state = os_down_unused;
-        } else {
-            // Trigger keyup
+        } else { // Trigger keyup
             switch (*state) {
             case os_down_unused:
                 // If we didn't use the mod while trigger was held, queue it.
@@ -49,7 +46,6 @@ void oneshot_update_state(
             case os_down_used:
                 // If we did use the mod while trigger was held, unregister it.
                 *state = os_up_unqueued;
-                unregister_code(mod);
                 break;
             default:
                 break;
@@ -57,21 +53,19 @@ void oneshot_update_state(
         }
     } else {
         if (record->event.pressed) {
+            // Cancel oneshot on designated cancel keydown.
             if (is_oneshot_cancel_key(keycode) && *state != os_up_unqueued) {
-                // Cancel oneshot on designated cancel keydown.
                 *state = os_up_unqueued;
-                unregister_code(mod);
             }
         } else {
+            // On non-ignored keyup, consider the oneshot used.
             if (!is_oneshot_ignored_key(keycode)) {
-                // On non-ignored keyup, consider the oneshot used.
                 switch (*state) {
                 case os_down_unused:
                     *state = os_down_used;
                     break;
                 case os_up_queued:
                     *state = os_up_unqueued;
-                    unregister_code(mod);
                     break;
                 default:
                     break;
@@ -79,4 +73,8 @@ void oneshot_update_state(
             }
         }
     }
+
+    /* Publish event */
+    // TODO deduplicate. Publish only when changed
+    oneshot_process_event(trigger, *state);
 }
