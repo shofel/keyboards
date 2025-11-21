@@ -112,22 +112,29 @@ enum my_layer_names {
 
 /* Switch language */
 
-typedef enum {
-  Ru, En,
-} SlavaLang;
+static int8_t ru_active = 0;
 
-void slava_set_language(SlavaLang l) {
-  switch (l) {
-    case Ru:
-      layer_on(L_RUSSIAN);
-      break;
-    case En:
-      layer_off(L_RUSSIAN);
-      break;
-  }
+void ru_suspend(void) {
+    ru_active -= 1;
+    layer_off(L_RUSSIAN);
 }
 
-//TODO suspend_ru with a depth counter
+void ru_resume(void) {
+    ru_active += 1;
+    if (ru_active > 0) {
+        layer_on(L_RUSSIAN);
+    }
+}
+
+void ru_enable(void) {
+    ru_active = 1;
+    layer_on(L_RUSSIAN);
+}
+
+void ru_disable(void) {
+  ru_active = 0;
+  layer_on(L_RUSSIAN);
+}
 
 /* Key overrides */
 
@@ -328,19 +335,16 @@ bool is_oneshot_ignored_key(uint16_t keycode) {
 /* */
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 
-  /* Route oneshot triggers first. So that combos absorb the oneshot. */
+  /* Route oneshot triggers first. */
   oneshot_process_record(oneshot_state_entries, keycode, record);
 
   switch (keycode) {
     case KK_RU:
-      if (record->event.pressed) {
-        layer_on(L_RUSSIAN);
-      } else {
-        layer_off(L_RUSSIAN);
-      }
+      // TODO tap=ru taptap=en
+      ru_enable();
       return false;
-    case KC_ESC: /* Switch language in vim. */
-      slava_set_language(En);
+    case KC_ESC: /* Especially useful in vim. */
+      ru_disable();
       return true;
     case KK_GO_DECLARATION:
       if (record->event.pressed) {
