@@ -30,6 +30,7 @@ typedef struct {
 
 void oneshot_process_record(
     oneshot_state_entry_t state_entries[],
+    size_t state_entries_size,
     uint16_t keycode,
     keyrecord_t *record
 );

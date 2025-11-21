@@ -39,6 +39,8 @@
  * - one-shot mods on an sm_td hold-layer
  * - caps-word is non-trivial
  *
+ * TODO: implement UC_VIM in userspace ; and switch to qmk trunk
+ *
  * Idea: One-word layer
  * It can also be a mod-layer
  * Contra: I don't mind holding a layer key, since all of them are on thumb keys
@@ -89,10 +91,6 @@ enum my_keycodes {
 
   // thumb keys
   KK_RU,
-
-  // Unicode modes
-  UC_VIM, // TODO implement this in userspace ; and switch to qmk trunk
-  UC_LINX,
 };
 
 /* Layer names */
@@ -335,7 +333,12 @@ bool is_oneshot_ignored_key(uint16_t keycode) {
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 
   /* Route oneshot triggers first. */
-  oneshot_process_record(oneshot_state_entries, keycode, record);
+  oneshot_process_record(
+      oneshot_state_entries,
+      oneshot_state_entries_size,
+      keycode,
+      record
+  );
 
   switch (keycode) {
     case KK_RU:
