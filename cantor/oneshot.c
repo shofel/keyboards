@@ -33,10 +33,9 @@ void oneshot_process_record_single(
 ) {
     if (keycode == trigger) {
         if (record->event.pressed) { // Trigger keydown
-            // TODO what if two physical keys represent the same trigger?
-            if (*state == os_up_unqueued) { // TODO ? redundant check ?
-              *state = os_down_unused;
-            }
+            /* What if two physical keys represent the same trigger?
+             * As for me, it's all right. */
+            *state = os_down_unused;
         } else { // Trigger keyup
             switch (*state) {
             case os_down_unused:
@@ -51,14 +50,15 @@ void oneshot_process_record_single(
                 break;
             }
         }
-    } else {
+    } else { // when not a trigger
         if (record->event.pressed) {
             // Cancel oneshot on designated cancel keydown.
-            if (is_oneshot_cancel_key(keycode) && *state != os_up_unqueued) {
+            if (is_oneshot_cancel_key(keycode)) {
                 *state = os_up_unqueued;
             }
         } else {
             // On non-ignored keyup, consider the oneshot used.
+            // We don't deactivate mod on keydown to let it do the job.
             if (!is_oneshot_ignored_key(keycode)) {
                 switch (*state) {
                 case os_down_unused:

@@ -38,3 +38,4 @@ During the work, keep config
 ### After
 - cleanup sm_td
 - to cancel one shot: not esc, but a dedicated key (0,0)
+- review TODO comments
