@@ -1,0 +1,40 @@
+# Mods: vert combos with one shot and suspending the ru layer
+
+## How
+- make a feature-toggle to disable/enable sm_td
+- implement feature by feature
+
+## 1. get callum's oneshot
+put files in the directory
+- https://raw.githubusercontent.com/callum-oakley/qmk_firmware/refs/heads/master/users/callum/oneshot.h
+- https://raw.githubusercontent.com/callum-oakley/qmk_firmware/refs/heads/master/users/callum/oneshot.c
+
+make a simple oneshot key with callum , then wi
+
+
+1. copy from callum one-shot
+when
+    mod down,
+    mod queued
+-> suspend_ru
+
+Progression
+1. callum one-shot for a simple key
+2. oneshot for combos
+3. with suspending ru
+
+During the work, keep config 
+
+### Assure:
+* combos for ({[<>]})
+* combo for esc
+* remove combos for mod+esc. one-shot is perfect for this
+
+* switch lang
+  - simple = keys on fn_sys layer
+  - as before = KK_RU: tap->ru taptap->en esc->en
+* switch unicode input mode
+
+### After
+- cleanup sm_td
+- to cancel one shot: not esc, but a dedicated key (0,0)
