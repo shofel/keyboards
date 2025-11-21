@@ -22,5 +22,4 @@ KEY_OVERRIDE_ENABLE = yes
 UNICODE_COMMON = yes
 UNICODEMAP_ENABLE = yes
 
-SRC += unicode.c
 SRC += oneshot.c
