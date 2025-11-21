@@ -138,8 +138,7 @@ void ru_disable(void) {
 
 /* Key overrides */
 
-// Make pairs: ,; .:
-// TODO  I don't use these ones. How else can they be useful?
+// Make , . immune to shift
 const key_override_t labk_override = ko_make_basic(MOD_MASK_SHIFT, KC_COMMA, KC_COMMA);
 const key_override_t rabk_override = ko_make_basic(MOD_MASK_SHIFT, KC_DOT,   KC_DOT);
 
