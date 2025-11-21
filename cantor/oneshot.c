@@ -14,10 +14,11 @@
 /* Process record against all triggers, one by one. */
 void oneshot_process_record(
     oneshot_state_entry_t state_entries[],
+    size_t size,
     uint16_t keycode,
     keyrecord_t *record
 ) {
-  for (size_t i = 0; i < ONESHOT_STATE_SIZE; i++) {
+  for (size_t i = 0; i < size; i++) {
     oneshot_state_entry_t *entry = &oneshot_state_entries[i];
     oneshot_process_record_single(entry->trigger, entry->state, keycode, record);
   }
