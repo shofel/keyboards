@@ -91,8 +91,8 @@ enum my_keycodes {
   KK_RU,
 
   // Unicode modes
-  KK_VIM,
-  KK_LINX,
+  UC_VIM, // TODO implement this in userspace ; and switch to qmk trunk
+  UC_LINX,
 };
 
 /* Layer names */
@@ -555,7 +555,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
        bot F10  F1  F2  F3  __                       __  br↓ vl↓ vl0 __  bot
                              __  __  __     __  __  __
        */
-        XX,  KC_F12,  KC_F7,  KC_F8,  KC_F9, KK_VIM,       XX, KC_BRIU,  KC_VOLU,  KK_LINX,  DB_TOGG, XX,
+        XX,  KC_F12,  KC_F7,  KC_F8,  KC_F9, UC_VIM,       XX, KC_BRIU,  KC_VOLU,  UC_LINX,  DB_TOGG, XX,
         XX,  KC_F11,  KC_F4,  KC_F5,  KC_F6,     XX,       XX, KC_LCTL,  KC_LSFT,  KC_LALT,  KC_RGUI, XX,
    QK_BOOT,  KC_F10,  KC_F1,  KC_F2,  KC_F3,     XX,       XX, KC_BRID,  KC_VOLD,  KC_MUTE,  XX, QK_BOOT,
                                 __ ,    __ ,   __ ,         __ ,   __ ,   __
