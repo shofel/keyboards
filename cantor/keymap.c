@@ -53,6 +53,7 @@
  *   - drashma
  */
 
+#include <stdint.h>
 #include QMK_KEYBOARD_H
 
 #include "unicode.c"
@@ -132,8 +133,8 @@ void slava_set_language(SlavaLang l) {
 
 // Make pairs: ,; .:
 // TODO  I don't use these ones. How else can they be useful?
-const key_override_t labk_override = ko_make_basic(MOD_MASK_SHIFT, KC_COMMA, KC_SEMICOLON);
-const key_override_t rabk_override = ko_make_basic(MOD_MASK_SHIFT, KC_DOT,   KC_COLON);
+const key_override_t labk_override = ko_make_basic(MOD_MASK_SHIFT, KC_COMMA, KC_COMMA);
+const key_override_t rabk_override = ko_make_basic(MOD_MASK_SHIFT, KC_DOT,   KC_DOT);
 
 const key_override_t *key_overrides[] = {
   &labk_override,
@@ -310,6 +311,18 @@ void process_combo_event(uint16_t combo_index, bool pressed) {
       }
       break;
   }
+}
+
+bool is_oneshot_cancel_key(uint16_t keycode) {
+  return false;
+}
+
+/** TODO
+ * - ignore layer transitions
+ * - ignore mods
+ */
+bool is_oneshot_ignored_key(uint16_t keycode) {
+  return false;
 }
 
 /* */
