@@ -32,6 +32,8 @@ void oneshot_process_record_single(
     uint16_t keycode, // event key
     keyrecord_t *record // event details
 ) {
+    oneshot_state_t saved_state = *state;
+
     if (keycode == trigger) {
         if (record->event.pressed) { // Trigger keydown
             /* What if two physical keys represent the same trigger?
@@ -76,6 +78,7 @@ void oneshot_process_record_single(
     }
 
     /* Publish event */
-    // TODO deduplicate. Publish only when changed
-    oneshot_process_event(trigger, *state);
+    if (saved_state != *state) {
+        oneshot_process_event(trigger, *state);
+    }
 }
