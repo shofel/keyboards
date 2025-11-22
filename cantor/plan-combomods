@@ -23,7 +23,18 @@ Progression
 2. oneshot for combos
 3. with suspending ru
 
-During the work, keep config 
+### On suspending ru
+in user process
+monitor mods
+on down suspend ru
+on up resume ru
+
+### renames in oneshot
+
+- rename os_ states
+- rename state entries to entries
+
+During the work, keep config
 
 ### Assure:
 * combos for ({[<>]})

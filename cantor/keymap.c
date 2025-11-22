@@ -86,8 +86,7 @@ enum my_keycodes {
   OS_CTL,
   OS_ALT,
   OS_GUI,
-  OS_NUMNAV,
-  OS_SYM,
+  OS_NUV,
 
   // thumb keys
   KK_RU,
@@ -107,6 +106,8 @@ enum my_layer_names {
 #define KK_SHIFT OSM(MOD_LSFT)
 #define KK_SYMBO OSL(L_SYMBOLS)
 #define KK_MOUSE MO(L_MOUSE)
+
+#define KK_NUV MO(L_NUM_NAV)
 
 /* Switch language */
 
