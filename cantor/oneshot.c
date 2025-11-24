@@ -38,7 +38,6 @@ void oneshot_process_record_single(
             /* What if two physical keys represent the same trigger?
              * As for me, it's all right. */
             oneshot->state = os_down_unused;
-            register_code16(oneshot->triggee);
         } else { // Trigger keyup
             switch (oneshot->state) {
             case os_down_unused:
@@ -77,7 +76,10 @@ void oneshot_process_record_single(
         }
     }
 
-    /* */
+    /* Perform base effects: apply and release the triggee. */
+    if (oneshot->state == os_down_unused) {
+      register_code16(oneshot->triggee);
+    }
     if (oneshot->state == os_up_unqueued) {
       unregister_code16(oneshot->triggee);
     }
