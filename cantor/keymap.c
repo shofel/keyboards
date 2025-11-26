@@ -27,6 +27,7 @@
  * - mouse
  *   - sticky mouse layer
  *   - bisect with digitizer. I see a digitizer in gnome settings. It shoold work now!
+ * - easier key for kitty
  *
  * Big dream: employ zig
  * - implement modules for keymap in zig
@@ -330,6 +331,11 @@ bool is_oneshot_cancel_key(uint16_t keycode) {
  * - ignore mods
  */
 bool is_oneshot_ignored_key(uint16_t keycode) {
+  switch (keycode) {
+    case OSL(L_NUM_NAV):
+      // TODO ignore all keys from `oneshot_state_entries`
+      return true;
+  }
   return false;
 }
 
@@ -337,6 +343,9 @@ bool is_oneshot_ignored_key(uint16_t keycode) {
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 
   /* Route oneshot triggers first. */
+  // TODO stop processing on false?
+  // when a oneshot is a cuctom key, then no difference
+  // but if we redefine an existing key, then it's must do
   oneshot_process_record(
       oneshot_state_entries,
       oneshot_state_entries_size,
@@ -415,6 +424,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
  *  It's the [BOO layout](https://ballerboo.github.io/boolayout/), which is Dvorak modified for more rollover.
  *
  *  ** Modifiers
+ *  // TODO update. no hrm any more
  *  1. Spatial closeness is prioritised over predictability and speed
  *  2. As a result, home row mods are all the way down. There are misfirings some times,
  *     but when it works, it feels great.
