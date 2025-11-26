@@ -1,7 +1,7 @@
 # Mods: vert combos with one shot and suspending the ru layer
 
 ## How
-- make a feature-toggle to disable/enable sm_td
+- ~~ make a feature-toggle to disable/enable sm_td ~~
 - implement feature by feature
 
 ## 1. get callum's oneshot
@@ -19,21 +19,29 @@ when
 -> suspend_ru
 
 Progression
-1. callum one-shot for a simple key
-2. oneshot for combos
-3. with suspending ru
+1. [done] callum one-shot for a simple key
+2. [done] oneshot for combos
+3. [done] with suspending ru
 
-### On suspending ru
+### [done] On suspending ru
 in user process
 monitor mods
 on down suspend ru
 on up resume ru
 
+
+### Fixup
+
+- [x] numnav // i used OSL, but it'd be cool to implement it with the custom oneshot
+- [ ] ru-en switch
+- [ ] unicode switch
+- [ ] right middle thumb for numnav
+- [ ] shift as oneshot
+
 ### renames in oneshot
 
 - rename os_ states
 - rename state entries to entries
-
 During the work, keep config
 
 ### Assure:

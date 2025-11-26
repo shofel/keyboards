@@ -26,6 +26,7 @@
  *   - idea: sticky mod + combo
  * - mouse
  *   - sticky mouse layer
+ *   - bisect with digitizer. I see a digitizer in gnome settings. It shoold work now!
  *
  * Big dream: employ zig
  * - implement modules for keymap in zig
@@ -82,11 +83,12 @@ enum my_keycodes {
   KK_NOT_EQUAL,
   KK_NOOP,
 
-  /* One-shot triggers (combos will emit these) */
+  /* One-shot trigger keys */
   OS_CTL,
   OS_ALT,
   OS_GUI,
   OS_NUV,
+  OS_SFT,
 
   // thumb keys
   KK_RU,
@@ -103,11 +105,11 @@ enum my_layer_names {
 };
 
 /* Simple thumb keys. */
-#define KK_SHIFT OSM(MOD_LSFT)
 #define KK_SYMBO OSL(L_SYMBOLS)
+#define KK_SHIFT OS_SFT
 #define KK_MOUSE MO(L_MOUSE)
 
-#define KK_NUV MO(L_NUM_NAV)
+// 1:42
 
 /* Switch language */
 
@@ -212,7 +214,7 @@ enum combos {
   CMB_ANG_R,
 
   CMB_LCTL,
-  CMB_LLT2,
+  CMB_LNUV,
   CMB_LALT,
   CMB_LGUI,
   CMB_RCTL,
@@ -240,6 +242,7 @@ combo_t key_combos[] = {
   [CMB_RIGHT_ARROW]= COMBO(right_arrow_combo, KK_RIGHT_ARROW),
   [CMB_NOT_EQUAL]  = COMBO(not_equal_combo, KK_NOT_EQUAL),
 
+  /* ({[<>]}) */
   [CMB_SQ_L]       = COMBO(square_left_combo , KC_LBRC),
   [CMB_SQ_R]       = COMBO(square_right_combo, KC_RBRC),
   [CMB_BR_L]       = COMBO(brace_left_combo, KC_LPRN),
