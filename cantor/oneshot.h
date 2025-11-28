@@ -21,6 +21,14 @@ typedef enum {
     os_down_used,
 } oneshot_state_t;
 
+typedef enum {
+    os_trigger_down,
+    os_trigger_up,
+    os_other_up,
+    os_ignore,
+    os_cancel,
+} oneshot_event_t;
+
 /* A trigger, configuration, state */
 typedef struct {
   uint16_t trigger;
@@ -39,8 +47,7 @@ void oneshot_process_record(
 
 void oneshot_process_record_single(
     oneshot_state_entry_t *oneshot,
-    uint16_t keycode, // event key
-    keyrecord_t *record // event details
+    oneshot_event_t event
 );
 
 /* Interface. These are to be defined by consumer. */

@@ -28,6 +28,8 @@
  *   - sticky mouse layer
  *   - bisect with digitizer. I see a digitizer in gnome settings. It shoold work now!
  * - easier key for kitty
+ * - double vertical combos? 🤔
+ * - leave mods only on the left hand?
  * - qmk userspace and useful lsp hints in vim
  *
  * Big dream: employ zig
@@ -327,16 +329,17 @@ bool is_oneshot_cancel_key(uint16_t keycode) {
   return false;
 }
 
-// TODO try MO() again
 bool is_oneshot_ignored_key(uint16_t keycode) {
-  // TODO ignore all keys from `oneshot_state_entries`
+  // Ignore oneshot triggers. Allow them to stack up.
+  for (size_t i = 0; i < oneshot_state_entries_size; i++) {
+    if (oneshot_state_entries[i].trigger == keycode) {
+      return true;
+    }
+  }
+
   switch (keycode) {
     case OSL(L_NUM_NAV):
     case OSL(L_SYMBOLS):
-    case OS_ALT:
-    case OS_SFT:
-    case OS_CTL:
-    case OS_GUI:
       return true;
     default:
       return false;
