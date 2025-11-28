@@ -28,6 +28,7 @@
  *   - sticky mouse layer
  *   - bisect with digitizer. I see a digitizer in gnome settings. It shoold work now!
  * - easier key for kitty
+ * - qmk userspace and useful lsp hints in vim
  *
  * Big dream: employ zig
  * - implement modules for keymap in zig
@@ -326,17 +327,20 @@ bool is_oneshot_cancel_key(uint16_t keycode) {
   return false;
 }
 
-/** TODO
- * - ignore layer transitions
- * - ignore mods
- */
+// TODO try MO() again
 bool is_oneshot_ignored_key(uint16_t keycode) {
+  // TODO ignore all keys from `oneshot_state_entries`
   switch (keycode) {
     case OSL(L_NUM_NAV):
-      // TODO ignore all keys from `oneshot_state_entries`
+    case OSL(L_SYMBOLS):
+    case OS_ALT:
+    case OS_SFT:
+    case OS_CTL:
+    case OS_GUI:
       return true;
+    default:
+      return false;
   }
-  return false;
 }
 
 /* */
