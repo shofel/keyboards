@@ -4,9 +4,6 @@
  * Source: https://github.com/callum-oakley/qmk_firmware/blob/master/users/callum/oneshot.c
  *
  * You specify a key which controls (trigger), and a key under control (triggee).
- *   Press trigger -> triggee becomes pressed
- *   Release trigger -> triggee released
- *
  *   Tap trigger -> triggee pressed
  *   Tap another trigger -> now two triggees are pressed
  *   Tap another key -> on keyup all trigees released

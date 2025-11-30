@@ -8,9 +8,7 @@ MAGIC_ENABLE = no
 
 MOUSEKEY_ENABLE = yes      # Mouse keys
 EXTRAKEY_ENABLE = yes      # Audio control and System control
-# TODO implement bisecting screen with a mouse cursor.
-#      it doesn't work on my nixOS :/
-DIGITIZER_ENABLE = yes
+DIGITIZER_ENABLE = yes     # Touchscreen. For bisection
 
 COMBO_ENABLE = yes
 LEADER_ENABLE = yes
