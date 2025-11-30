@@ -2,7 +2,6 @@
  * A layout for the Cantor Keyboard.
  *
  * TODO Next:
- * - reach fn layer : try set oneshot layer ()
  * - reach nav with a single right hand: leader,n
  *   - a way back
  * - oneshot win with a leader seq
@@ -152,6 +151,8 @@ const uint16_t PROGMEM rctl_combo[] = {KC_N, KC_F, COMBO_END};
 const uint16_t PROGMEM rlt2_combo[] = {KC_T, KC_D, COMBO_END};
 const uint16_t PROGMEM ralt_combo[] = {KC_R, KC_L, COMBO_END};
 const uint16_t PROGMEM rgui_combo[] = {KC_I, KC_Y, COMBO_END};
+/* Combos to access layers */
+const uint16_t PROGMEM fkeys_combo[] = {KC_B, KC_Q, COMBO_END};
 
 /* Indices for all combos (designated initializers) */
 enum combos {
@@ -187,6 +188,8 @@ enum combos {
   CMB_RLT2,
   CMB_RALT,
   CMB_RGUI,
+
+  CMB_FSYS,
 };
 
 combo_t key_combos[] = {
@@ -222,7 +225,7 @@ combo_t key_combos[] = {
   [CMB_RALT]       = COMBO(ralt_combo, OS_ALT),
   [CMB_RGUI]       = COMBO(rgui_combo, OS_GUI),
 
-  // [CMB_FSYS]       = COMBO(),
+  [CMB_FSYS]       = COMBO(fkeys_combo, OSL(L_FKEYS_SYS)),
 };
 
 void process_combo_event(uint16_t combo_index, bool pressed) {
@@ -284,7 +287,7 @@ void leader_start_user(void) {
 }
 
 void leader_end_user(void) {
-  ru_suspend();
+  ru_resume();
 
   /* Ru */
   if (leader_sequence_one_key(KC_R)) {
@@ -306,7 +309,6 @@ void leader_end_user(void) {
   if (leader_sequence_one_key(KC_M)) {
     layer_on(L_MOUSE);
   }
-  // combo of QK_LEAD,KC_F -> OSL(L_FKEYS_SYS)
 
   /* */
   if (leader_sequence_one_key(KC_A)) {
@@ -496,14 +498,6 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   ),
   /**
    * Layer for F keys and multimedia buttons.
-   * Also modifiers on the home-row.
-   *
-   * Activated by right-most key of the right thumb.
-   *
-   * There are also keys to switch the mode of unicode input.
-   *
-   * Idea: UC_VIM and UC_LINX as well as other one-shot swithes would be fancier represented as
-   *       [leader-sequences](https://docs.qmk.fm/features/leader_key).
    */
   [L_FKEYS_SYS] = LAYOUT_split_3x6_3(/*
         __ F11  F7  F8  F9  __                       __  br↑ vl↑ __  DBG __
