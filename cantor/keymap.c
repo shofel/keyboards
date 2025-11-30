@@ -213,16 +213,16 @@ combo_t key_combos[] = {
   [CMB_ANG_L]      = COMBO(angle_left_combo, KC_LABK),
   [CMB_ANG_R]      = COMBO(angle_right_combo, KC_RABK),
 
-  [CMB_LCTL]       = COMBO_ACTION(lctl_combo),
+  [CMB_LCTL]       = COMBO(lctl_combo, OS_CTL),
   [CMB_LLT2]       = COMBO(llt2_combo, OSL(L_NUM_NAV)),
-  [CMB_LALT]       = COMBO_ACTION(lalt_combo),
-  [CMB_LGUI]       = COMBO_ACTION(lgui_combo),
-  [CMB_RCTL]       = COMBO_ACTION(rctl_combo),
+  [CMB_LALT]       = COMBO(lalt_combo, OS_ALT),
+  [CMB_LGUI]       = COMBO(lgui_combo, OS_GUI),
+  [CMB_RCTL]       = COMBO(rctl_combo, OS_CTL),
   [CMB_RLT2]       = COMBO(rlt2_combo, OSL(L_NUM_NAV)),
-  [CMB_RALT]       = COMBO_ACTION(ralt_combo),
-  [CMB_RGUI]       = COMBO_ACTION(rgui_combo),
+  [CMB_RALT]       = COMBO(ralt_combo, OS_ALT),
+  [CMB_RGUI]       = COMBO(rgui_combo, OS_GUI),
 
-  [CMB_FSYS]       = COMBO(),
+  // [CMB_FSYS]       = COMBO(),
 };
 
 void process_combo_event(uint16_t combo_index, bool pressed) {
@@ -230,12 +230,24 @@ void process_combo_event(uint16_t combo_index, bool pressed) {
   }
 }
 
+/* Oneshot */
+
+oneshot_state_entry_t oneshot_state_entries[] = {
+  {OS_CTL, KC_LCTL, os_up_unqueued},
+  {OS_ALT, KC_LALT, os_up_unqueued},
+  {OS_GUI, KC_LGUI, os_up_unqueued},
+  {OS_SFT, KC_LSFT, os_up_unqueued},
+};
+
+size_t oneshot_state_entries_size = sizeof(oneshot_state_entries) / sizeof(oneshot_state_entry_t);
+
 bool is_oneshot_cancel_key(uint16_t keycode) {
   return false;
 }
 
+/* Allow oneshots to stack up and to penetrate layers. */
 bool is_oneshot_ignored_key(uint16_t keycode) {
-  // Ignore oneshot triggers. Allow them to stack up.
+  /* Ignore oneshot triggers */
   for (size_t i = 0; i < oneshot_state_entries_size; i++) {
     if (oneshot_state_entries[i].trigger == keycode) {
       return true;
@@ -248,6 +260,20 @@ bool is_oneshot_ignored_key(uint16_t keycode) {
       return true;
     default:
       return false;
+  }
+}
+
+void oneshot_process_event(oneshot_state_entry_t *oneshot) {
+  if ((oneshot->trigger == OS_CTL) ||
+      (oneshot->trigger == OS_ALT) ||
+      (oneshot->trigger == OS_GUI))
+  {
+    switch (oneshot->state) {
+      case os_down_unused: ru_suspend(); break;
+      case os_down_used: break;
+      case os_up_queued: break;
+      case os_up_unqueued: ru_resume(); break;
+    }
   }
 }
 

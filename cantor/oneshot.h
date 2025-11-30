@@ -55,7 +55,7 @@ void oneshot_process_record_single(
 oneshot_state_entry_t oneshot_state_entries[ONESHOT_STATE_SIZE];
 
 // Handle change of state
-bool oneshot_process_event(oneshot_state_entry_t *oneshot);
+void oneshot_process_event(oneshot_state_entry_t *oneshot);
 
 // Defines keys to cancel oneshot mods.
 bool is_oneshot_cancel_key(uint16_t keycode);
