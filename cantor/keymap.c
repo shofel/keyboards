@@ -9,7 +9,9 @@
  * - dedicated key to reset state. Employ it in ESC then ; leader seq or a combo
  * - mouse: turn one btn1 to a sticky - for selection
  * - mouse - bisect with digitizer. I see a digitizer in gnome settings. It shoold work now!
+ * - employ ucis for emoji: tulip and other flowers, thumbup, ok
  * - implement UC_VIM in userspace ; and switch to qmk trunk
+ * - - rawhid for seamless unicode modes in vim and linux
  * - dx: qmk userspace and useful lsp hints in vim
  *
  * Big dream: employ zig
@@ -48,7 +50,8 @@ void keyboard_post_init_user(void) {
 
 /* */
 enum my_keycodes {
-  SWITCH_LANG = SAFE_RANGE,
+  KK = SAFE_RANGE,
+
   KK_GO_DECLARATION,
   KK_RIGHT_ARROW,
   KK_FAT_RIGHT_ARROW,
@@ -75,9 +78,6 @@ enum my_layer_names {
 /* Simple thumb keys. */
 #define KK_SYMBO OSL(L_SYMBOLS)
 #define KK_SHIFT OS_SFT
-#define KK_MOUSE MO(L_MOUSE)
-
-// 1:42
 
 /* Switch language */
 
@@ -189,13 +189,8 @@ enum combos {
   CMB_RGUI,
 };
 
-/* Track temporary RU disables across overlapping mod-combos */
-static uint8_t ru_combo_depth = 0;
-
 combo_t key_combos[] = {
   [CMB_ESC]        = COMBO(esc_combo, KC_ESC),
-  [CMB_CTL_ESC]    = COMBO(ctl_esc_combo, LCTL(KC_ESC)),
-  [CMB_ALT_ESC]    = COMBO(alt_esc_combo, LALT(KC_ESC)),
 
   [CMB_BOOT_L]     = COMBO(boot_combo_left,  QK_BOOT),
   [CMB_BOOT_R]     = COMBO(boot_combo_right, QK_BOOT),
@@ -226,64 +221,12 @@ combo_t key_combos[] = {
   [CMB_RLT2]       = COMBO(rlt2_combo, OSL(L_NUM_NAV)),
   [CMB_RALT]       = COMBO_ACTION(ralt_combo),
   [CMB_RGUI]       = COMBO_ACTION(rgui_combo),
+
+  [CMB_FSYS]       = COMBO(),
 };
 
 void process_combo_event(uint16_t combo_index, bool pressed) {
   switch (combo_index) {
-    case CMB_LCTL:
-      if (pressed) {
-        if (layer_state_is(L_RUSSIAN)) { ru_combo_depth++; layer_off(L_RUSSIAN); }
-        register_mods(MOD_BIT(KC_LCTL));
-      } else {
-        unregister_mods(MOD_BIT(KC_LCTL));
-        if (ru_combo_depth) { ru_combo_depth--; if (!ru_combo_depth) layer_on(L_RUSSIAN); }
-      }
-      break;
-    case CMB_LALT:
-      if (pressed) {
-        if (layer_state_is(L_RUSSIAN)) { ru_combo_depth++; layer_off(L_RUSSIAN); }
-        register_mods(MOD_BIT(KC_LALT));
-      } else {
-        unregister_mods(MOD_BIT(KC_LALT));
-        if (ru_combo_depth) { ru_combo_depth--; if (!ru_combo_depth) layer_on(L_RUSSIAN); }
-      }
-      break;
-    case CMB_LGUI:
-      if (pressed) {
-        if (layer_state_is(L_RUSSIAN)) { ru_combo_depth++; layer_off(L_RUSSIAN); }
-        register_mods(MOD_BIT(KC_LGUI));
-      } else {
-        unregister_mods(MOD_BIT(KC_LGUI));
-        if (ru_combo_depth) { ru_combo_depth--; if (!ru_combo_depth) layer_on(L_RUSSIAN); }
-      }
-      break;
-    case CMB_RCTL:
-      if (pressed) {
-        if (layer_state_is(L_RUSSIAN)) { ru_combo_depth++; layer_off(L_RUSSIAN); }
-        register_mods(MOD_BIT(KC_LCTL));
-      } else {
-        unregister_mods(MOD_BIT(KC_LCTL));
-        if (ru_combo_depth) { ru_combo_depth--; if (!ru_combo_depth) layer_on(L_RUSSIAN); }
-      }
-      break;
-    case CMB_RALT:
-      if (pressed) {
-        if (layer_state_is(L_RUSSIAN)) { ru_combo_depth++; layer_off(L_RUSSIAN); }
-        register_mods(MOD_BIT(KC_LALT));
-      } else {
-        unregister_mods(MOD_BIT(KC_LALT));
-        if (ru_combo_depth) { ru_combo_depth--; if (!ru_combo_depth) layer_on(L_RUSSIAN); }
-      }
-      break;
-    case CMB_RGUI:
-      if (pressed) {
-        if (layer_state_is(L_RUSSIAN)) { ru_combo_depth++; layer_off(L_RUSSIAN); }
-        register_mods(MOD_BIT(KC_LGUI));
-      } else {
-        unregister_mods(MOD_BIT(KC_LGUI));
-        if (ru_combo_depth) { ru_combo_depth--; if (!ru_combo_depth) layer_on(L_RUSSIAN); }
-      }
-      break;
   }
 }
 
@@ -337,9 +280,7 @@ void leader_end_user(void) {
   if (leader_sequence_one_key(KC_M)) {
     layer_on(L_MOUSE);
   }
-  if (leader_sequence_one_key(KC_F)) {
-    layer_on(L_FKEYS_SYS);
-  }
+  // combo of QK_LEAD,KC_F -> OSL(L_FKEYS_SYS)
 
   /* */
   if (leader_sequence_one_key(KC_A)) {
@@ -357,7 +298,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   /* Route oneshot triggers first. */
   // TODO stop processing on false?
   // when a oneshot is a custom key, then no difference
-  // but if we redefine an existing key, then it's must do
+  // but if we redefine an existing key, then it's a must do
   oneshot_process_record(
       oneshot_state_entries,
       oneshot_state_entries_size,
@@ -390,33 +331,6 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         SEND_STRING("!=");
       }
       return false;
-
-    case LCTL(KC_ESC): return true;
-    case LALT(KC_ESC): return true;
-
-    case QK_BOOT: return true;
-    case QK_REBOOT: return true;
-
-    case KC_LBRC: return true;
-    case KC_RBRC: return true;
-    case KC_LPRN: return true;
-    case KC_RPRN: return true;
-    case KC_LCBR: return true;
-    case KC_RCBR: return true;
-    case KC_LABK: return true;
-    case KC_RABK: return true;
-
-    case KC_LCTL: return true;
-    case OSL(L_NUM_NAV): return true;
-    case KC_LALT: return true;
-    case KC_LGUI: return true;
-
-    case OSM_SFT: return true;
-    case OSM_ALT: return true;
-    case OSM_CTL: return true;
-    case OSM_GUI: return true;
-    case KK_SYMBO: return true;
-
     default:
       break;
   }
@@ -433,11 +347,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
  *  It's the [BOO layout](https://ballerboo.github.io/boolayout/), which is Dvorak modified for more rollover.
  *
  *  ** Modifiers
- *  // TODO update. no hrm any more
- *  1. Spatial closeness is prioritised over predictability and speed
- *  2. As a result, home row mods are all the way down. There are misfirings some times,
- *     but when it works, it feels great.
- *  3. Exception is for SHIFT, which is a dedicated `OSM(L_SFT)` key on a middle thumb of left hand.
+ *  Vertical combo mods: a home-row key plus a key just above it.
  *
  *  ** Unicode Input
  *  *** Why?
@@ -466,24 +376,19 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
        __  '   ,   u   c   v                        q   f   d   l   y   /
        __  a   o   e   s   g                        b   n   t   r   i   -
        __      x   .   w   z                        p   h   m   k   j   __
-                     MOUSE sft SYMBOLS          ret spc RU
+                        __ sft SYMBOLS          ret spc LEAD
        */
            __ , KC_QUOT, KC_COMM,    KC_U,   KC_C,  KC_V,     KC_Q,  KC_F,  KC_D,  KC_L,  KC_Y,   KC_SLASH,
            __ ,    KC_A,    KC_O,    KC_E,   KC_S,  KC_G,     KC_B,  KC_N,  KC_T,  KC_R,  KC_I,   KC_MINUS,
        KK_NOOP,     __ ,    KC_X,  KC_DOT,   KC_W,  KC_Z,     KC_P,  KC_H,  KC_M,  KC_K,  KC_J,   KK_NOOP,
 
-                          KK_MOUSE , KK_SHIFT , KK_SYMBO,     KC_ENTER , KC_SPACE, QK_LEAD
+                                __ , KK_SHIFT , KK_SYMBO,     KC_ENTER , KC_SPACE, QK_LEAD
   ),
 
   /**
    * Russian layer.
    *
-   * Activated by right-most key of the right thumb. Activation is tricky:
-   *
-   * 1. Tap activates the layer
-   * 1. Double tap switches back to English.
-   * 1. Tap of Esc switches back to English. So that in vim you return to normal mode in English.
-   * 1. Tap-then-hold RU key to type an English word in a flow of Russian text. When Ru is active, tap-then-hold the RU key. While you hold it, you type English letters. Release it to continue typing Russian. The idea is to facilitate typing isolated English words in a flow of Russian text.
+   * Activate and deactivate with leader seqs.
    */
   [L_RUSSIAN] = LAYOUT_split_3x6_3(/** Russian layer ```
        ё   й   ц   у   к   е                        н   г   ш   щ   з   х
@@ -555,7 +460,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   [L_NUM_NAV] = LAYOUT_split_3x6_3(/*
        __  __  7   8   9   /                        `   pg↑ ↑   pg↓ __  __
        __  0   4   5   6   :                        ⇤-  ←   ⏎   →   -⇥  __
-       __  0   1   2   3   .                        __  ⮀   ↓   __  __  __
+       __  ,   1   2   3   .                        __  ⮀   ↓   __  __  __
                             __  __  __    __  __  __
        */
        XX,KC_QUOT,  KC_7,  KC_8,  KC_9, KC_SLSH,       KC_GRV,  KC_PGUP,  KC_UP,    KC_PGDN, XX,      XX,
@@ -575,13 +480,13 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    *       [leader-sequences](https://docs.qmk.fm/features/leader_key).
    */
   [L_FKEYS_SYS] = LAYOUT_split_3x6_3(/*
-        __ F11  F7  F8  F9  UVIM                     hr↑ br↑ vl↑ ULX DBG __
-        __ F11  F4  F5  F6  __                       hr↓ ctl sft alt gui __
+        __ F11  F7  F8  F9  __                       __  br↑ vl↑ __  DBG __
+        __ F11  F4  F5  F6  __                       __  __  __  __  __  __
        bot F10  F1  F2  F3  __                       __  br↓ vl↓ vl0 __  bot
                              __  __  __     __  __  __
        */
-        XX,  KC_F12,  KC_F7,  KC_F8,  KC_F9, UC_VIM,       XX, KC_BRIU,  KC_VOLU,  UC_LINX,  DB_TOGG, XX,
-        XX,  KC_F11,  KC_F4,  KC_F5,  KC_F6,     XX,       XX, KC_LCTL,  KC_LSFT,  KC_LALT,  KC_RGUI, XX,
+        XX,  KC_F12,  KC_F7,  KC_F8,  KC_F9,     XX,       XX, KC_BRIU,  KC_VOLU,       XX,  DB_TOGG, XX,
+        XX,  KC_F11,  KC_F4,  KC_F5,  KC_F6,     XX,       XX,      XX,       XX,       XX,       XX, XX,
    QK_BOOT,  KC_F10,  KC_F1,  KC_F2,  KC_F3,     XX,       XX, KC_BRID,  KC_VOLD,  KC_MUTE,  XX, QK_BOOT,
                                 __ ,    __ ,   __ ,         __ ,   __ ,   __
   ),
