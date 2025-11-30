@@ -12,6 +12,9 @@
  *   Tap another key -> on keyup all trigees released
  *
  * For some reason it doesn't work with MO() keys.
+ *
+ * These are eager oneshots. That is, keydown is sent to the wire right away,
+ * not waiting for the `other` key.
  */
 
 #include QMK_KEYBOARD_H
