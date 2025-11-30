@@ -343,7 +343,14 @@ bool is_oneshot_ignored_key(uint16_t keycode) {
 
 /* Leader */
 
+void leader_start_user(void) {
+  ru_suspend();
+}
+
 void leader_end_user(void) {
+  ru_suspend();
+
+  /* Ru */
   if (leader_sequence_one_key(KC_R)) {
     ru_enable();
   }
@@ -359,6 +366,7 @@ void leader_end_user(void) {
     ru_enable();
   }
 
+  /* Layers */
   if (leader_sequence_one_key(KC_M)) {
     layer_on(L_MOUSE);
   }
@@ -366,6 +374,7 @@ void leader_end_user(void) {
     layer_on(L_FKEYS_SYS);
   }
 
+  /* */
   if (leader_sequence_one_key(KC_A)) {
     tap_code16(LCTL(KC_A));
     tap_code16(KC_DEL);
@@ -510,7 +519,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
        ё   й   ц   у   к   е                        н   г   ш   щ   з   х
        __  ф   ы   в   а   п                        р   о   л   д   ж   э
        __  я   ч   с   м   и                        т   ь   б   ю   .   ъ
-                            __  __  __    __  __  RU
+                            __  __  __    __  __  __
        ```
        */
          RU_YO,   RU_Y,    RU_TS,    RU_U,   RU_K,  RU_E,     RU_N,  RU_G,   RU_SH, RU_SHCH,RU_Z,   RU_H,
@@ -581,7 +590,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
        */
        XX,KC_QUOT,  KC_7,  KC_8,  KC_9, KC_SLSH,       KC_GRV,  KC_PGUP,  KC_UP,    KC_PGDN, XX,      XX,
        XX,   KC_0,  KC_4,  KC_5,  KC_6, KC_COLN,       KC_HOME, KC_LEFT,  KC_ENTER, KC_RGHT, KC_END,  XX,
-       XX,   KC_0,  KC_1,  KC_2,  KC_3,  KC_DOT,       XX,      KC_TAB,   KC_DOWN,  XX,      XX,      XX,
+       XX,KC_COMM,  KC_1,  KC_2,  KC_3,  KC_DOT,       XX,      KC_TAB,   KC_DOWN,  XX,      XX,      XX,
                             __ ,    __ ,   __ ,         __ ,   __ ,   __
   ),
   /**
