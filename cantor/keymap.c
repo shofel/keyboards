@@ -379,6 +379,9 @@ void leader_end_user(void) {
     tap_code16(LCTL(KC_A));
     tap_code16(KC_DEL);
   }
+  if (leader_sequence_one_key(KC_K)) {
+    tap_code16(LGUI(KC_T));
+  }
 }
 
 /* */
