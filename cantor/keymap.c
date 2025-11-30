@@ -19,7 +19,6 @@
  *   - cleanup: remove mod+esc combos
  *   - cleanup: remove mods from mouse layer
  *   - extra: ? combos for mod+Lnum
- * - employ leader key for unicode method
  * - combos
  *   - extract combos to a def-file
  *   - name keys in combos as hand_finger_row and hand_thumb_{left,middle,right}
@@ -91,11 +90,7 @@ enum my_keycodes {
   OS_CTL,
   OS_ALT,
   OS_GUI,
-  OS_NUV,
   OS_SFT,
-
-  // thumb keys
-  KK_RU,
 };
 
 /* Layer names */
@@ -138,7 +133,7 @@ void ru_enable(void) {
 
 void ru_disable(void) {
   ru_active = 0;
-  layer_on(L_RUSSIAN);
+  layer_off(L_RUSSIAN);
 }
 
 /* Key overrides */
@@ -218,7 +213,7 @@ enum combos {
   CMB_ANG_R,
 
   CMB_LCTL,
-  CMB_LNUV,
+  CMB_LLT2,
   CMB_LALT,
   CMB_LGUI,
   CMB_RCTL,
@@ -346,6 +341,32 @@ bool is_oneshot_ignored_key(uint16_t keycode) {
   }
 }
 
+/* Leader */
+
+void leader_end_user(void) {
+  if (leader_sequence_one_key(KC_R)) {
+    ru_enable();
+  }
+  if (leader_sequence_one_key(KC_E)) {
+    ru_disable();
+  }
+  if (leader_sequence_one_key(KC_L)) {
+    set_unicode_input_mode(UNICODE_MODE_LINUX);
+    ru_enable();
+  }
+  if (leader_sequence_one_key(KC_V)) {
+    set_unicode_input_mode(UNICODE_MODE_VIM);
+    ru_enable();
+  }
+
+  if (leader_sequence_one_key(KC_M)) {
+    layer_on(L_MOUSE);
+  }
+  if (leader_sequence_one_key(KC_F)) {
+    layer_on(L_FKEYS_SYS);
+  }
+}
+
 /* */
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 
@@ -361,12 +382,9 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   );
 
   switch (keycode) {
-    case KK_RU:
-      // TODO tap=ru taptap=en
-      ru_enable();
-      return false;
-    case KC_ESC: /* Especially useful in vim. */
-      ru_disable();
+    case KC_ESC:
+      ru_disable(); /* Especially useful in vim. */
+      layer_off(L_MOUSE);
       return true;
     case KK_GO_DECLARATION:
       if (record->event.pressed) {
@@ -470,7 +488,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
            __ ,    KC_A,    KC_O,    KC_E,   KC_S,  KC_G,     KC_B,  KC_N,  KC_T,  KC_R,  KC_I,   KC_MINUS,
        KK_NOOP,     __ ,    KC_X,  KC_DOT,   KC_W,  KC_Z,     KC_P,  KC_H,  KC_M,  KC_K,  KC_J,   KK_NOOP,
 
-                          KK_MOUSE , KK_SHIFT , KK_SYMBO,     KC_ENTER , KC_SPACE, KK_RU
+                          KK_MOUSE , KK_SHIFT , KK_SYMBO,     KC_ENTER , KC_SPACE, QK_LEAD
   ),
 
   /**
@@ -493,7 +511,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
          RU_YO,   RU_Y,    RU_TS,    RU_U,   RU_K,  RU_E,     RU_N,  RU_G,   RU_SH, RU_SHCH,RU_Z,   RU_H,
            __ ,   RU_F,    RU_YERU,  RU_V,   RU_A,  RU_P,     RU_R,  RU_O,   RU_L,  RU_D,   RU_ZH,  RU_EE,
            __ ,   RU_YA,   RU_CH,    RU_S,   RU_M,  RU_I,     RU_T,  RU_SOFT,RU_B,  RU_YU,  RU_DOT, RU_HARD,
-                                     __ ,    __ ,   __ ,       __ ,   __ ,   KK_RU
+                                     __ ,    __ ,   __ ,       __ ,   __ ,   __
   ),
 
   /**
@@ -601,12 +619,12 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   [L_MOUSE] = LAYOUT_split_3x6_3(/*
         __  a2  __  __  __  __                       __  w↑  ↑  w↓  b3  __
         __  a1  __  __  __  __                       __  <-  c  ->  b2  __
-        __  a0  __  __  __  __                       __  __  ↓  __  __  __
+        __  a0  __  __  __  __                       __  b1  ↓  __  __  __
                              __  __  __     b1  b2  b3
        */
         XX, MS_ACL2,        XX,       XX,      XX,  XX,       XX, KC_WH_U,  KC_MS_U,  KC_WH_D, KC_BTN3,  XX,
         XX, MS_ACL1,        XX,       XX,      XX,  XX,       XX, KC_MS_L,  KC_BTN1,  KC_MS_R, KC_BTN2,  XX,
-        XX, MS_ACL0,        XX,       XX,      XX,  XX,       XX,      XX,  KC_MS_D,       XX,      XX,  XX,
+        XX, MS_ACL0,        XX,       XX,      XX,  XX,       XX, KC_BTN1,  KC_MS_D,       XX,      XX,  XX,
 
                                    __ ,    __ ,   __ ,     KC_BTN1, KC_BTN3, KC_BTN2
   ),

@@ -33,10 +33,12 @@ on up resume ru
 ### Fixup
 
 - [x] numnav // i used OSL, but it'd be cool to implement it with the custom oneshot
-- [ ] ru-en switch
-- [ ] unicode switch
+- [x] ru-en switch
+- [x] unicode switch
 - [ ] right middle thumb for numnav
-- [ ] shift as oneshot
+- [x] shift as oneshot
+- [ ] reach fn layer
+- [x] mouse as leader,m
 
 ### renames in oneshot
 
