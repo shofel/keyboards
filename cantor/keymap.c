@@ -365,6 +365,11 @@ void leader_end_user(void) {
   if (leader_sequence_one_key(KC_F)) {
     layer_on(L_FKEYS_SYS);
   }
+
+  if (leader_sequence_one_key(KC_A)) {
+    tap_code16(LCTL(KC_A));
+    tap_code16(KC_DEL);
+  }
 }
 
 /* */
