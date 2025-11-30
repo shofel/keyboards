@@ -1,35 +1,16 @@
 /**
  * A layout for the Cantor Keyboard.
  *
- * Next:
- * - replace home-row mods:
- *   - activate with vertical combos
- *   - cleanup: rename combos to OS_
- *   - make them oneshot
- *     - employ callum oneshot
- *       - make a single key with a single state
- *       - debug output with SEND_STRING
- *       - many triggers many states
- *     - transparent for layers and mods
- *     - cancel with a dedicated key
- *     - cleanup: rename oneshot_state{,t}
- *   - suspend Ru when a mod registered
- *   - extra: make a runtime switch between sm_td HRM and vertcombos
- *   - cleanup: cleanup after sm_td
- *   - cleanup: remove mod+esc combos
- *   - cleanup: remove mods from mouse layer
- *   - extra: ? combos for mod+Lnum
- * - combos
- *   - extract combos to a def-file
- *   - name keys in combos as hand_finger_row and hand_thumb_{left,middle,right}
- *   - idea: sticky mod + combo
- * - mouse
- *   - sticky mouse layer
- *   - bisect with digitizer. I see a digitizer in gnome settings. It shoold work now!
- * - easier key for kitty
- * - double vertical combos? 🤔
- * - leave mods only on the left hand?
- * - qmk userspace and useful lsp hints in vim
+ * TODO Next:
+ * - reach fn layer : try set oneshot layer ()
+ * - reach nav with a single right hand: leader,n
+ *   - a way back
+ * - oneshot win with a leader seq
+ * - dedicated key to reset state. Employ it in ESC then ; leader seq or a combo
+ * - mouse: turn one btn1 to a sticky - for selection
+ * - mouse - bisect with digitizer. I see a digitizer in gnome settings. It shoold work now!
+ * - implement UC_VIM in userspace ; and switch to qmk trunk
+ * - dx: qmk userspace and useful lsp hints in vim
  *
  * Big dream: employ zig
  * - implement modules for keymap in zig
@@ -38,19 +19,7 @@
  *   - the rest features and a keymap implement in zig
  * - ? replace gcc with zig.build
  *
- * problems with sm_td:
- * - leader key is shadowed : https://github.com/stasmarkin/sm_td/issues/29
- * - one-shot mods on an sm_td hold-layer
- * - caps-word is non-trivial
- *
- * TODO: implement UC_VIM in userspace ; and switch to qmk trunk
- *
- * Idea: One-word layer
- * It can also be a mod-layer
- * Contra: I don't mind holding a layer key, since all of them are on thumb keys
- *
  * Idea: Draw the layers diagram by hand
- *
  * Idea: Make animations to explain tricks
  *
  * References
@@ -154,8 +123,6 @@ const key_override_t *key_overrides[] = {
 
 /* Hit both middle thumb keys for esc. */
 const uint16_t PROGMEM esc_combo[]     = {KK_SHIFT, KC_SPACE, COMBO_END};
-const uint16_t PROGMEM ctl_esc_combo[] = {KK_SHIFT, KC_S, COMBO_END};
-const uint16_t PROGMEM alt_esc_combo[] = {KK_SHIFT, KC_O, COMBO_END};
 /* Two outer bottom keys on a single half to get into bootloader. */
 const uint16_t PROGMEM boot_combo_left[]  = {KK_NOOP, KK_SYMBO, COMBO_END};
 const uint16_t PROGMEM boot_combo_right[] = {KC_ENTER, KK_NOOP, COMBO_END};
@@ -389,7 +356,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 
   /* Route oneshot triggers first. */
   // TODO stop processing on false?
-  // when a oneshot is a cuctom key, then no difference
+  // when a oneshot is a custom key, then no difference
   // but if we redefine an existing key, then it's must do
   oneshot_process_record(
       oneshot_state_entries,
@@ -621,17 +588,11 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
   /**
    * Mouse layer.
-   * Also contains modifiers on the home row.
    *
-   * Activated by the left-most key of the left thumb.
-   *
-   * Right hand does all the job.
-   * Mouse buttons are duplicated on thumb keys.
+   * Activated by Leader,m
    *
    * Left hand has its own button one to facilitate selection
    * Left hand can apply modifiers, to perform shift+click, or ctrl+wheelup.
-   *
-   * Idea: my dream is to implement mouse bisection (with every step you choose direction to finally get the destination point. Like in binary search.). It's even possible and easy with [digitizer](https://docs.qmk.fm/features/digitizer). But unfortunately digitizer doesn't work on my Linux.
    */
   [L_MOUSE] = LAYOUT_split_3x6_3(/*
         __  a2  __  __  __  __                       __  w↑  ↑  w↓  b3  __
@@ -643,6 +604,6 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         XX, MS_ACL1,        XX,       XX,      XX,  XX,       XX, KC_MS_L,  KC_BTN1,  KC_MS_R, KC_BTN2,  XX,
         XX, MS_ACL0,        XX,       XX,      XX,  XX,       XX, KC_BTN1,  KC_MS_D,       XX,      XX,  XX,
 
-                                   __ ,    __ ,   __ ,     KC_BTN1, KC_BTN3, KC_BTN2
+                                   __ ,    __ ,   __ ,         __ ,  __ ,  __
   ),
 };

@@ -29,10 +29,9 @@ typedef enum {
     os_cancel,
 } oneshot_event_t;
 
-/* A trigger, configuration, state */
 typedef struct {
-  uint16_t trigger;
-  uint16_t triggee;
+  uint16_t trigger; /* key to watch */
+  uint16_t triggee; /* key to imitate */
   oneshot_state_t state;
 } oneshot_state_entry_t;
 
