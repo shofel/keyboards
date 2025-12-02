@@ -2,12 +2,6 @@
  * A layout for the Cantor Keyboard.
  *
  * TODO Next:
- * - think how leader plays with layers
- *   - suspend/resume or always reset to boo first?
- * - reach nav with a single right hand: leader,n
- *   - a way back
- * - oneshot win with a leader seq
- * - dedicated key to reset state. Employ it in ESC then ; leader seq or a combo
  * - mouse: turn one btn1 to a sticky - for selection
  * - mouse - bisect with digitizer. I see a digitizer in gnome settings. It shoold work now!
  * - employ ucis for emoji: tulip and other flowers, thumbup, ok
@@ -16,7 +10,6 @@
  * - dx: qmk userspace and useful lsp hints in vim
  *
  * - migrate braces to vert combos
- * - os : deactivate on second tap
  * - caps word by double shift
  * - switch windows with a leader sequence. Sticky like Callum's one
  *
