@@ -10,6 +10,8 @@
 #define LAYER_STATE_8BIT
 #define COMBO_ONLY_FROM_LAYER 0
 
+#define DEBOUNCE 15
+
 /* MOUSE */
 
 /*
