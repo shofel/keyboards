@@ -17,6 +17,8 @@
  *
  * - migrate braces to vert combos
  * - os : deactivate on second tap
+ * - caps word by double shift
+ * - switch windows with a leader sequence. Sticky like Callum's one
  *
  * Big dream: employ zig
  * - implement modules for keymap in zig
