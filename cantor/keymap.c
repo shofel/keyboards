@@ -320,6 +320,9 @@ void leader_end_user(void) {
   if (leader_sequence_one_key(KC_M)) {
     layer_on(L_MOUSE);
   }
+  if (leader_sequence_one_key(KC_T)) {
+    layer_on(L_NUM_NAV);
+  }
 
   /* */
   if (leader_sequence_one_key(KC_A)) {
@@ -507,7 +510,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                             __  __  __    __  __  __
        */
        XX,KC_QUOT,  KC_7,  KC_8,  KC_9, KC_SLSH,       KC_GRV,  KC_PGUP,  KC_UP,    KC_PGDN, XX,      XX,
-       XX,   KC_0,  KC_4,  KC_5,  KC_6, KC_COLN,       KC_HOME, KC_LEFT,  KC_ENTER, KC_RGHT, KC_END,  XX,
+       XX,   KC_0,  KC_4,  KC_5,  KC_6, KC_COLN,       KC_HOME, KC_LEFT,  KC_ENTER, KC_RGHT, KC_END,  KK_SESC,
        XX,KC_COMM,  KC_1,  KC_2,  KC_3,  KC_DOT,       XX,      KC_TAB,   KC_DOWN,  XX,      XX,      XX,
                             __ ,    __ ,   __ ,         __ ,   __ ,   __
   ),
@@ -521,7 +524,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                              __  __  __     __  __  __
        */
         XX,  KC_F12,  KC_F7,  KC_F8,  KC_F9,     XX,       XX, KC_BRIU,  KC_VOLU,       XX,  DB_TOGG, XX,
-        XX,  KC_F11,  KC_F4,  KC_F5,  KC_F6,     XX,       XX,      XX,       XX,       XX,       XX, XX,
+        XX,  KC_F11,  KC_F4,  KC_F5,  KC_F6,     XX,       XX,      XX,       XX,       XX,       XX, __,
    QK_BOOT,  KC_F10,  KC_F1,  KC_F2,  KC_F3,     XX,       XX, KC_BRID,  KC_VOLD,  KC_MUTE,  XX, QK_BOOT,
                                 __ ,    __ ,   __ ,         __ ,   __ ,   __
   ),
@@ -531,17 +534,16 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    *
    * Activated by Leader,m
    *
-   * Left hand has its own button one to facilitate selection
    * Left hand can apply modifiers, to perform shift+click, or ctrl+wheelup.
    */
   [L_MOUSE] = LAYOUT_split_3x6_3(/*
         __  a2  __  __  __  __                       __  w↑  ↑  w↓  b3  __
         __  a1  __  __  __  __                       __  <-  c  ->  b2  __
         __  a0  __  __  __  __                       __  b1  ↓  __  __  __
-                             __  __  __     b1  b2  b3
+                             __  __  __     __  __  __
        */
         XX, MS_ACL2,        XX,       XX,      XX,  XX,       XX, KC_WH_U,  KC_MS_U,  KC_WH_D, KC_BTN3,  XX,
-        XX, MS_ACL1,        XX,       XX,      XX,  XX,       XX, KC_MS_L,  KC_BTN1,  KC_MS_R, KC_BTN2,  XX,
+        XX, MS_ACL1,        XX,       XX,      XX,  XX,       XX, KC_MS_L,  KC_BTN1,  KC_MS_R, KC_BTN2,  __,
         XX, MS_ACL0,        XX,       XX,      XX,  XX,       XX, KC_BTN1,  KC_MS_D,       XX,      XX,  XX,
 
                                    __ ,    __ ,   __ ,         __ ,  __ ,  __
