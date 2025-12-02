@@ -9,7 +9,6 @@
  * - - rawhid for seamless unicode modes in vim and linux
  * - dx: qmk userspace and useful lsp hints in vim
  *
- * - migrate braces to vert combos
  * - caps word by double shift
  * - switch windows with a leader sequence. Sticky like Callum's one
  *
@@ -135,14 +134,14 @@ const uint16_t PROGMEM fat_right_arrow_combo[] = {KC_H, KC_M, COMBO_END}; // =>
 const uint16_t PROGMEM right_arrow_combo[]     = {KC_H, KC_K, COMBO_END}; // ->
 const uint16_t PROGMEM not_equal_combo[]       = {KC_H, KC_X, COMBO_END}; // !=
 /* [{(<>)}] */
-const uint16_t PROGMEM square_left_combo[]  = {KC_S, KC_O, COMBO_END};
-const uint16_t PROGMEM square_right_combo[] = {KC_N, KC_R, COMBO_END};
-const uint16_t PROGMEM brace_left_combo[]   = {KC_S, KC_A, COMBO_END};
-const uint16_t PROGMEM brace_right_combo[]  = {KC_N, KC_I, COMBO_END};
-const uint16_t PROGMEM curly_left_combo[]   = {KC_E, KC_A, COMBO_END};
-const uint16_t PROGMEM curly_right_combo[]  = {KC_T, KC_I, COMBO_END};
-const uint16_t PROGMEM angle_left_combo[]   = {KC_G, KC_E, COMBO_END};
-const uint16_t PROGMEM angle_right_combo[]  = {KC_B, KC_T, COMBO_END};
+const uint16_t PROGMEM square_left_combo[]  = {KC_S, KC_W, COMBO_END};
+const uint16_t PROGMEM square_right_combo[] = {KC_N, KC_H, COMBO_END};
+const uint16_t PROGMEM brace_left_combo[]   = {KC_E, KC_DOT, COMBO_END};
+const uint16_t PROGMEM brace_right_combo[]  = {KC_T, KC_M, COMBO_END};
+const uint16_t PROGMEM curly_left_combo[]   = {KC_O, KC_X, COMBO_END};
+const uint16_t PROGMEM curly_right_combo[]  = {KC_R, KC_K, COMBO_END};
+const uint16_t PROGMEM angle_left_combo[]   = {KC_G, KC_Z, COMBO_END};
+const uint16_t PROGMEM angle_right_combo[]  = {KC_B, KC_P, COMBO_END};
 /* Vertical combos for mods */
 const uint16_t PROGMEM lctl_combo[] = {KC_S, KC_C, COMBO_END};
 const uint16_t PROGMEM llt2_combo[] = {KC_E, KC_U, COMBO_END};
