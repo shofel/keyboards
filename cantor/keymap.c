@@ -61,6 +61,7 @@ enum my_keycodes {
   KK_FAT_RIGHT_ARROW,
   KK_NOT_EQUAL,
   KK_NOOP,
+  KK_SESC,
 
   /* One-shot trigger keys */
   OS_CTL,
@@ -250,6 +251,9 @@ oneshot_state_entry_t oneshot_state_entries[] = {
 size_t oneshot_state_entries_size = sizeof(oneshot_state_entries) / sizeof(oneshot_state_entry_t);
 
 bool is_oneshot_cancel_key(uint16_t keycode) {
+  if (keycode == KK_SESC) {
+    return true;
+  }
   return false;
 }
 
@@ -340,9 +344,13 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   );
 
   switch (keycode) {
+    case KK_SESC:
+      layer_move(L_BOO);
+      ru_disable();
+      return false;
     case KC_ESC:
-      ru_disable(); /* Especially useful in vim. */
-      layer_off(L_MOUSE);
+      layer_move(L_BOO); // In vim: restore En in normal mode
+      ru_disable();
       return true;
     case KK_GO_DECLARATION:
       if (record->event.pressed) {
@@ -415,7 +423,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
            __ ,    KC_A,    KC_O,    KC_E,   KC_S,  KC_G,     KC_B,  KC_N,  KC_T,  KC_R,  KC_I,   KC_MINUS,
        KK_NOOP,     __ ,    KC_X,  KC_DOT,   KC_W,  KC_Z,     KC_P,  KC_H,  KC_M,  KC_K,  KC_J,   KK_NOOP,
 
-                                __ , KK_SHIFT , KK_SYMBO,     KC_ENTER , KC_SPACE, QK_LEAD
+                           KK_SESC , KK_SHIFT , KK_SYMBO,     KC_ENTER , KC_SPACE, QK_LEAD
   ),
 
   /**
