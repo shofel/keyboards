@@ -2,6 +2,8 @@
  * A layout for the Cantor Keyboard.
  *
  * TODO Next:
+ * - think how leader plays with layers
+ *   - suspend/resume or always reset to boo first?
  * - reach nav with a single right hand: leader,n
  *   - a way back
  * - oneshot win with a leader seq
@@ -12,6 +14,9 @@
  * - implement UC_VIM in userspace ; and switch to qmk trunk
  * - - rawhid for seamless unicode modes in vim and linux
  * - dx: qmk userspace and useful lsp hints in vim
+ *
+ * - migrate braces to vert combos
+ * - os : deactivate on second tap
  *
  * Big dream: employ zig
  * - implement modules for keymap in zig
@@ -145,7 +150,7 @@ const uint16_t PROGMEM angle_right_combo[]  = {KC_B, KC_T, COMBO_END};
 /* Vertical combos for mods */
 const uint16_t PROGMEM lctl_combo[] = {KC_S, KC_C, COMBO_END};
 const uint16_t PROGMEM llt2_combo[] = {KC_E, KC_U, COMBO_END};
-const uint16_t PROGMEM lalt_combo[] = {KC_O, KC_SCLN, COMBO_END};
+const uint16_t PROGMEM lalt_combo[] = {KC_O, KC_COMM, COMBO_END};
 const uint16_t PROGMEM lgui_combo[] = {KC_A, KC_QUOT, COMBO_END};
 const uint16_t PROGMEM rctl_combo[] = {KC_N, KC_F, COMBO_END};
 const uint16_t PROGMEM rlt2_combo[] = {KC_T, KC_D, COMBO_END};
