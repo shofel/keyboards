@@ -2,14 +2,17 @@
  * A layout for the Cantor Keyboard.
  *
  * TODO Next:
- * - implement UC_VIM in userspace ; and switch to qmk trunk
- * - - rawhid for seamless unicode modes in vim and linux
+ * - implement UC_VIM in userspace IN_PROGRESS
+ * - and switch to qmk trunk
+ * - rawhid for seamless unicode modes in vim and linux
  * - mouse: turn one btn1 to a sticky - for selection
  * - employ ucis for emoji: tulip and other flowers, tup=thumbup, ok, think, monocle
+ * - sentence case
  * - dx: qmk userspace and useful lsp hints in vim
  * - caps word by double shift
  * - mouse - bisect with digitizer. I see a digitizer in gnome settings. It shoold work now!
  * - switch windows with a leader sequence. Sticky like Callum's one
+ * - shift+space = esc
  *
  * Big dream: employ zig
  * - implement modules for keymap in zig
