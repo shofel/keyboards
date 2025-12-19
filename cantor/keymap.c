@@ -3,10 +3,7 @@
  *
  * TODO Next:
  * - 2 caps word by double shift
- * - 2 leader seq to delete a word
  * - 2 mouse: turn one btn1 to a sticky - for selection (activate on tap; deactivate on tap)
- * - 2 mouse: put speed mods on home row
- * - 4 sym: resolve _- confusion
  * - 4 sym: fill the gaps for some useful stuff: _
  * - 6 DX: qmk userspace and useful lsp hints in vim
  * - 6 employ ucis for emoji: tulip and other flowers, tup=thumbup, ok, think, monocle
