@@ -539,9 +539,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         __  a0  __  __  __  __                       __  b1  ↓  __  __  __
                              __  __  __     __  __  __
        */
-        XX, MS_ACL2,        XX,       XX,      XX,  XX,       XX, KC_WH_U,  KC_MS_U,  KC_WH_D, KC_BTN3,  XX,
-        XX, MS_ACL1,        XX,       XX,      XX,  XX,       XX, KC_MS_L,  KC_BTN1,  KC_MS_R, KC_BTN2,  __,
-        XX, MS_ACL0,        XX,       XX,      XX,  XX,       XX, KC_BTN1,  KC_MS_D,       XX,      XX,  XX,
+        XX,      XX,        XX,       XX,      XX,  XX,       XX, MS_WHLU,  MS_UP  ,  MS_WHLD, MS_BTN3,  XX,
+        XX,      XX,   MS_ACL2,  MS_ACL0, MS_ACL1,  XX,       XX, MS_LEFT,  MS_BTN1,  MS_RGHT, MS_BTN2,  __,
+        XX,      XX,        XX,       XX,      XX,  XX,       XX, MS_BTN1,  MS_DOWN,       XX,      XX,  XX,
 
                                    __ ,    __ ,   __ ,         __ ,  __ ,  __
   ),
