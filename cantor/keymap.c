@@ -321,11 +321,21 @@ void leader_end_user(void) {
     layer_on(L_NUM_NAV);
   }
 
-  /* */
-  if (leader_sequence_one_key(KC_A)) {
+  /* Text editing */
+  if (leader_sequence_two_keys(KC_D, KC_A)) { // Delete All
     tap_code16(LCTL(KC_A));
     tap_code16(KC_DEL);
   }
+  if (leader_sequence_two_keys(KC_D, KC_S)) { // Delete Start
+    tap_code16(KC_HOME);
+    tap_code16(KC_DEL);
+    tap_code16(KC_END);
+  }
+  if (leader_sequence_two_keys(KC_D, KC_W)) { // Delete Word
+    tap_code16(LCTL(KC_BSPC));
+  }
+
+  /* Kitty */
   if (leader_sequence_one_key(KC_K)) {
     tap_code16(LGUI(KC_T));
   }
