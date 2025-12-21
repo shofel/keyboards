@@ -2,14 +2,24 @@
  * A layout for the Cantor Keyboard.
  *
  * TODO Next:
+ * - leader seq for gui+L_SYM
+ * - easier access for gui key
+ * - handier one-handed alt+`
+ * - leader layer activators : make them toggles
  * - 2 caps word by double shift
  * - 2 mouse: turn one btn1 to a sticky - for selection (activate on tap; deactivate on tap)
  * - 4 sym: fill the gaps for some useful stuff: _
- * - 6 DX: qmk userspace and useful lsp hints in vim
  * - 6 employ ucis for emoji: tulip and other flowers, tup=thumbup, ok, think, monocle
  * - 6 revise the sym layer: braces
- * - 8 mouse - bisect with digitizer. I see a digitizer in gnome settings. It shoold work now!
+ * - 8 mouse - bisect with digitizer. I see a digitizer in gnome settings. It should work now!
+ * - 88 bug: fast seq [os_sft c a] resolves to [C A], while [C a] expected
  * - 9 rawhid for seamless unicode modes in vim and linux
+ *
+ * TODO ## DX and practices
+ * - convert to external qmk userspace
+ * - extract oneshot as a community module
+ * - extract unicode_ru as a community module
+ * - setup commands to build
  *
  * TODO hardware:
  * - a sturdier case with quieter sound
