@@ -487,11 +487,17 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    *   - `!=` `:=` are literally sums of their symbols
    *
    * Combos work independently of layers.
+
+   rare: & $ % ^ ! ~ | \ @
+   more: * ; : ? # +
+   most: =
+   maybe: ` "
+
    */
   [L_SYMBOLS] = LAYOUT_split_3x6_3(/*
-       __  `   &   *   __  __                       __  \   +   |   ~   /
-       __  ;   $   %   ^   __                       __  __  __  __  :   -
-       __  __  !   @   #   󰹿                        󰭜   =   __  ?   __  __
+       __  `   &   %   #   __                       __  \   +   |   ~   /
+       __  ;   !   __  __  __                       __  __  __  ?   :   -
+       __  __  $   @   ^   󰹿                        󰭜   =   *   __  __  __
                             __  __  SYM   __  __  __
        */
         XX,  KC_GRV,   KC_AMPR,  KC_ASTR,      XX,      XX,       XX,      KC_BSLS,  KC_PLUS,  KC_PIPE, KC_TILD, KC_SLASH,
