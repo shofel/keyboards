@@ -1,28 +1,21 @@
 # Flashing the keyboard:
-# make flash
+# From repository root: make -C cantor flash
+# Or directly: cd .. && qmk flash -kb cantor -km keymap
 
 .DEFAULT_GOAL := flash
 
 keyboard = cantor
 keymap = keymap
-target = flash
+repo_root = $(shell git rev-parse --show-toplevel)
+keymap_file = ${repo_root}/keyboards/${keyboard}/keymaps/${keymap}/keymap.c
 
-keymap_src = .
-keymap_dest = ${QMK_FIRMWARE}/keyboards/${keyboard}/keymaps/${keymap}/
-
-clean:
-	rm -rf ${keymap_dest}
-
-copy: clean
-	cp -r ${keymap_src} ${keymap_dest}
-
-qmk_flash:
-	qmk flash -kb ${keyboard} -km ${keymap}
-
+# Flash using QMK CLI (must be run from repo root)
 flash:
-	@make copy
-	@make qmk_flash || true
-	@make clean
+	@cd ${repo_root} && qmk flash -kb ${keyboard} -km ${keymap}
+
+# Compile using QMK CLI (must be run from repo root)
+compile:
+	@cd ${repo_root} && qmk compile -kb ${keyboard} -km ${keymap}
 
 visual = visual
 json = ${visual}/keymap.json
@@ -33,7 +26,7 @@ combos = ${visual}/combos.yml
 draw_config = ${visual}/draw_config.yml
 
 c2json:
-	qmk c2json -q keymap.c -kb ${keyboard} -km ${keymap} --no-cpp > ${json}
+	qmk c2json -q ${keymap_file} -kb ${keyboard} -km ${keymap} --no-cpp > ${json}
 
 parse:
 	@make c2json

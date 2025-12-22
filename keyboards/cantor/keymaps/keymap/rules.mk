@@ -21,4 +21,4 @@ KEY_OVERRIDE_ENABLE = yes
 UNICODE_COMMON = yes
 UNICODEMAP_ENABLE = yes
 
-SRC += oneshot.c
+# Note: oneshot.c is in userspace (users/shofel/) and is automatically compiled

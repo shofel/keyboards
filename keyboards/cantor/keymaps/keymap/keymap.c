@@ -40,11 +40,12 @@
  *   - drashma
  */
 
+#include "keycodes.h"
 #include <stdint.h>
 #include QMK_KEYBOARD_H
 
-#include "unicode.c"
-#include "oneshot.h"
+#include "users/shofel/unicode.c"
+#include "users/shofel/oneshot.h"
 
 void keyboard_post_init_user(void) {
   // Customise these values to desired behaviour
