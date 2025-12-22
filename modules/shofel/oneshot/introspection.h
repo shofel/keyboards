@@ -35,24 +35,11 @@ typedef struct {
   oneshot_state_t state;
 } oneshot_state_entry_t;
 
-/* */
-
-void oneshot_process_record(
-    oneshot_state_entry_t state_entries[],
-    size_t state_entries_size,
-    uint16_t keycode,
-    keyrecord_t *record
-);
-
-void oneshot_process_record_single(
-    oneshot_state_entry_t *oneshot,
-    oneshot_event_t event
-);
-
-/* Interface. These are to be defined by consumer. */
+/* Interface functions - these must be defined by the keymap */
 
 // State of all oneshots
-oneshot_state_entry_t oneshot_state_entries[ONESHOT_STATE_SIZE];
+extern oneshot_state_entry_t oneshot_state_entries[ONESHOT_STATE_SIZE];
+extern size_t oneshot_state_entries_size;
 
 // Handle change of state
 void oneshot_process_event(oneshot_state_entry_t *oneshot);
@@ -65,3 +52,4 @@ bool is_oneshot_cancel_key(uint16_t keycode);
 // change keys allows stacking multiple oneshot modifiers, and carrying them
 // between layers.
 bool is_oneshot_ignored_key(uint16_t keycode);
+

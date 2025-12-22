@@ -1,0 +1,8 @@
+{
+    "module_name": "Oneshot Modifiers",
+    "maintainer": "shofel",
+    "license": "GPL-2.0-or-later",
+    "url": "https://github.com/shofel/keyboards/tree/qmk_userspace/modules/shofel/oneshot",
+    "description": "Eager oneshot modifier implementation inspired by Callum's oneshot. Allows stacking multiple oneshot modifiers and carrying them between layers."
+}
+

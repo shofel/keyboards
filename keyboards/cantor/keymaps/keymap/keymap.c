@@ -16,8 +16,7 @@
  * - 9 rawhid for seamless unicode modes in vim and linux
  *
  * TODO ## DX and practices
- * - convert to external qmk userspace
- * - extract oneshot as a community module
+ * - oneshot follow up: size SIZE
  * - extract unicode_ru as a community module
  * - setup commands to build
  *
@@ -45,7 +44,6 @@
 #include QMK_KEYBOARD_H
 
 #include "users/shofel/unicode.c"
-#include "users/shofel/oneshot.h"
 
 void keyboard_post_init_user(void) {
   // Customise these values to desired behaviour
@@ -352,16 +350,6 @@ void leader_end_user(void) {
 /* */
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 
-  /* Route oneshot triggers first. */
-  // TODO stop processing on false?
-  // when a oneshot is a custom key, then no difference
-  // but if we redefine an existing key, then it's a must do
-  oneshot_process_record(
-      oneshot_state_entries,
-      oneshot_state_entries_size,
-      keycode,
-      record
-  );
 
   switch (keycode) {
     case KK_SESC:
@@ -424,12 +412,12 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
  *  - and the qmk keyboard uses its own Russian layer.
  *
  *  *** How
- *  A separate layer with Russian letters.  
+ *  A separate layer with Russian letters.
  *  https://docs.qmk.fm/features/unicode#input-subsystems
- *  
- *  Switch between `Linux` and `Vim` input modes  
- *  VIM mode looks and feels awesome, but works only in Vim/Neovim  
- *  Linux mode feels clunky in some apps, but kinda works everywhere.  
+ *
+ *  Switch between `Linux` and `Vim` input modes
+ *  VIM mode looks and feels awesome, but works only in Vim/Neovim
+ *  Linux mode feels clunky in some apps, but kinda works everywhere.
  *  Also, as of time of writing, the vim mode is not in upstream QMK. I sent [a pull-request](https://github.com/qmk/qmk_firmware/pull/25188) which implements it
  */
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
