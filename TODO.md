@@ -1,25 +1,38 @@
 # TODO
 
-## TODO Next
+## Cantor
 
+- leader layer activators : make them toggles
 - leader seq for gui+L_NUM
-- easier access for gui key
 - handier one-handed alt+`
 - backspace @ vert combo mirror to fsyslayer
-- leader layer activators : make them toggles
-- 2 caps word by double shift
 - 2 mouse: turn one btn1 to a sticky - for selection (activate on tap; deactivate on tap)
-- 4 sym: fill the gaps for some useful stuff: _
 - 6 employ ucis for emoji: tulip and other flowers, tup=thumbup, ok, think, monocle
+- 4 sym: fill the gaps for some useful stuff: _
 - 6 revise the sym layer: braces
-- 8 mouse - bisect with digitizer. I see a digitizer in gnome settings. It should work now!
-- 88 bug: fast seq [os_sft c a] resolves to [C A], while [C a] expected
-- 9 rawhid for seamless unicode modes in vim and linux
+- 2 caps word by double shift
+
+## Modules
+
 - oneshot: allow press two oneshots at a time to schedule both
+- 8 mouse - bisect with digitizer. I see a digitizer in gnome settings. It should work now!
+- 9 rawhid for seamless unicode modes in vim and linux
+- 88 bug: fast seq [os_sft c a] resolves to [C A], while [C a] expected
 
-## TODO DX and practices
+## Dactyl
 
-- setup commands to build
+- make a shared layout for cantor and dactyl
+  - transform dactyl keymap to a cantor's
+    - make a text transform program
+    - which removes keys not presented on cantor
+      - from the comment
+      - from the code
+    - which is covered by tests
+- cleanup readme
+  - nix flake run
+  - guide for initial flash for left and right
+- generate clean schemes from layer definitions.
+  - Now they are good, but manual and prone to be outdated.
 
 ## TODO cantor hardware
 

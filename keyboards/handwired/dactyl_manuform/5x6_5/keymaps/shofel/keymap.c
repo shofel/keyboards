@@ -1,18 +1,5 @@
 /* A layout for the Dactyl Manuform 5x6_5 Keyboard */
 
-// TODO make a shared layout for cantor and dactyl
-//      - transform dactyl keymap to a cantor's
-//        - make a text transform program
-//        - which removes keys not presented on cantor
-//          - from the comment
-//          - from the code
-//        - which is covered by tests
-// TODO cleanup readme
-//      nix flake run
-//      guide for initial flash for left and right
-// TODO generate clean schemes from layer definitions.
-//      Now they are good, but manual and prone to be outdated.
-
 #include QMK_KEYBOARD_H
 
 /* Home-row mods */
