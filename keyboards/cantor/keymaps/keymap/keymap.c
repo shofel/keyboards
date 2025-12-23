@@ -123,7 +123,8 @@ const uint16_t PROGMEM rctl_combo[] = {KC_N, KC_F, COMBO_END};
 const uint16_t PROGMEM rlt2_combo[] = {KC_T, KC_D, COMBO_END};
 const uint16_t PROGMEM ralt_combo[] = {KC_R, KC_L, COMBO_END};
 const uint16_t PROGMEM rgui_combo[] = {KC_I, KC_Y, COMBO_END};
-/* Combos to access layers */
+/* Vertical combos for backspace and fkeys layer */
+const uint16_t PROGMEM lbspc_combo[] = {KC_G, KC_V, COMBO_END};
 const uint16_t PROGMEM fkeys_combo[] = {KC_B, KC_Q, COMBO_END};
 
 /* Indices for all combos (designated initializers) */
@@ -161,6 +162,7 @@ enum combos {
   CMB_RALT,
   CMB_RGUI,
 
+  CMB_LBSPC,
   CMB_FSYS,
 };
 
@@ -197,6 +199,7 @@ combo_t key_combos[] = {
   [CMB_RALT]       = COMBO(ralt_combo, OS_ALT),
   [CMB_RGUI]       = COMBO(rgui_combo, OS_GUI),
 
+  [CMB_LBSPC]      = COMBO(lbspc_combo, KC_BSPC),
   [CMB_FSYS]       = COMBO(fkeys_combo, OSL(L_FKEYS_SYS)),
 };
 

@@ -2,10 +2,10 @@
 
 ## Cantor
 
+- TO TEST: backspace @ vert combo mirror to fsyslayer
 - leader layer activators : make them toggles
 - leader seq for gui+L_NUM
 - handier one-handed alt+`
-- backspace @ vert combo mirror to fsyslayer
 - 2 mouse: turn one btn1 to a sticky - for selection (activate on tap; deactivate on tap)
 - 6 employ ucis for emoji: tulip and other flowers, tup=thumbup, ok, think, monocle
 - 4 sym: fill the gaps for some useful stuff: _
