@@ -1,0 +1,12 @@
+{
+    "module_name": "Russian Unicode Support",
+    "maintainer": "shofel",
+    "license": "GPL-2.0-or-later",
+    "url": "https://github.com/shofel/keyboards/tree/qmk_userspace/modules/shofel/unicode_ru",
+    "description": "Russian unicode character support with unicode_map definitions for Cyrillic alphabet and emoji.",
+    "features": {
+        "unicode_common": true,
+        "unicodemap": true
+    }
+}
+

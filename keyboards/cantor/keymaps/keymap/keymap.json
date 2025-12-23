@@ -1,6 +1,7 @@
 {
     "modules": [
-        "shofel/oneshot"
+        "shofel/oneshot",
+        "shofel/unicode_ru"
     ]
 }
 

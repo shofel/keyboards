@@ -43,8 +43,6 @@
 #include <stdint.h>
 #include QMK_KEYBOARD_H
 
-#include "users/shofel/unicode.c"
-
 void keyboard_post_init_user(void) {
   // Customise these values to desired behaviour
   debug_enable = false;

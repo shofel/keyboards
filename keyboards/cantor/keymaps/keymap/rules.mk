@@ -17,6 +17,3 @@ CAPS_WORD_ENABLE = no
 DEFERRED_EXEC_ENABLE = yes
 # https://docs.qmk.fm/features/key_overrides
 KEY_OVERRIDE_ENABLE = yes
-
-UNICODE_COMMON = yes
-UNICODEMAP_ENABLE = yes
