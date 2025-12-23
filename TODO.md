@@ -2,7 +2,7 @@
 
 ## TODO Next
 
-- leader seq for gui+L_SYM
+- leader seq for gui+L_NUM
 - easier access for gui key
 - handier one-handed alt+`
 - backspace @ vert combo mirror to fsyslayer
@@ -15,10 +15,10 @@
 - 8 mouse - bisect with digitizer. I see a digitizer in gnome settings. It should work now!
 - 88 bug: fast seq [os_sft c a] resolves to [C A], while [C a] expected
 - 9 rawhid for seamless unicode modes in vim and linux
+- oneshot: allow press two oneshots at a time to schedule both
 
 ## TODO DX and practices
 
-- oneshot follow up: size SIZE
 - setup commands to build
 
 ## TODO cantor hardware
