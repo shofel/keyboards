@@ -26,6 +26,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // Lighting
 #define WS2812_DI_PIN D1
 #define RGBLED_NUM 18
+#define RGBLIGHT_LED_COUNT RGBLED_NUM
 #define RGBLED_SPLIT { 9, 9 }
 #define RGBLIGHT_DEFAULT_HUE 85
 #define RGBLIGHT_SPLIT

@@ -98,7 +98,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
        QK_BOOT, KC_SCLN,    KC_X,  KC_DOT,   KC_W,  KC_Z,     KC_P,  KC_H,  KC_M,  KC_K,  KC_J,   QK_BOOT,
 
        KC_F11, KC_F12,    OSM_SFT , OSL_SYM ,      XX,        XX , KC_ENTER  , KC_SPACE,   KC_UP, KC_DOWN,
-                                    MO_SYS  ,      XX,        XX , MO_SYS), 
+                                    MO_SYS  ,      XX,        XX , MO_SYS),
 
   [L_QWERTY] = LAYOUT_5x6_5(
            __ ,     __ ,     __ ,     __ ,    __ ,   __ ,       __ ,   __ ,   __ ,      __ , KC_MINUS, KC_RBRC,
@@ -166,9 +166,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                                ___ ___     ___ ___
        */
         XX,      XX,        XX,       XX,      XX,     XX,       XX,      XX,       XX,       XX,      XX,      XX,
-        XX,      XX,        XX,       XX,      XX,     XX,       XX, KC_WH_U,  KC_MS_U,  KC_WH_D,      XX,      XX,
-        XX,      XX,   KC_LALT,  KC_BTN1, KC_LCTL,     XX,       XX, KC_MS_L,  KC_BTN1,  KC_MS_R, KC_BTN3,      XX,
-        XX,      XX,        XX,       XX,      XX,     XX,       XX, KC_BTN2,  KC_MS_D,       XX,      XX,      XX,
+        XX,      XX,        XX,       XX,      XX,     XX,       XX, MS_WHLU,  MS_UP,    MS_WHLD,      XX,      XX,
+        XX,      XX,   KC_LALT,  MS_BTN1, KC_LCTL,     XX,       XX, MS_LEFT, MS_BTN1,  MS_RGHT, MS_BTN3,      XX,
+        XX,      XX,        XX,       XX,      XX,     XX,       XX, MS_BTN2, MS_DOWN,       XX,      XX,      XX,
 
            __ ,     __ ,    KC_LSFT ,     __  ,    __  ,          __  ,    __  ,    __,          __ ,     __ ,
                                           __  ,    __  ,          __  ,    __ ),
@@ -182,9 +182,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                                 ___ ___     ___ ___
        */
         XX,      XX,        XX,       XX,      XX,     XX,       XX,      XX,       XX,       XX,      XX,      XX,
-        XX,      XX,   RGB_HUI,  RGB_VAI, RGB_MOD,     XX,       XX,      XX,       XX,       XX,      XX,      XX,
-        XX,      XX,   RGB_SAD,  RGB_TOG, RGB_SAI,     XX,       XX,      XX,       XX,       XX,      XX,      XX,
-        XX,      XX,   RGB_HUD,  RGB_VAD, RGB_M_P,     XX,       XX,      XX,       XX,       XX,      XX,      XX,
+        XX,      XX,   UG_HUEU,  UG_VALU, UG_NEXT,     XX,       XX,      XX,       XX,       XX,      XX,      XX,
+        XX,      XX,   UG_SATD,  UG_TOGG, UG_SATU,     XX,       XX,      XX,       XX,       XX,      XX,      XX,
+        XX,      XX,   UG_HUED,  UG_VALD, RGB_M_P,     XX,       XX,      XX,       XX,       XX,      XX,      XX,
 
            __ ,     __ ,        __  ,     __  ,    __  ,          __  ,    __  ,    __,          __ ,     __ ,
                                           __  ,    __  ,          __  ,    __ ),

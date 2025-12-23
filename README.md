@@ -30,6 +30,7 @@ This repository follows the [official QMK userspace template](https://github.com
 ## Keyboards
 
 - **cantor** - Custom keymap with BOO layout, Russian layer, and custom oneshot implementation
+- **handwired/dactyl_manuform/5x6_5** (shofel) - Dactyl Manuform 5x6_5 keymap with BOO and QWERTY layouts
 
 ## Modules
 
