@@ -7,7 +7,7 @@ This repository contains QMK keyboard keymaps and userspace code, structured as 
 This repository follows the [official QMK userspace template](https://github.com/qmk/qmk_userspace) structure:
 
 - `keyboards/` - Keymap files organized by keyboard
-- `users/shofel/` - Shared userspace code (oneshot, unicode, etc.)
+- `modules/shofel/` - QMK community modules (oneshot, unicode_ru)
 - `qmk.json` - Build targets configuration
 
 ## Setup
@@ -31,11 +31,12 @@ This repository follows the [official QMK userspace template](https://github.com
 
 - **cantor** - Custom keymap with BOO layout, Russian layer, and custom oneshot implementation
 
-## Userspace Code
+## Modules
 
-The `users/shofel/` directory contains:
-- `oneshot.c` / `oneshot.h` - Custom oneshot modifier implementation (inspired by Callum's one)
-- `unicode.c` - Russian unicode support
+The `modules/shofel/` directory contains QMK community modules:
+
+- **oneshot** - Custom oneshot modifier implementation (inspired by Callum's one). Allows stacking multiple oneshot modifiers and carrying them between layers.
+- **unicode_ru** - Russian Unicode support with unicode_map definitions for Cyrillic alphabet.
 
 ## Development
 
@@ -45,6 +46,8 @@ To regenerate `compile_commands.json`:
 ```bash
 qmk compile -kb cantor -km keymap --compiledb
 ```
+
+See [TODO.md](TODO.md) for planned improvements and tasks.
 
 ## Reference
 
