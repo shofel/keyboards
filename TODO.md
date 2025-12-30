@@ -10,7 +10,7 @@
 - handier one-handed alt+`
 - 4 sym: fill the gaps for some useful stuff: _
 - 6 revise the sym layer: braces
-- 2 caps word by double shift
+- 2 caps_word_on() on leader seq one key os_sft
 
 ## Modules
 
