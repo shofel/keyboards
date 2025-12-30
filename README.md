@@ -20,16 +20,16 @@ This repository follows the [official QMK userspace template](https://github.com
 
 2. Build a keymap:
    ```bash
-   qmk compile -kb cantor -km keymap
+   qmk compile -kb cantor -km shofel
    # Or for Dactyl with the shared keymap:
-   qmk compile -kb handwired/dactyl_manuform/5x6_5 -km keymap
+   qmk compile -kb handwired/dactyl_manuform/5x6_5 -km shofel
    ```
 
 3. Flash a keymap:
    ```bash
-   qmk flash -kb cantor -km keymap
+   qmk flash -kb cantor -km shofel
    # Or for Dactyl:
-   qmk flash -kb handwired/dactyl_manuform/5x6_5 -km keymap
+   qmk flash -kb handwired/dactyl_manuform/5x6_5 -km shofel
    ```
 
 ## Modules
@@ -45,7 +45,7 @@ This repository is configured for LSP support with clangd. The `.clangd` and `.c
 
 To regenerate `compile_commands.json`:
 ```bash
-qmk compile -kb cantor -km keymap --compiledb
+qmk compile -kb cantor -km shofel --compiledb
 ```
 
 See [TODO.md](TODO.md) for planned improvements and tasks.

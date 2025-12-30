@@ -1,13 +1,13 @@
 # Flashing the keyboard:
 # From repository root: make -C cantor flash
-# Or directly: cd .. && qmk flash -kb cantor -km keymap
+# Or directly: cd .. && qmk flash -kb cantor -km shofel
 
 .DEFAULT_GOAL := flash
 
 keyboard = cantor
-keymap = keymap
+keymap = shofel
 repo_root = $(shell git rev-parse --show-toplevel)
-keymap_file = ${repo_root}/keyboards/${keyboard}/keymaps/${keymap}/keymap.c
+keymap_file = ${repo_root}/layouts/default/split_3x6_3/${keymap}/keymap.c
 
 # Flash using QMK CLI (must be run from repo root)
 flash:
