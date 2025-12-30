@@ -1,5 +1,6 @@
 /**
- * A layout for the Cantor Keyboard.
+ * A keymap for 6x3_3 layout.
+ * Originally made for Cantor; and hopefully useful for a Dactyl.
  */
 
 #include "keycodes.h"

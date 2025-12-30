@@ -18,6 +18,7 @@
 - 8 mouse - bisect with digitizer. I see a digitizer in gnome settings. It should work now!
 - 9 rawhid for seamless unicode modes in vim and linux
 - 88 bug: fast seq [os_sft c a] resolves to [C A], while [C a] expected
+- make ucis and unicodemap work together
 
 ## Dactyl
 

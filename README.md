@@ -7,6 +7,7 @@ This repository contains QMK keyboard keymaps and userspace code, structured as 
 This repository follows the [official QMK userspace template](https://github.com/qmk/qmk_userspace) structure:
 
 - `keyboards/` - Keymap files organized by keyboard
+- `layouts/` - Contains a 6x3_3 keymap, which is used for both Cantor and Dactyl (see [QMK layouts documentation](https://docs.qmk.fm/feature_layouts#supporting-a-layout))
 - `modules/shofel/` - QMK community modules (oneshot, unicode_ru)
 - `qmk.json` - Build targets configuration
 
@@ -20,17 +21,16 @@ This repository follows the [official QMK userspace template](https://github.com
 2. Build a keymap:
    ```bash
    qmk compile -kb cantor -km keymap
+   # Or for Dactyl with the shared keymap:
+   qmk compile -kb handwired/dactyl_manuform/5x6_5 -km keymap
    ```
 
 3. Flash a keymap:
    ```bash
    qmk flash -kb cantor -km keymap
+   # Or for Dactyl:
+   qmk flash -kb handwired/dactyl_manuform/5x6_5 -km keymap
    ```
-
-## Keyboards
-
-- **cantor** - Custom keymap with BOO layout, Russian layer, and custom oneshot implementation
-- **handwired/dactyl_manuform/5x6_5** (shofel) - Dactyl Manuform 5x6_5 keymap with BOO and QWERTY layouts
 
 ## Modules
 
@@ -53,4 +53,3 @@ See [TODO.md](TODO.md) for planned improvements and tasks.
 ## Reference
 
 This repository is based on the [official QMK userspace template](https://github.com/qmk/qmk_userspace). For more information about external userspaces, see the [QMK documentation](https://docs.qmk.fm/).
-
