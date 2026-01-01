@@ -1,4 +1,5 @@
 {
+    "community_layouts": ["split_3x6_3"],
     "layouts": {
         "LAYOUT_split_3x6_3": {
             "layout": [
