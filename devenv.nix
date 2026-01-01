@@ -12,6 +12,16 @@
     S_QMK_FIRMWARE = "/tmp/qmk_firmware";
   };
 
+  scripts.setup-qmk.exec = /* sh */ ''
+    source <(qmk env)
+    if test ! -d "$S_QMK_FIRMWARE"; then
+      gh repo clone qmk/qmk_firmware "$S_QMK_FIRMWARE" -- \
+        --branch "$S_QMK_TAG" \
+        --filter=blob:none --depth=1
+      qmk setup -y
+    fi
+  '';
+
   enterShell = /* sh */ ''
     qmk config user.overlay_dir=$(pwd)
     qmk config user.qmk_home="$S_QMK_FIRMWARE"
@@ -20,13 +30,7 @@
     qmk config -ro user
     echo
 
-    source <(qmk env)
-    if test ! -d "$S_QMK_FIRMWARE"; then
-      gh repo clone qmk/qmk_firmware "$S_QMK_FIRMWARE" -- \
-        --branch "$S_QMK_TAG" \
-        --filter=blob:none --depth=1
-      qmk setup -y
-    fi
+    setup-qmk
   '';
 
   # Keymap drawer # https://github.com/caksoylar/keymap-drawer
