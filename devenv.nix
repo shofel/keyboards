@@ -9,7 +9,7 @@
 
   env = {
     S_QMK_TAG = "0.31.1";
-    S_QMK_FIRMWARE = "/tmp/qmk_firmware";
+    S_QMK_FIRMWARE = "/home/slava/workspaces-one/forks/qmk_firmware/";
   };
 
   scripts.setup-qmk.exec = /* sh */ ''
