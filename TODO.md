@@ -11,6 +11,10 @@
 - 4 sym: fill the gaps for some useful stuff: _
 - 6 revise the sym layer: braces
 - 2 caps_word_on() on leader seq one key os_sft
+- make `~/` an inward roll on the top row:
+  - `~` = top right pinky
+  - `/` = top right ring
+  - -> and as a consequence, decide where to move `|`?
 
 ## Modules
 
