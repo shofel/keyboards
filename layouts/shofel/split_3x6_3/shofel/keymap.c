@@ -303,10 +303,9 @@ void leader_end_user(void) {
     tap_code16(LCTL(KC_A));
     tap_code16(KC_DEL);
   }
-  if (leader_sequence_two_keys(KC_D, KC_S)) { // Delete Start
-    tap_code16(KC_HOME);
+  if (leader_sequence_two_keys(KC_D, KC_U)) { // Like ctrl-u
+    tap_code16(LSFT(KC_HOME));
     tap_code16(KC_DEL);
-    tap_code16(KC_END);
   }
   if (leader_sequence_two_keys(KC_D, KC_W)) { // Delete Word
     tap_code16(LCTL(KC_BSPC));
