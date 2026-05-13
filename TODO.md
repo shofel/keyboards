@@ -2,6 +2,7 @@
 
 ## Cantor
 
+- easier ctrl+esc
 - TO TEST: backspace @ vert combo mirror to fsyslayer
 - TO TEST: 2 mouse: turn one btn1 to a sticky - for selection (activate on tap; deactivate on tap)
 - TO TEST: 6 employ ucis for emoji: tulip and other flowers, tup=thumbup, ok, think, monocle
@@ -21,6 +22,10 @@
 - oneshot: allow press two oneshots at a time to schedule both
 - 8 mouse - bisect with digitizer. I see a digitizer in gnome settings. It should work now!
 - 9 rawhid for seamless unicode modes in vim and linux
+- dream: smoother unicode input on Linux outside of vim
+  - today: outside vim relies on ibus/UCIS sequences, which are slow and stateful
+  - want: type unicode as fluently as in vim — no mode toggles, no hex codes
+  - possible paths: rawhid signal to the host to switch IME, or per-app composer
 - 88 bug: fast seq [os_sft c a] resolves to [C A], while [C a] expected
 - make ucis and unicodemap work together
 
