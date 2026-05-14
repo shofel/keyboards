@@ -35,9 +35,6 @@ enum my_keycodes {
   OS_ALT,
   OS_GUI,
   OS_SFT,
-
-  /* Sticky mouse button */
-  MS_BTS1,
 };
 
 /* Layer names */
@@ -53,9 +50,6 @@ enum my_layer_names {
 /* Simple thumb keys. */
 #define KK_SYMBO OSL(L_SYMBOLS)
 #define KK_SHIFT OS_SFT
-
-/* Sticky mouse button state */
-static bool ms_btn1_sticky_active = false;
 
 /* Switch language */
 
@@ -355,17 +349,6 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         SEND_STRING("!=");
       }
       return false;
-    case MS_BTS1:
-      if (record->event.pressed) {
-        // Toggle sticky button state on tap
-        ms_btn1_sticky_active = !ms_btn1_sticky_active;
-        if (ms_btn1_sticky_active) {
-          register_code(MS_BTN1);
-        } else {
-          unregister_code(MS_BTN1);
-        }
-      }
-      return false;
     default:
       break;
   }
@@ -530,17 +513,16 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    * Activated by Leader,m
    *
    * Left hand can apply modifiers, to perform shift+click, or ctrl+wheelup.
-   * Bottom row b1 is sticky - tap to activate selection, tap again to deactivate.
    */
   [L_MOUSE] = LAYOUT_split_3x6_3(/*
         __  a2  __  __  __  __                       __  w↑  ↑  w↓  b3  __
         __  a1  __  __  __  __                       __  <-  c  ->  b2  __
-        __  a0  __  __  __  __                       __  b1* ↓  __  __  __
+        __  a0  __  __  __  __                       __  b1  ↓  __  __  __
                              __  __  __     __  __  __
        */
         XX,      XX,        XX,       XX,      XX,  XX,       XX, MS_WHLU,  MS_UP  ,  MS_WHLD, MS_BTN3,  XX,
         XX,      XX,   MS_ACL2,  MS_ACL0, MS_ACL1,  XX,       XX, MS_LEFT,  MS_BTN1,  MS_RGHT, MS_BTN2,  __,
-        XX,      XX,        XX,       XX,      XX,  XX,       XX, MS_BTS1,  MS_DOWN,       XX,      XX,  XX,
+        XX,      XX,        XX,       XX,      XX,  XX,       XX, MS_BTN1,  MS_DOWN,       XX,      XX,  XX,
 
                                    __ ,    __ ,   __ ,         __ ,  __ ,  __
   ),
