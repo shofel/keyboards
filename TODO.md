@@ -3,6 +3,7 @@
 ## Cantor
 
 - easier ctrl+esc
+- lower vertical combos: use only the index and middle fingers
 - TO TEST: backspace @ vert combo mirror to fsyslayer
 - TO TEST: 2 mouse: turn one btn1 to a sticky - for selection (activate on tap; deactivate on tap)
 - TO TEST: 6 employ ucis for emoji: tulip and other flowers, tup=thumbup, ok, think, monocle
