@@ -1,22 +1,25 @@
 # TODO
 
-## Cantor
+## Layout
 
-- easier ctrl+esc
-- lower vertical combos: use only the index and middle fingers
-- TO TEST: backspace @ vert combo mirror to fsyslayer
-- 2 mouse: turn one btn1 to a sticky - for selection (activate on tap; deactivate on tap)
-- TO TEST: 6 employ ucis for emoji: tulip and other flowers, tup=thumbup, ok, think, monocle
-- leader layer activators : make them toggles
-- leader seq for gui+L_NUM
-- handier one-handed alt+`
-- 4 sym: fill the gaps for some useful stuff: _
-- 6 revise the sym layer: braces
-- 2 caps_word_on() on leader seq one key os_sft
+- braces: lower vertical combos: use only the index and middle fingers
+- braces: revise the sym layer
+- employ ucis for emoji: tulip and other flowers, tup=thumbup, ok, think, monocle
+- leader layer activators : escape the layers with the same hand : ? leader->space ?
+- leader layer activator for fsys: ? leader->f ?
+- easier ctrl+esc : ? esc and ctrl+esc as one-handed leader seqs ?
+- caps_word_on() on leader seq one key os_sft
 - make `~/` an inward roll on the top row:
   - `~` = top right pinky
   - `/` = top right ring
   - -> and as a consequence, decide where to move `|`?
+### Free Positions
+- vert combo opposite to fsyslayer
+### Obsolete
+- 2 mouse: turn one btn1 to a sticky - for selection (activate on tap; deactivate on tap)
+- leader seq for gui+L_NUM
+- handier one-handed alt+`
+- 4 sym: fill the gaps for some useful stuff: _
 
 ## Modules
 
