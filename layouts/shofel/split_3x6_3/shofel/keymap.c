@@ -1,50 +1,11 @@
 /**
- * A layout for the Cantor Keyboard.
- *
- * TODO Next:
- * - leader seq for gui+L_SYM
- * - easier access for gui key
- * - handier one-handed alt+`
- * - leader layer activators : make them toggles
- * - 2 caps word by double shift
- * - 2 mouse: turn one btn1 to a sticky - for selection (activate on tap; deactivate on tap)
- * - 4 sym: fill the gaps for some useful stuff: _
- * - 6 employ ucis for emoji: tulip and other flowers, tup=thumbup, ok, think, monocle
- * - 6 revise the sym layer: braces
- * - 8 mouse - bisect with digitizer. I see a digitizer in gnome settings. It should work now!
- * - 88 bug: fast seq [os_sft c a] resolves to [C A], while [C a] expected
- * - 9 rawhid for seamless unicode modes in vim and linux
- *
- * TODO ## DX and practices
- * - convert to external qmk userspace
- * - extract oneshot as a community module
- * - extract unicode_ru as a community module
- * - setup commands to build
- *
- * TODO hardware:
- * - a sturdier case with quieter sound
- *
- * Big dream: employ zig
- * - implement modules for keymap in zig
- * - make the whole keymap in zig
- * - from QMK use only low-level (keyboard support and matrix poll)
- *   - the rest features and a keymap implement in zig
- * - ? replace gcc with zig.build
- *
- * Idea: Draw the layers diagram by hand
- * Idea: Make animations to explain tricks
- *
- * References
- * https://github.com/possumvibes/keyboard-layout?tab=readme-ov-file#code-influences-alphabetically-and-non-comprehensively
- *   - callum
- *   - drashma
+ * A keymap for 6x3_3 layout.
+ * Originally made for Cantor; and hopefully useful for a Dactyl.
  */
 
+#include "keycodes.h"
 #include <stdint.h>
 #include QMK_KEYBOARD_H
-
-#include "unicode.c"
-#include "oneshot.h"
 
 void keyboard_post_init_user(void) {
   // Customise these values to desired behaviour
@@ -163,7 +124,8 @@ const uint16_t PROGMEM rctl_combo[] = {KC_N, KC_F, COMBO_END};
 const uint16_t PROGMEM rlt2_combo[] = {KC_T, KC_D, COMBO_END};
 const uint16_t PROGMEM ralt_combo[] = {KC_R, KC_L, COMBO_END};
 const uint16_t PROGMEM rgui_combo[] = {KC_I, KC_Y, COMBO_END};
-/* Combos to access layers */
+/* Vertical combos for backspace and fkeys layer */
+const uint16_t PROGMEM lbspc_combo[] = {KC_G, KC_V, COMBO_END};
 const uint16_t PROGMEM fkeys_combo[] = {KC_B, KC_Q, COMBO_END};
 
 /* Indices for all combos (designated initializers) */
@@ -201,6 +163,7 @@ enum combos {
   CMB_RALT,
   CMB_RGUI,
 
+  CMB_LBSPC,
   CMB_FSYS,
 };
 
@@ -237,6 +200,7 @@ combo_t key_combos[] = {
   [CMB_RALT]       = COMBO(ralt_combo, OS_ALT),
   [CMB_RGUI]       = COMBO(rgui_combo, OS_GUI),
 
+  [CMB_LBSPC]      = COMBO(lbspc_combo, KC_BSPC),
   [CMB_FSYS]       = COMBO(fkeys_combo, OSL(L_FKEYS_SYS)),
 };
 
@@ -333,10 +297,9 @@ void leader_end_user(void) {
     tap_code16(LCTL(KC_A));
     tap_code16(KC_DEL);
   }
-  if (leader_sequence_two_keys(KC_D, KC_S)) { // Delete Start
-    tap_code16(KC_HOME);
+  if (leader_sequence_two_keys(KC_D, KC_U)) { // Like ctrl-u
+    tap_code16(LSFT(KC_HOME));
     tap_code16(KC_DEL);
-    tap_code16(KC_END);
   }
   if (leader_sequence_two_keys(KC_D, KC_W)) { // Delete Word
     tap_code16(LCTL(KC_BSPC));
@@ -346,21 +309,16 @@ void leader_end_user(void) {
   if (leader_sequence_one_key(KC_K)) {
     tap_code16(LGUI(KC_T));
   }
+
+  /* UCIS emoji */
+  if (leader_sequence_one_key(KC_U)) {
+    ucis_start();
+  }
 }
 
 /* */
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 
-  /* Route oneshot triggers first. */
-  // TODO stop processing on false?
-  // when a oneshot is a custom key, then no difference
-  // but if we redefine an existing key, then it's a must do
-  oneshot_process_record(
-      oneshot_state_entries,
-      oneshot_state_entries_size,
-      keycode,
-      record
-  );
 
   switch (keycode) {
     case KK_SESC:
@@ -423,12 +381,12 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
  *  - and the qmk keyboard uses its own Russian layer.
  *
  *  *** How
- *  A separate layer with Russian letters.  
+ *  A separate layer with Russian letters.
  *  https://docs.qmk.fm/features/unicode#input-subsystems
- *  
- *  Switch between `Linux` and `Vim` input modes  
- *  VIM mode looks and feels awesome, but works only in Vim/Neovim  
- *  Linux mode feels clunky in some apps, but kinda works everywhere.  
+ *
+ *  Switch between `Linux` and `Vim` input modes
+ *  VIM mode looks and feels awesome, but works only in Vim/Neovim
+ *  Linux mode feels clunky in some apps, but kinda works everywhere.
  *  Also, as of time of writing, the vim mode is not in upstream QMK. I sent [a pull-request](https://github.com/qmk/qmk_firmware/pull/25188) which implements it
  */
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
@@ -529,8 +487,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
        __  ,   1   2   3   .                        __  ⮀   ↓   __  __  __
                             __  __  __    __  __  __
        */
-       XX,KC_QUOT,  KC_7,  KC_8,  KC_9, KC_SLSH,       KC_GRV,  KC_PGUP,  KC_UP,    KC_PGDN, XX,      XX,
-       XX,   KC_0,  KC_4,  KC_5,  KC_6, KC_COLN,       KC_HOME, KC_LEFT,  KC_ENTER, KC_RGHT, KC_END,  KK_SESC,
+       XX,KC_QUOT,  KC_7,  KC_8,  KC_9, KC_SLSH,       KC_GRV,  KC_PGUP,  KC_UP,    KC_PGDN, XX,      __,
+       XX,   KC_0,  KC_4,  KC_5,  KC_6, KC_COLN,       KC_HOME, KC_LEFT,  KC_ENTER, KC_RGHT, KC_END,  __,
        XX,KC_COMM,  KC_1,  KC_2,  KC_3,  KC_DOT,       XX,      KC_TAB,   KC_DOWN,  XX,      XX,      XX,
                             __ ,    __ ,   __ ,         __ ,   __ ,   __
   ),
@@ -544,7 +502,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                              __  __  __     __  __  __
        */
         XX,  KC_F12,  KC_F7,  KC_F8,  KC_F9,     XX,       XX, KC_BRIU,  KC_VOLU,       XX,  DB_TOGG, XX,
-        XX,  KC_F11,  KC_F4,  KC_F5,  KC_F6,     XX,       XX,      XX,       XX,       XX,       XX, __,
+   KC_PSCR,  KC_F11,  KC_F4,  KC_F5,  KC_F6,     XX,       XX,      XX,       XX,       XX,       XX, __,
    QK_BOOT,  KC_F10,  KC_F1,  KC_F2,  KC_F3,     XX,       XX, KC_BRID,  KC_VOLD,  KC_MUTE,  XX, QK_BOOT,
                                 __ ,    __ ,   __ ,         __ ,   __ ,   __
   ),

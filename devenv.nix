@@ -8,26 +8,29 @@
   # hardware.keyboard.qmk.enable = true;
 
   env = {
-    QMK_TAG = "0.28.6";
+    S_QMK_TAG = "0.31.1";
+    S_QMK_FIRMWARE = "/home/slava/workspaces-one/forks/qmk_firmware/";
   };
 
-  enterShell = /* sh */ ''
-    # assert qmk util # does this check work?
-    if ! qmk >/dev/null; then
-      echo "FAIL: qmk error"
-      exit 2
-    fi
-
+  scripts.setup-qmk.exec = /* sh */ ''
     source <(qmk env)
-    export QMK_FIRMWARE
-
-    source <(qmk env)
-    if test ! -d "$QMK_FIRMWARE"; then
-      gh repo clone qmk/qmk_firmware "$QMK_FIRMWARE" -- \
-        --branch "$QMK_TAG" \
+    if test ! -d "$S_QMK_FIRMWARE"; then
+      gh repo clone qmk/qmk_firmware "$S_QMK_FIRMWARE" -- \
+        --branch "$S_QMK_TAG" \
         --filter=blob:none --depth=1
       qmk setup -y
     fi
+  '';
+
+  enterShell = /* sh */ ''
+    qmk config user.overlay_dir=$(pwd)
+    qmk config user.qmk_home="$S_QMK_FIRMWARE"
+
+    echo QMK config:
+    qmk config -ro user
+    echo
+
+    setup-qmk
   '';
 
   # Keymap drawer # https://github.com/caksoylar/keymap-drawer

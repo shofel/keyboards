@@ -7,3 +7,17 @@ devenv.local.nix
 
 # pre-commit
 .pre-commit-config.yaml
+
+# LSP and build artifacts
+compile_commands.json
+*.compile_commands.json
+
+# QMK build artifacts
+*.bin
+*.hex
+*.uf2
+*.elf
+*.map
+build/
+
+.cache

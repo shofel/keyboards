@@ -1,0 +1,8 @@
+{
+    "modules": [
+        "shofel/oneshot",
+        "shofel/unicode_ru",
+        "shofel/ucis_emoji"
+    ]
+}
+
