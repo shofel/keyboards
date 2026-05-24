@@ -73,7 +73,7 @@ void ru_enable(void) {
 
 void ru_disable(void) {
   ru_active = 0;
-  layer_off(L_RUSSIAN);
+  layer_move(L_BOO);
 }
 
 /* Key overrides */
@@ -286,14 +286,12 @@ void leader_end_user(void) {
     tap_code16(LCTL(KC_ESC));
   }
   if (leader_sequence_one_key(KC_J)) {
-    layer_move(L_BOO);
-    ru_disable();
     oneshot_cancel();
+    ru_disable();
   }
   if (leader_sequence_one_key(KC_UNDS)) {
-    layer_move(L_BOO);
-    ru_disable();
     oneshot_cancel();
+    ru_disable();
   }
   if (leader_sequence_one_key(KC_F)) {
     layer_on(L_FKEYS_SYS);
@@ -332,8 +330,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 
   switch (keycode) {
     case KC_ESC:
-      layer_move(L_BOO); // In vim: restore En in normal mode
-      ru_disable();
+      ru_disable(); // In vim: restore En in normal mode
       return true;
     case KK_GO_DECLARATION:
       if (record->event.pressed) {
