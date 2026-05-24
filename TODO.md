@@ -9,6 +9,7 @@
   - -> and as a consequence, decide where to move `|`?
 - employ ucis for emoji: tulip and other flowers, tup=thumbup, ok, think, monocle
 - place something cool on the right hand of sym layer. Lot's of empty keys are there
+  - easier underscore , and removeone from left lower pinky
 ### Free Positions
 - vert combo opposite to fsyslayer
 ### Obsolete
