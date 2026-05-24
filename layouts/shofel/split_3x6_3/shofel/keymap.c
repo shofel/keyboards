@@ -94,7 +94,10 @@ const key_override_t *key_overrides[] = {
  */
 
 /* Hit both middle thumb keys for esc. */
-const uint16_t PROGMEM esc_combo[]     = {KK_SHIFT, KC_SPACE, COMBO_END};
+const uint16_t PROGMEM esc_combo[]      = {KK_SHIFT, KC_SPACE, COMBO_END};
+/* Left thumb + finger key for ctrl+esc and esc. */
+const uint16_t PROGMEM sesc_a_combo[]   = {KK_SESC, KC_A,    COMBO_END};
+const uint16_t PROGMEM sesc_unds_combo[] = {KK_SESC, KC_UNDS, COMBO_END};
 /* Two outer bottom keys on a single half to get into bootloader. */
 const uint16_t PROGMEM boot_combo_left[]  = {KK_NOOP, KK_SYMBO, COMBO_END};
 const uint16_t PROGMEM boot_combo_right[] = {KC_ENTER, KK_NOOP, COMBO_END};
@@ -165,6 +168,8 @@ enum combos {
 
 combo_t key_combos[] = {
   [CMB_ESC]        = COMBO(esc_combo, KC_ESC),
+  [CMB_CTL_ESC]    = COMBO_ACTION(sesc_a_combo),
+  [CMB_ALT_ESC]    = COMBO(sesc_unds_combo, KC_ESC),
 
   [CMB_BOOT_L]     = COMBO(boot_combo_left,  QK_BOOT),
   [CMB_BOOT_R]     = COMBO(boot_combo_right, QK_BOOT),
@@ -200,6 +205,9 @@ combo_t key_combos[] = {
 
 void process_combo_event(uint16_t combo_index, bool pressed) {
   switch (combo_index) {
+  case CMB_CTL_ESC:
+    if (pressed) tap_code16(LCTL(KC_ESC));
+    break;
   }
 }
 
@@ -285,13 +293,7 @@ void leader_end_user(void) {
   if (leader_sequence_one_key(KC_I)) {
     tap_code16(LCTL(KC_ESC));
   }
-  if (leader_sequence_one_key(KC_A)) {
-    tap_code16(LCTL(KC_ESC));
-  }
   if (leader_sequence_one_key(KC_J)) {
-    tap_code(KC_ESC);
-  }
-  if (leader_sequence_one_key(KC_UNDS)) {
     tap_code(KC_ESC);
   }
   if (leader_sequence_one_key(KC_F)) {
