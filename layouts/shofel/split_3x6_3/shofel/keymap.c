@@ -66,12 +66,13 @@ void ru_resume(void) {
     }
 }
 
-void ru_enable(void) {
+void ru_enter(void) {
     ru_active = 1;
+    layer_move(L_BOO);
     layer_on(L_RUSSIAN);
 }
 
-void ru_disable(void) {
+void ru_exit(void) {
   ru_active = 0;
   layer_move(L_BOO);
 }
@@ -254,18 +255,18 @@ void leader_end_user(void) {
 
   /* Ru */
   if (leader_sequence_one_key(KC_R)) {
-    ru_enable();
+    ru_enter();
   }
   if (leader_sequence_one_key(KC_E)) {
-    ru_disable();
+    ru_exit();
   }
   if (leader_sequence_one_key(KC_L)) {
     set_unicode_input_mode(UNICODE_MODE_LINUX);
-    ru_enable();
+    ru_enter();
   }
   if (leader_sequence_one_key(KC_V)) {
     set_unicode_input_mode(UNICODE_MODE_VIM);
-    ru_enable();
+    ru_enter();
   }
 
   /* Layers */
@@ -287,11 +288,11 @@ void leader_end_user(void) {
   }
   if (leader_sequence_one_key(KC_J)) {
     oneshot_cancel();
-    ru_disable();
+    ru_exit();
   }
   if (leader_sequence_one_key(KC_UNDS)) {
     oneshot_cancel();
-    ru_disable();
+    ru_exit();
   }
   if (leader_sequence_one_key(KC_F)) {
     layer_on(L_FKEYS_SYS);
@@ -330,7 +331,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 
   switch (keycode) {
     case KC_ESC:
-      ru_disable(); // In vim: restore En in normal mode
+      ru_exit(); // In vim: restore En in normal mode
       return true;
     case KK_GO_DECLARATION:
       if (record->event.pressed) {
