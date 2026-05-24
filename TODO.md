@@ -2,15 +2,13 @@
 
 ## Layout
 
-- employ ucis for emoji: tulip and other flowers, tup=thumbup, ok, think, monocle
-- leader layer activators : escape the layers with the same hand : ? leader->space ?
-- leader layer activator for fsys: ? leader->f ?
 - easier ctrl+esc : ? esc and ctrl+esc as one-handed leader seqs ?
 - caps_word_on() on leader seq one key os_sft
 - make `~/` an inward roll on the top row:
   - `~` = top right pinky
   - `/` = top right ring
   - -> and as a consequence, decide where to move `|`?
+- employ ucis for emoji: tulip and other flowers, tup=thumbup, ok, think, monocle
 - place something cool on the right hand of sym layer. Lot's of empty keys are there
 ### Free Positions
 - vert combo opposite to fsyslayer

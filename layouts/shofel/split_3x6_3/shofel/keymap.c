@@ -279,6 +279,12 @@ void leader_end_user(void) {
   }
 
   /* Layers */
+  if (leader_sequence_one_key(KC_SPACE)) {
+    layer_move(L_BOO);
+  }
+  if (leader_sequence_one_key(KC_F)) {
+    layer_on(L_FKEYS_SYS);
+  }
   if (leader_sequence_one_key(KC_M)) {
     layer_on(L_MOUSE);
   }
