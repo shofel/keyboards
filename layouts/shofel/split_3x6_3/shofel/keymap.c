@@ -304,10 +304,7 @@ void leader_end_user(void) {
     tap_code16(LGUI(KC_T));
   }
 
-  /* UCIS emoji */
-  if (leader_sequence_one_key(KC_U)) {
-    ucis_start();
-  }
+  /* UCIS emoji — disabled (module conflict with unicodemap) */
 }
 
 /* */
