@@ -2,7 +2,6 @@
 
 ## Layout
 
-- easier ctrl+esc : ? esc and ctrl+esc as one-handed leader seqs ?
 - caps_word_on() on leader seq one key os_sft
 - make `~/` an inward roll on the top row:
   - `~` = top right pinky
