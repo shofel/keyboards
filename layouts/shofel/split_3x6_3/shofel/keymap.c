@@ -285,7 +285,13 @@ void leader_end_user(void) {
   if (leader_sequence_one_key(KC_I)) {
     tap_code16(LCTL(KC_ESC));
   }
+  if (leader_sequence_one_key(KC_A)) {
+    tap_code16(LCTL(KC_ESC));
+  }
   if (leader_sequence_one_key(KC_J)) {
+    tap_code(KC_ESC);
+  }
+  if (leader_sequence_one_key(KC_UNDS)) {
     tap_code(KC_ESC);
   }
   if (leader_sequence_one_key(KC_F)) {
