@@ -32,7 +32,6 @@ void oneshot_process_record(
     keyrecord_t *record
 ) {
   bool is_ignored_key = is_oneshot_ignored_key(keycode);
-  bool is_cancel_key = is_oneshot_cancel_key(keycode);
   bool pressed = record->event.pressed;
 
   for (size_t i = 0; i < size; i++) {
@@ -42,12 +41,11 @@ void oneshot_process_record(
 
     // What happened?
     oneshot_event_t event;
-         if (is_trigger && pressed)     { event = os_trigger_down; }
-    else if (is_trigger && !pressed)    { event = os_trigger_up; }
-    else if (is_cancel_key && pressed)  { event = os_cancel; }
-    else if (is_ignored_key)            { event = os_ignore; }
-    else if (!pressed)                  { event = os_other_up; }
-    else                                { event = os_ignore; }
+         if (is_trigger && pressed)  { event = os_trigger_down; }
+    else if (is_trigger && !pressed) { event = os_trigger_up; }
+    else if (is_ignored_key)         { event = os_ignore; }
+    else if (!pressed)               { event = os_other_up; }
+    else                             { event = os_ignore; }
 
     oneshot_state_t saved_state = oneshot->state;
 
@@ -91,9 +89,6 @@ static void oneshot_process_record_single(
         break;
       case os_ignore:
         break;
-      case os_cancel:
-        oneshot->state = os_up_unqueued;
-        break;
     }
 
     /* Perform effects: apply and release the triggee. */
@@ -103,6 +98,18 @@ static void oneshot_process_record_single(
     if (oneshot->state == os_up_unqueued) {
       unregister_code16(oneshot->triggee);
     }
+}
+
+void oneshot_cancel(void) {
+  for (size_t i = 0; i < oneshot_state_entries_size; i++) {
+    oneshot_state_entry_t *oneshot = &oneshot_state_entries[i];
+    oneshot_state_t saved_state = oneshot->state;
+    oneshot->state = os_up_unqueued;
+    unregister_code16(oneshot->triggee);
+    if (saved_state != oneshot->state) {
+      oneshot_process_event(oneshot);
+    }
+  }
 }
 
 /* Community Module hook: process_record */

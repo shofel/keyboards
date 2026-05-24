@@ -26,7 +26,6 @@ typedef enum {
     os_trigger_up,
     os_other_up,
     os_ignore,
-    os_cancel,
 } oneshot_event_t;
 
 typedef struct {
@@ -44,8 +43,8 @@ extern size_t oneshot_state_entries_size;
 // Handle change of state
 void oneshot_process_event(oneshot_state_entry_t *oneshot);
 
-// Defines keys to cancel oneshot mods.
-bool is_oneshot_cancel_key(uint16_t keycode);
+// Programmatically cancel all active oneshots.
+void oneshot_cancel(void);
 
 // Defines keys to ignore when determining
 // whether a oneshot mod has been used. Setting this to modifiers and layer

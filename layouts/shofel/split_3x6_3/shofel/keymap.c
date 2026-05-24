@@ -28,7 +28,6 @@ enum my_keycodes {
   KK_FAT_RIGHT_ARROW,
   KK_NOT_EQUAL,
   KK_NOOP,
-  KK_SESC,
 
   /* One-shot trigger keys */
   OS_CTL,
@@ -95,9 +94,6 @@ const key_override_t *key_overrides[] = {
 
 /* Hit both middle thumb keys for esc. */
 const uint16_t PROGMEM esc_combo[]      = {KK_SHIFT, KC_SPACE, COMBO_END};
-/* Left thumb + finger key for ctrl+esc and esc. */
-const uint16_t PROGMEM sesc_a_combo[]   = {KK_SESC, KC_A,    COMBO_END};
-const uint16_t PROGMEM sesc_unds_combo[] = {KK_SESC, KC_UNDS, COMBO_END};
 /* Two outer bottom keys on a single half to get into bootloader. */
 const uint16_t PROGMEM boot_combo_left[]  = {KK_NOOP, KK_SYMBO, COMBO_END};
 const uint16_t PROGMEM boot_combo_right[] = {KC_ENTER, KK_NOOP, COMBO_END};
@@ -132,8 +128,6 @@ const uint16_t PROGMEM fkeys_combo[] = {KC_B, KC_Q, COMBO_END};
 /* Indices for all combos (designated initializers) */
 enum combos {
   CMB_ESC,
-  CMB_CTL_ESC,
-  CMB_ALT_ESC,
 
   CMB_BOOT_L,
   CMB_BOOT_R,
@@ -168,8 +162,6 @@ enum combos {
 
 combo_t key_combos[] = {
   [CMB_ESC]        = COMBO(esc_combo, KC_ESC),
-  [CMB_CTL_ESC]    = COMBO_ACTION(sesc_a_combo),
-  [CMB_ALT_ESC]    = COMBO(sesc_unds_combo, KC_ESC),
 
   [CMB_BOOT_L]     = COMBO(boot_combo_left,  QK_BOOT),
   [CMB_BOOT_R]     = COMBO(boot_combo_right, QK_BOOT),
@@ -205,9 +197,6 @@ combo_t key_combos[] = {
 
 void process_combo_event(uint16_t combo_index, bool pressed) {
   switch (combo_index) {
-  case CMB_CTL_ESC:
-    if (pressed) tap_code16(LCTL(KC_ESC));
-    break;
   }
 }
 
@@ -221,13 +210,6 @@ oneshot_state_entry_t oneshot_state_entries[] = {
 };
 
 size_t oneshot_state_entries_size = sizeof(oneshot_state_entries) / sizeof(oneshot_state_entry_t);
-
-bool is_oneshot_cancel_key(uint16_t keycode) {
-  if (keycode == KK_SESC) {
-    return true;
-  }
-  return false;
-}
 
 /* Allow oneshots to stack up and to penetrate layers. */
 bool is_oneshot_ignored_key(uint16_t keycode) {
@@ -290,11 +272,28 @@ void leader_end_user(void) {
   if (leader_sequence_one_key(KC_SPACE)) {
     layer_move(L_BOO);
   }
-  if (leader_sequence_one_key(KC_I)) {
+  /* Esc / Ctrl+Esc / Sesc — symmetric */
+  if (leader_sequence_one_key(KC_N)) {
+    tap_code(KC_ESC);
+  }
+  if (leader_sequence_one_key(KC_S)) {
+    tap_code(KC_ESC);
+  }
+  if (leader_sequence_one_key(KC_H)) {
+    tap_code16(LCTL(KC_ESC));
+  }
+  if (leader_sequence_one_key(KC_W)) {
     tap_code16(LCTL(KC_ESC));
   }
   if (leader_sequence_one_key(KC_J)) {
-    tap_code(KC_ESC);
+    layer_move(L_BOO);
+    ru_disable();
+    oneshot_cancel();
+  }
+  if (leader_sequence_one_key(KC_UNDS)) {
+    layer_move(L_BOO);
+    ru_disable();
+    oneshot_cancel();
   }
   if (leader_sequence_one_key(KC_F)) {
     layer_on(L_FKEYS_SYS);
@@ -332,10 +331,6 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 
 
   switch (keycode) {
-    case KK_SESC:
-      layer_move(L_BOO);
-      ru_disable();
-      return false;
     case KC_ESC:
       layer_move(L_BOO); // In vim: restore En in normal mode
       ru_disable();
@@ -411,7 +406,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
            __ ,    KC_A,    KC_O,    KC_E,   KC_S,  KC_G,     KC_B,  KC_N,  KC_T,  KC_R,  KC_I,   KC_MINUS,
        KK_NOOP, KC_UNDS,    KC_X,  KC_DOT,   KC_W,  KC_Z,     KC_P,  KC_H,  KC_M,  KC_K,  KC_J,   KK_NOOP,
 
-                           KK_SESC , KK_SHIFT , KK_SYMBO,     KC_ENTER , KC_SPACE, QK_LEAD
+                           QK_LEAD , KK_SHIFT , KK_SYMBO,     KC_ENTER , KC_SPACE, QK_LEAD
   ),
 
   /**
