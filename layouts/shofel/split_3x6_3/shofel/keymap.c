@@ -106,13 +106,11 @@ const uint16_t PROGMEM go_declaration_combo[]  = {KC_H, KC_I, COMBO_END}; // :=
 const uint16_t PROGMEM fat_right_arrow_combo[] = {KC_H, KC_M, COMBO_END}; // =>
 const uint16_t PROGMEM right_arrow_combo[]     = {KC_H, KC_K, COMBO_END}; // ->
 const uint16_t PROGMEM not_equal_combo[]       = {KC_H, KC_X, COMBO_END}; // !=
-/* [{(<>)}] */
+/* [(<>)] */
 const uint16_t PROGMEM square_left_combo[]  = {KC_S, KC_W, COMBO_END};
 const uint16_t PROGMEM square_right_combo[] = {KC_N, KC_H, COMBO_END};
 const uint16_t PROGMEM brace_left_combo[]   = {KC_E, KC_DOT, COMBO_END};
 const uint16_t PROGMEM brace_right_combo[]  = {KC_T, KC_M, COMBO_END};
-const uint16_t PROGMEM curly_left_combo[]   = {KC_O, KC_X, COMBO_END};
-const uint16_t PROGMEM curly_right_combo[]  = {KC_R, KC_K, COMBO_END};
 const uint16_t PROGMEM angle_left_combo[]   = {KC_G, KC_Z, COMBO_END};
 const uint16_t PROGMEM angle_right_combo[]  = {KC_B, KC_P, COMBO_END};
 /* Vertical combos for mods */
@@ -149,8 +147,6 @@ enum combos {
   CMB_SQ_R,
   CMB_BR_L,
   CMB_BR_R,
-  CMB_CU_L,
-  CMB_CU_R,
   CMB_ANG_L,
   CMB_ANG_R,
 
@@ -181,13 +177,11 @@ combo_t key_combos[] = {
   [CMB_RIGHT_ARROW]= COMBO(right_arrow_combo, KK_RIGHT_ARROW),
   [CMB_NOT_EQUAL]  = COMBO(not_equal_combo, KK_NOT_EQUAL),
 
-  /* ({[<>]}) */
+  /* ([<>])  NB: {} = shift+[] */
   [CMB_SQ_L]       = COMBO(square_left_combo , KC_LBRC),
   [CMB_SQ_R]       = COMBO(square_right_combo, KC_RBRC),
   [CMB_BR_L]       = COMBO(brace_left_combo, KC_LPRN),
   [CMB_BR_R]       = COMBO(brace_right_combo, KC_RPRN),
-  [CMB_CU_L]       = COMBO(curly_left_combo, KC_LCBR),
-  [CMB_CU_R]       = COMBO(curly_right_combo, KC_RCBR),
   [CMB_ANG_L]      = COMBO(angle_left_combo, KC_LABK),
   [CMB_ANG_R]      = COMBO(angle_right_combo, KC_RABK),
 

@@ -2,8 +2,6 @@
 
 ## Layout
 
-- braces: lower vertical combos: use only the index and middle fingers
-- braces: revise the sym layer
 - employ ucis for emoji: tulip and other flowers, tup=thumbup, ok, think, monocle
 - leader layer activators : escape the layers with the same hand : ? leader->space ?
 - leader layer activator for fsys: ? leader->f ?
@@ -13,6 +11,7 @@
   - `~` = top right pinky
   - `/` = top right ring
   - -> and as a consequence, decide where to move `|`?
+- place something cool on the right hand of sym layer. Lot's of empty keys are there
 ### Free Positions
 - vert combo opposite to fsyslayer
 ### Obsolete
