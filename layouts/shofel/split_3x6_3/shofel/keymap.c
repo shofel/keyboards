@@ -322,6 +322,11 @@ void leader_end_user(void) {
     tap_code16(LGUI(KC_T));
   }
 
+  /* Print Screen */
+  if (leader_sequence_one_key(KC_P)) {
+    tap_code(KC_PSCR);
+  }
+
   /* UCIS emoji — disabled (module conflict with unicodemap) */
 }
 
@@ -500,13 +505,13 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    * Layer for F keys and multimedia buttons.
    */
   [L_FKEYS_SYS] = LAYOUT_split_3x6_3(/*
-        __ F11  F7  F8  F9  __                       __  br↑ vl↑ __  DBG __
+        __ F12  F7  F8  F9  __                       __  br↑ vl↑ __  DBG __
         __ F11  F4  F5  F6  __                       __  __  __  __  __  __
        bot F10  F1  F2  F3  __                       __  br↓ vl↓ vl0 __  bot
                              __  __  __     __  __  __
        */
         XX,  KC_F12,  KC_F7,  KC_F8,  KC_F9,     XX,       XX, KC_BRIU,  KC_VOLU,       XX,  DB_TOGG, XX,
-   KC_PSCR,  KC_F11,  KC_F4,  KC_F5,  KC_F6,     XX,       XX,      XX,       XX,       XX,       XX, __,
+        XX,  KC_F11,  KC_F4,  KC_F5,  KC_F6,     XX,       XX,      XX,       XX,       XX,       XX, __,
    QK_BOOT,  KC_F10,  KC_F1,  KC_F2,  KC_F3,     XX,       XX, KC_BRID,  KC_VOLD,  KC_MUTE,  XX, QK_BOOT,
                                 __ ,    __ ,   __ ,         __ ,   __ ,   __
   ),
