@@ -3,9 +3,10 @@
  * Originally made for Cantor; and hopefully useful for a Dactyl.
  */
 
-#include "keycodes.h"
 #include <stdint.h>
 #include QMK_KEYBOARD_H
+#include "introspection.h"
+#include "../../../../modules/shofel/unicode_ru/introspection.h"
 
 void keyboard_post_init_user(void) {
   // Customise these values to desired behaviour
