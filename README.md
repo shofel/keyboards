@@ -23,13 +23,20 @@ This repository follows the [official QMK userspace template](https://github.com
    qmk compile -kb cantor -km shofel
    # Or for Dactyl with the shared keymap:
    qmk compile -kb handwired/dactyl_manuform/5x6_5 -km shofel
+   # Shorthand (Cantor only):
+   make build
    ```
 
-3. Flash a keymap:
+3. Flash a keymap (put keyboard in bootloader mode first — double-tap reset):
    ```bash
-   qmk flash -kb cantor -km shofel
-   # Or for Dactyl:
-   qmk flash -kb handwired/dactyl_manuform/5x6_5 -km shofel
+   # Build + flash in one step (Cantor only):
+   make flash
+
+   # Or manually — compile first, then:
+   dfu-util -d 0483:df11 -a 0 -s 0x08000000:leave -D $(qmk config -ro user.qmk_home | cut -d= -f2)/cantor_shofel.bin
+
+   # Note: `qmk flash -kb cantor -km shofel` also works but requires
+   # the keyboard to be in bootloader mode before the command finishes compiling.
    ```
 
 ## Modules
