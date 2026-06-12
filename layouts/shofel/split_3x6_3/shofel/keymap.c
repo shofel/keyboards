@@ -112,6 +112,16 @@ const key_override_t *key_overrides[] = {
 /**
  * Combos
  * NB: to add a combo, add it in 3 places
+ *
+ * Vertical (same-column) combos: a home-row key chorded with the key directly
+ * above it (mods, backspace, layer toggles) or below it (brackets).
+ * On a Cantor with choc switches these are comfortable and misfire-free —
+ * during normal typing you never press two keys of one column with a single
+ * finger, so a vertical chord is always unambiguous intent.
+ * The top-row pairs (home + above) feel best; the bottom-row pairs (home +
+ * below) are more of a reach — which is why the highest-value combos (mods,
+ * backspace, primary num-layer access) take the top slots and brackets the
+ * bottom.
  */
 
 /* Hit both middle thumb keys for esc. */
@@ -390,7 +400,14 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
  *  It's the [BOO layout](https://ballerboo.github.io/boolayout/), which is Dvorak modified for more rollover.
  *
  *  ** Modifiers
- *  Vertical combo mods: a home-row key plus a key just above it.
+ *  Vertical combo mods: a home-row key plus a key just above it. See the Combos
+ *  block above for why same-column combos are comfortable and misfire-free on choc.
+ *
+ *  ** Thumbs
+ *  On the Cantor the middle thumb is the most comfortable key, so the two most
+ *  used thumb actions live there: Space (right middle) and Shift (left middle).
+ *  Esc is both middle thumbs at once — the strongest pair. Enter sits on the
+ *  inner thumb since it is far less frequent than Space.
  *
  *  ** Unicode Input
  *  *** Why?
