@@ -6,7 +6,7 @@
 #include <stdint.h>
 #include QMK_KEYBOARD_H
 #include "introspection.h"
-#include "../../../../modules/shofel/unicode_ru/introspection.h"
+#include "modules/shofel/unicode_ru/introspection.h"
 
 void keyboard_post_init_user(void) {
   // Customise these values to desired behaviour
