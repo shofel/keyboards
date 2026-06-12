@@ -8,23 +8,24 @@
 #include "introspection.h"
 #include "modules/shofel/unicode_ru/introspection.h"
 
+/*
+ * Runtime debug logging — all off by default.
+ * Flip any flag to `true` (and build with CONSOLE_ENABLE) to stream the
+ * corresponding events to `qmk console`. Kept as a ready-to-use toggle hook.
+ */
 void keyboard_post_init_user(void) {
-  // Customise these values to desired behaviour
-  debug_enable = false;
-  debug_matrix = false;
+  debug_enable   = false;
+  debug_matrix   = false;
   debug_keyboard = false;
-  debug_mouse = false;
+  debug_mouse    = false;
 }
 
 /* Fancy looking spare keys. */
 #define __ KC_TRNS
 #define XX KC_NO
 
-/* */
 enum my_keycodes {
-  KK = SAFE_RANGE,
-
-  KK_GO_DECLARATION,
+  KK_GO_DECLARATION = SAFE_RANGE,
   KK_RIGHT_ARROW,
   KK_FAT_RIGHT_ARROW,
   KK_NOT_EQUAL,
@@ -53,40 +54,59 @@ enum my_layer_names {
 
 /* Switch language */
 
-static int8_t ru_active = 0;
+/*
+ * Russian state is two independent concerns:
+ *   ru_enabled        — whether Russian is logically on
+ *   ru_suspend_depth  — how many nested mod/leader holds are masking it
+ * The layer is on iff enabled and nothing is suspending it. Keeping these
+ * separate makes the counter impossible to desync from the on/off intent.
+ */
+static bool    ru_enabled       = false;
+static uint8_t ru_suspend_depth = 0;
 
-void ru_suspend(void) {
-    ru_active -= 1;
-    layer_off(L_RUSSIAN);
-}
-
-void ru_resume(void) {
-    ru_active += 1;
-    if (ru_active > 0) {
+static void ru_apply(void) {
+    if (ru_enabled && ru_suspend_depth == 0) {
         layer_on(L_RUSSIAN);
+    } else {
+        layer_off(L_RUSSIAN);
     }
 }
 
+void ru_suspend(void) {
+    ru_suspend_depth += 1;
+    ru_apply();
+}
+
+void ru_resume(void) {
+    if (ru_suspend_depth > 0) {
+        ru_suspend_depth -= 1;
+    }
+    ru_apply();
+}
+
 void ru_enter(void) {
-    ru_active = 1;
+    ru_enabled = true;
+    ru_suspend_depth = 0;
     layer_move(L_BOO);
-    layer_on(L_RUSSIAN);
+    ru_apply();
 }
 
 void ru_exit(void) {
-  ru_active = 0;
-  layer_move(L_BOO);
+    ru_enabled = false;
+    ru_suspend_depth = 0;
+    layer_move(L_BOO);
+    ru_apply();
 }
 
 /* Key overrides */
 
-// Make , . immune to shift
-const key_override_t labk_override = ko_make_basic(MOD_MASK_SHIFT, KC_COMMA, KC_COMMA);
-const key_override_t rabk_override = ko_make_basic(MOD_MASK_SHIFT, KC_DOT,   KC_DOT);
+// Swap , and . under shift:  shifted , -> .   and   shifted . -> ,
+const key_override_t comma_override = ko_make_basic(MOD_MASK_SHIFT, KC_COMMA, KC_DOT);
+const key_override_t dot_override   = ko_make_basic(MOD_MASK_SHIFT, KC_DOT,   KC_COMMA);
 
 const key_override_t *key_overrides[] = {
-  &labk_override,
-  &rabk_override,
+  &comma_override,
+  &dot_override,
 };
 
 /**
@@ -197,11 +217,6 @@ combo_t key_combos[] = {
   [CMB_FSYS]       = COMBO(fkeys_combo, OSL(L_FKEYS_SYS)),
 };
 
-void process_combo_event(uint16_t combo_index, bool pressed) {
-  switch (combo_index) {
-  }
-}
-
 /* Oneshot */
 
 oneshot_state_entry_t oneshot_state_entries[] = {
@@ -225,6 +240,7 @@ bool is_oneshot_ignored_key(uint16_t keycode) {
   switch (keycode) {
     case OSL(L_NUM_NAV):
     case OSL(L_SYMBOLS):
+    case OSL(L_FKEYS_SYS):
       return true;
     default:
       return false;
@@ -331,13 +347,12 @@ void leader_end_user(void) {
   /* UCIS emoji — disabled (module conflict with unicodemap) */
 }
 
-/* */
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
-
-
   switch (keycode) {
     case KC_ESC:
-      ru_exit(); // In vim: restore En in normal mode
+      if (record->event.pressed) {
+        ru_exit(); // In vim: restore En in normal mode
+      }
       return true;
     case KK_GO_DECLARATION:
       if (record->event.pressed) {
@@ -401,13 +416,13 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
  */
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   [L_BOO] = LAYOUT_split_3x6_3(/** BOO LAYOUT
-       __  '   ,   u   c   v                        q   f   d   l   y   /
-       __  a   o   e   s   g                        b   n   t   r   i   -
-       __      x   .   w   z                        p   h   m   k   j   __
+       XX  '   ,   u   c   v                        q   f   d   l   y   /
+       XX  a   o   e   s   g                        b   n   t   r   i   -
+   noop  _   x   .   w   z                        p   h   m   k   j   noop
                         __ sft SYMBOLS          ret spc LEAD
        */
-           __ , KC_QUOT, KC_COMM,    KC_U,   KC_C,  KC_V,     KC_Q,  KC_F,  KC_D,  KC_L,  KC_Y,   KC_SLASH,
-           __ ,    KC_A,    KC_O,    KC_E,   KC_S,  KC_G,     KC_B,  KC_N,  KC_T,  KC_R,  KC_I,   KC_MINUS,
+           XX , KC_QUOT, KC_COMM,    KC_U,   KC_C,  KC_V,     KC_Q,  KC_F,  KC_D,  KC_L,  KC_Y,   KC_SLASH,
+           XX ,    KC_A,    KC_O,    KC_E,   KC_S,  KC_G,     KC_B,  KC_N,  KC_T,  KC_R,  KC_I,   KC_MINUS,
        KK_NOOP, KC_UNDS,    KC_X,  KC_DOT,   KC_W,  KC_Z,     KC_P,  KC_H,  KC_M,  KC_K,  KC_J,   KK_NOOP,
 
                            QK_LEAD , KK_SHIFT , KK_SYMBO,     KC_ENTER , KC_SPACE, QK_LEAD
@@ -483,8 +498,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    * Basic idea is clean: numbers on the left, and navigation on the right.
    *
    * ** Here are a bit less obvious decisions
-   * - two zeroes: one is in its logical place, before `1`, and another is on the home row place,
-   *   which is easier to reach and free.
+   * - `0` sits on the home-row place (left of `4`), which is easier to reach than its
+   *   logical spot before `1` (that slot holds `,`).
    * - `/` `:` `.` is to type `05/06/1970` `05:50` `3.1415`
    * - KC_GRV (```) is to switch windows in gnome:
    *   - with the left hand hold alt+L_NUM_NAV (howe-row of the ring and middle fingers)
@@ -497,13 +512,15 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
        __  ,   1   2   3   .                        __  ⮀   ↓   __  __  __
                             __  __  __    __  __  __
        */
-       XX,KC_QUOT,  KC_7,  KC_8,  KC_9, KC_SLSH,       KC_GRV,  KC_PGUP,  KC_UP,    KC_PGDN, XX,      __,
+       XX,KC_QUOT,  KC_7,  KC_8,  KC_9, KC_SLASH,      KC_GRV,  KC_PGUP,  KC_UP,    KC_PGDN, XX,      __,
        XX,   KC_0,  KC_4,  KC_5,  KC_6, KC_COLN,       KC_HOME, KC_LEFT,  KC_ENTER, KC_RGHT, KC_END,  __,
        XX,KC_COMM,  KC_1,  KC_2,  KC_3,  KC_DOT,       XX,      KC_TAB,   KC_DOWN,  XX,      XX,      XX,
                             __ ,    __ ,   __ ,         __ ,   __ ,   __
   ),
   /**
    * Layer for F keys and multimedia buttons.
+   *
+   * One-shot via the B+Q combo; sticky via Leader,f (exit with Esc or Leader,space).
    */
   [L_FKEYS_SYS] = LAYOUT_split_3x6_3(/*
         __ F12  F7  F8  F9  __                       __  br↑ vl↑ __  DBG __
@@ -520,19 +537,19 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   /**
    * Mouse layer.
    *
-   * Activated by Leader,m
+   * Activated by Leader,m (sticky). Exit with Esc (shift+space combo) or Leader,space.
    *
    * Left hand can apply modifiers, to perform shift+click, or ctrl+wheelup.
    */
   [L_MOUSE] = LAYOUT_split_3x6_3(/*
-        __  a2  __  __  __  __                       __  w↑  ↑  w↓  b3  __
+        __  a2  __  __  __  __                       __  w↑  ↑  w↓  __  __
         __  a1  __  __  __  __                       __  <-  c  ->  b2  __
-        __  a0  __  __  __  __                       __  b1  ↓  __  __  __
+        __  a0  __  __  __  __                       __  b3  ↓  __  __  __
                              __  __  __     __  __  __
        */
-        XX,      XX,        XX,       XX,      XX,  XX,       XX, MS_WHLU,  MS_UP  ,  MS_WHLD, MS_BTN3,  XX,
+        XX,      XX,        XX,       XX,      XX,  XX,       XX, MS_WHLU,  MS_UP  ,  MS_WHLD,      XX,  XX,
         XX,      XX,   MS_ACL2,  MS_ACL0, MS_ACL1,  XX,       XX, MS_LEFT,  MS_BTN1,  MS_RGHT, MS_BTN2,  __,
-        XX,      XX,        XX,       XX,      XX,  XX,       XX, MS_BTN1,  MS_DOWN,       XX,      XX,  XX,
+        XX,      XX,        XX,       XX,      XX,  XX,       XX, MS_BTN3,  MS_DOWN,       XX,      XX,  XX,
 
                                    __ ,    __ ,   __ ,         __ ,  __ ,  __
   ),
