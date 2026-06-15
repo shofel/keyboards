@@ -54,9 +54,21 @@ the default layer).
 
 ```
 active_toggle    : NONE | L_RUSSIAN | L_FKEYS_SYS | L_MOUSE | L_NUM_NAV
-toggle_suspend_depth: uint8_t   // nested mod / leader holds masking the layer
+leader_active    : bool     // a leader sequence is in progress: mask ANY active layer
+toggle_suspend_depth: uint8_t   // nested mod holds: mask Russian only
 applied_layer    : NONE | <layer>   // the sticky layer physically on; we own it
 ```
+
+There are two distinct reasons to mask the active layer, with different scope:
+
+- **`leader_active`** — while a leader sequence is being typed, mask *whatever*
+  toggle layer is active so the sequence keys resolve on the base BOO layout.
+  Leader sequences are letter-based (`leader,t`, `leader,f`, …); without this,
+  with NUM_NAV/MOUSE/FKEYS active the sequence key resolves on that overlay
+  (e.g. the key at T's position is not `KC_T`) and the activator silently fails.
+- **`toggle_suspend_depth`** — while a mod (Ctrl/Alt/Gui oneshot) is held, mask
+  *Russian only*, so mod combos fall through to the Latin base while NUM_NAV
+  etc. stay put (Ctrl+arrow keeps working inside num/nav).
 
 `active_toggle` is the user's intent ("I want Russian on"). `applied_layer` is
 what is physically toggled on right now. Keeping them separate is what makes the
@@ -70,8 +82,10 @@ reconcile surgical and OSL-safe.
 ```
 toggle_apply():
     want = active_toggle
-    if active_toggle == L_RUSSIAN and toggle_suspend_depth > 0:
-        want = NONE                     // only Russian suspends under mods
+    if leader_active:
+        want = NONE                     // leader seq reads keys from base
+    elif active_toggle == L_RUSSIAN and toggle_suspend_depth > 0:
+        want = NONE                     // mods mask only Russian
     if applied_layer == want:
         return                          // nothing changed
     if applied_layer != NONE:
@@ -85,9 +99,11 @@ toggle_apply():
 momentary layer on top is left intact. The default layer (`L_BOO`, layer 0) is
 never moved — base is always present underneath.
 
-Only Russian has the suspend-under-mods property. This is encoded directly in
-`toggle_apply()` (`active_toggle == L_RUSSIAN`) rather than a per-layer table,
-since exactly one layer needs it.
+The two masks are checked in order: `leader_active` wins (mask everything),
+otherwise the mod path masks Russian only. Only Russian has the
+suspend-under-mods property, encoded directly in `toggle_apply()`
+(`active_toggle == L_RUSSIAN`) rather than a per-layer table, since exactly one
+layer needs it.
 
 ### Operations
 
@@ -105,19 +121,29 @@ toggle_reset():                         // leader,space — full reset
     oneshot_cancel()
     toggle_disable()
 
-toggle_suspend():                          // mod down / leader start
+toggle_suspend():                          // mod down (oneshot Ctrl/Alt/Gui)
     toggle_suspend_depth += 1
     toggle_apply()
 
-toggle_resume():                           // mod up / leader end
+toggle_resume():                           // mod up
     if toggle_suspend_depth > 0:
         toggle_suspend_depth -= 1
+    toggle_apply()
+
+leader_suspend():                          // leader sequence start
+    leader_active = true
+    toggle_apply()
+
+leader_resume():                           // leader sequence end
+    leader_active = false
     toggle_apply()
 ```
 
 The old `ru_enter/ru_exit/ru_apply/ru_suspend/ru_resume` functions are replaced
-by the above. `ru_suspend`/`ru_resume` become `toggle_suspend`/`toggle_resume`
-(callers: `oneshot_process_event`, `leader_start_user`, `leader_end_user`).
+by the above. `toggle_suspend`/`toggle_resume` are called from
+`oneshot_process_event` (mods, Russian-only mask); `leader_suspend`/
+`leader_resume` are called from `leader_start_user`/`leader_end_user` (mask any
+active layer).
 
 ### Leader sequence mapping
 
@@ -162,10 +188,14 @@ base" behavior; confirm it feels right in practice.
 
 ### Suspend ordering inside leader
 
-`leader_start_user` calls `toggle_suspend()`; `leader_end_user` calls
-`toggle_resume()` **first**, then evaluates the sequence handlers (so an enable
-inside the sequence applies with `toggle_suspend_depth` already back down). This
-preserves today's ordering.
+`leader_start_user` calls `leader_suspend()` (sets `leader_active`), so every
+key captured during the sequence resolves on the base layout. `leader_end_user`
+calls `leader_resume()` **first**, then evaluates the sequence handlers (so an
+enable inside the sequence applies with `leader_active` already cleared).
+Switching layers via leader (e.g. NUM_NAV active → `leader,f`) briefly
+re-applies the old layer on `leader_resume()` then immediately replaces it —
+all synchronous within `leader_end_user`, no host output in between, so it is
+invisible.
 
 Shift is intentionally excluded from the mod-suspend hook (capitals are valid in
 Russian), exactly as today — only `OS_CTL`/`OS_ALT`/`OS_GUI` call
@@ -178,10 +208,12 @@ All changes are in `layouts/shofel/split_3x6_3/shofel/keymap.c`:
 - Replace the Russian state block (`ru_enabled`, `ru_suspend_depth`, `ru_apply`,
   `ru_suspend`, `ru_resume`, `ru_enter`, `ru_exit`) with the uniform state +
   `toggle_apply` / `toggle_enable` / `toggle_disable` / `toggle_reset` /
-  `toggle_suspend` / `toggle_resume`.
-- Update `oneshot_process_event` to call `toggle_suspend`/`toggle_resume`.
-- Update `leader_start_user` / `leader_end_user` to call `toggle_suspend`/
-  `toggle_resume` and the new enable/reset functions; retire `leader,e/j/_`.
+  `toggle_suspend` / `toggle_resume` / `leader_suspend` / `leader_resume`.
+- Update `oneshot_process_event` to call `toggle_suspend`/`toggle_resume`
+  (mods, Russian-only mask).
+- Update `leader_start_user` / `leader_end_user` to call `leader_suspend`/
+  `leader_resume` (mask any active layer) and the new enable/reset functions;
+  retire `leader,e/j/_`.
 - Update `process_record_user` `KC_ESC` to call `toggle_disable()`.
 
 No changes to `config.h`, `rules.mk`, combos, key overrides, or the keymaps
@@ -201,3 +233,6 @@ themselves. No module changes.
     Ctrl → Russian stays **off** (no resurrection).
   - OSL still works: with Russian active, the NUM_NAV combo (OSL) momentarily
     overlays numbers, then reverts to Russian.
+  - Leader works from inside an active overlay: `leader,t` to enable NUM_NAV,
+    then (with NUM_NAV active) `leader,f` → FKEYS_SYS, and `leader,m` → MOUSE.
+    Each activator fires even though a non-base toggle layer was already on.
