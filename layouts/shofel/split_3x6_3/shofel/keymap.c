@@ -52,50 +52,68 @@ enum my_layer_names {
 #define KK_SYMBO OSL(L_SYMBOLS)
 #define KK_SHIFT OS_SFT
 
-/* Switch language */
+/* Sticky toggle layers */
 
 /*
- * Russian state is two independent concerns:
- *   ru_enabled        — whether Russian is logically on
- *   ru_suspend_depth  — how many nested mod/leader holds are masking it
- * The layer is on iff enabled and nothing is suspending it. Keeping these
- * separate makes the counter impossible to desync from the on/off intent.
+ * Russian, F-keys, mouse and num/nav are all driven the same way: exactly one
+ * toggle layer is active at a time, enabled by its own leader sequence and
+ * disabled by leader,space. State is two concerns:
+ *   active_toggle        — which toggle layer the user wants on (or TOGGLE_NONE)
+ *   toggle_suspend_depth — how many nested mod/leader holds are masking it
+ * applied_layer is the overlay we physically turned on. The reconcile only ever
+ * touches our own layer, so it never disturbs a native OSL momentary layer or
+ * the base layer (no layer_move). Russian is the only layer that suspends while
+ * a mod is held — Ctrl/Alt/Gui combos then fall through to the Latin base.
  */
-static bool    ru_enabled       = false;
-static uint8_t ru_suspend_depth = 0;
+#define TOGGLE_NONE 0xFF
 
-static void ru_apply(void) {
-    if (ru_enabled && ru_suspend_depth == 0) {
-        layer_on(L_RUSSIAN);
-    } else {
-        layer_off(L_RUSSIAN);
+static uint8_t active_toggle        = TOGGLE_NONE;
+static uint8_t applied_layer        = TOGGLE_NONE;
+static uint8_t toggle_suspend_depth = 0;
+
+static void toggle_apply(void) {
+    uint8_t want = active_toggle;
+    if (active_toggle == L_RUSSIAN && toggle_suspend_depth > 0) {
+        want = TOGGLE_NONE;
     }
-}
-
-void ru_suspend(void) {
-    ru_suspend_depth += 1;
-    ru_apply();
-}
-
-void ru_resume(void) {
-    if (ru_suspend_depth > 0) {
-        ru_suspend_depth -= 1;
+    if (applied_layer == want) {
+        return;
     }
-    ru_apply();
+    if (applied_layer != TOGGLE_NONE) {
+        layer_off(applied_layer);
+    }
+    if (want != TOGGLE_NONE) {
+        layer_on(want);
+    }
+    applied_layer = want;
 }
 
-void ru_enter(void) {
-    ru_enabled = true;
-    ru_suspend_depth = 0;
-    layer_move(L_BOO);
-    ru_apply();
+static void toggle_enable(uint8_t layer) {
+    active_toggle = layer;
+    toggle_apply();
 }
 
-void ru_exit(void) {
-    ru_enabled = false;
-    ru_suspend_depth = 0;
-    layer_move(L_BOO);
-    ru_apply();
+static void toggle_disable(void) {
+    active_toggle = TOGGLE_NONE;
+    toggle_suspend_depth = 0;
+    toggle_apply();
+}
+
+static void toggle_reset(void) {
+    oneshot_cancel();
+    toggle_disable();
+}
+
+void toggle_suspend(void) {
+    toggle_suspend_depth += 1;
+    toggle_apply();
+}
+
+void toggle_resume(void) {
+    if (toggle_suspend_depth > 0) {
+        toggle_suspend_depth -= 1;
+    }
+    toggle_apply();
 }
 
 /* Key overrides */
@@ -263,10 +281,10 @@ void oneshot_process_event(oneshot_state_entry_t *oneshot) {
       (oneshot->trigger == OS_GUI))
   {
     switch (oneshot->state) {
-      case os_down_unused: ru_suspend(); break;
+      case os_down_unused: toggle_suspend(); break;
       case os_down_used: break;
       case os_up_queued: break;
-      case os_up_unqueued: ru_resume(); break;
+      case os_up_unqueued: toggle_resume(); break;
     }
   }
 }
@@ -274,31 +292,28 @@ void oneshot_process_event(oneshot_state_entry_t *oneshot) {
 /* Leader */
 
 void leader_start_user(void) {
-  ru_suspend();
+  toggle_suspend();
 }
 
 void leader_end_user(void) {
-  ru_resume();
+  toggle_resume();
 
   /* Ru */
   if (leader_sequence_one_key(KC_R)) {
-    ru_enter();
-  }
-  if (leader_sequence_one_key(KC_E)) {
-    ru_exit();
+    toggle_enable(L_RUSSIAN);
   }
   if (leader_sequence_one_key(KC_L)) {
     set_unicode_input_mode(UNICODE_MODE_LINUX);
-    ru_enter();
+    toggle_enable(L_RUSSIAN);
   }
   if (leader_sequence_one_key(KC_V)) {
     set_unicode_input_mode(UNICODE_MODE_VIM);
-    ru_enter();
+    toggle_enable(L_RUSSIAN);
   }
 
-  /* Layers */
+  /* Disable any active toggle layer (one seq for all) */
   if (leader_sequence_one_key(KC_SPACE)) {
-    layer_move(L_BOO);
+    toggle_reset();
   }
   /* Esc / Ctrl+Esc / Sesc — symmetric */
   if (leader_sequence_one_key(KC_N)) {
@@ -313,22 +328,14 @@ void leader_end_user(void) {
   if (leader_sequence_one_key(KC_W)) {
     tap_code16(LCTL(KC_ESC));
   }
-  if (leader_sequence_one_key(KC_J)) {
-    oneshot_cancel();
-    ru_exit();
-  }
-  if (leader_sequence_one_key(KC_UNDS)) {
-    oneshot_cancel();
-    ru_exit();
-  }
   if (leader_sequence_one_key(KC_F)) {
-    layer_on(L_FKEYS_SYS);
+    toggle_enable(L_FKEYS_SYS);
   }
   if (leader_sequence_one_key(KC_M)) {
-    layer_on(L_MOUSE);
+    toggle_enable(L_MOUSE);
   }
   if (leader_sequence_one_key(KC_T)) {
-    layer_on(L_NUM_NAV);
+    toggle_enable(L_NUM_NAV);
   }
 
   /* Text editing */
@@ -361,7 +368,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   switch (keycode) {
     case KC_ESC:
       if (record->event.pressed) {
-        ru_exit(); // In vim: restore En in normal mode
+        toggle_disable(); // exits any active toggle; restores En in vim normal mode
       }
       return true;
     case KK_GO_DECLARATION:
