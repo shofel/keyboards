@@ -57,23 +57,31 @@ enum my_layer_names {
 /*
  * Russian, F-keys, mouse and num/nav are all driven the same way: exactly one
  * toggle layer is active at a time, enabled by its own leader sequence and
- * disabled by leader,space. State is two concerns:
+ * disabled by leader,space. State is three concerns:
  *   active_toggle        — which toggle layer the user wants on (or TOGGLE_NONE)
- *   toggle_suspend_depth — how many nested mod/leader holds are masking it
+ *   leader_active        — a leader sequence is in progress: mask ANY active
+ *                          toggle layer so the sequence keys read from the base
+ *                          layout (else e.g. leader,t would read num/nav's key
+ *                          at that position instead of KC_T)
+ *   toggle_suspend_depth — nested mod holds: mask Russian only, so Ctrl/Alt/Gui
+ *                          fall through to the Latin base while num/nav etc.
+ *                          stay put
  * applied_layer is the overlay we physically turned on. The reconcile only ever
  * touches our own layer, so it never disturbs a native OSL momentary layer or
- * the base layer (no layer_move). Russian is the only layer that suspends while
- * a mod is held — Ctrl/Alt/Gui combos then fall through to the Latin base.
+ * the base layer (no layer_move).
  */
 #define TOGGLE_NONE 0xFF
 
 static uint8_t active_toggle        = TOGGLE_NONE;
 static uint8_t applied_layer        = TOGGLE_NONE;
+static bool    leader_active        = false;
 static uint8_t toggle_suspend_depth = 0;
 
 static void toggle_apply(void) {
     uint8_t want = active_toggle;
-    if (active_toggle == L_RUSSIAN && toggle_suspend_depth > 0) {
+    if (leader_active) {
+        want = TOGGLE_NONE;
+    } else if (active_toggle == L_RUSSIAN && toggle_suspend_depth > 0) {
         want = TOGGLE_NONE;
     }
     if (applied_layer == want) {
@@ -113,6 +121,16 @@ void toggle_resume(void) {
     if (toggle_suspend_depth > 0) {
         toggle_suspend_depth -= 1;
     }
+    toggle_apply();
+}
+
+void leader_suspend(void) {
+    leader_active = true;
+    toggle_apply();
+}
+
+void leader_resume(void) {
+    leader_active = false;
     toggle_apply();
 }
 
@@ -292,11 +310,11 @@ void oneshot_process_event(oneshot_state_entry_t *oneshot) {
 /* Leader */
 
 void leader_start_user(void) {
-  toggle_suspend();
+  leader_suspend();
 }
 
 void leader_end_user(void) {
-  toggle_resume();
+  leader_resume();
 
   /* Ru */
   if (leader_sequence_one_key(KC_R)) {
