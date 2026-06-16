@@ -63,7 +63,7 @@ enum my_layer_names {
  *                          toggle layer so the sequence keys read from the base
  *                          layout (else e.g. leader,t would read num/nav's key
  *                          at that position instead of KC_T)
- *   toggle_suspend_depth — nested mod holds: mask Russian only, so Ctrl/Alt/Gui
+ *   mod_ru_suspend_depth — nested mod holds: mask Russian only, so Ctrl/Alt/Gui
  *                          fall through to the Latin base while num/nav etc.
  *                          stay put
  * applied_layer is the overlay we physically turned on. The reconcile only ever
@@ -75,13 +75,13 @@ enum my_layer_names {
 static uint8_t active_toggle        = TOGGLE_NONE;
 static uint8_t applied_layer        = TOGGLE_NONE;
 static bool    leader_active        = false;
-static uint8_t toggle_suspend_depth = 0;
+static uint8_t mod_ru_suspend_depth = 0;
 
 static void toggle_apply(void) {
     uint8_t want = active_toggle;
     if (leader_active) {
         want = TOGGLE_NONE;
-    } else if (active_toggle == L_RUSSIAN && toggle_suspend_depth > 0) {
+    } else if (active_toggle == L_RUSSIAN && mod_ru_suspend_depth > 0) {
         want = TOGGLE_NONE;
     }
     if (applied_layer == want) {
@@ -103,7 +103,7 @@ static void toggle_enable(uint8_t layer) {
 
 static void toggle_disable(void) {
     active_toggle = TOGGLE_NONE;
-    toggle_suspend_depth = 0;
+    mod_ru_suspend_depth = 0;
     toggle_apply();
 }
 
@@ -112,14 +112,14 @@ static void toggle_reset(void) {
     toggle_disable();
 }
 
-void toggle_suspend(void) {
-    toggle_suspend_depth += 1;
+void mod_ru_suspend(void) {
+    mod_ru_suspend_depth += 1;
     toggle_apply();
 }
 
-void toggle_resume(void) {
-    if (toggle_suspend_depth > 0) {
-        toggle_suspend_depth -= 1;
+void mod_ru_resume(void) {
+    if (mod_ru_suspend_depth > 0) {
+        mod_ru_suspend_depth -= 1;
     }
     toggle_apply();
 }
@@ -299,10 +299,10 @@ void oneshot_process_event(oneshot_state_entry_t *oneshot) {
       (oneshot->trigger == OS_GUI))
   {
     switch (oneshot->state) {
-      case os_down_unused: toggle_suspend(); break;
+      case os_down_unused: mod_ru_suspend(); break;
       case os_down_used: break;
       case os_up_queued: break;
-      case os_up_unqueued: toggle_resume(); break;
+      case os_up_unqueued: mod_ru_resume(); break;
     }
   }
 }

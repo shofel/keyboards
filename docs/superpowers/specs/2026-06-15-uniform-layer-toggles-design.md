@@ -55,7 +55,7 @@ the default layer).
 ```
 active_toggle    : NONE | L_RUSSIAN | L_FKEYS_SYS | L_MOUSE | L_NUM_NAV
 leader_active    : bool     // a leader sequence is in progress: mask ANY active layer
-toggle_suspend_depth: uint8_t   // nested mod holds: mask Russian only
+mod_ru_suspend_depth: uint8_t   // nested mod holds: mask Russian only
 applied_layer    : NONE | <layer>   // the sticky layer physically on; we own it
 ```
 
@@ -66,7 +66,7 @@ There are two distinct reasons to mask the active layer, with different scope:
   Leader sequences are letter-based (`leader,t`, `leader,f`, …); without this,
   with NUM_NAV/MOUSE/FKEYS active the sequence key resolves on that overlay
   (e.g. the key at T's position is not `KC_T`) and the activator silently fails.
-- **`toggle_suspend_depth`** — while a mod (Ctrl/Alt/Gui oneshot) is held, mask
+- **`mod_ru_suspend_depth`** — while a mod (Ctrl/Alt/Gui oneshot) is held, mask
   *Russian only*, so mod combos fall through to the Latin base while NUM_NAV
   etc. stay put (Ctrl+arrow keeps working inside num/nav).
 
@@ -84,7 +84,7 @@ toggle_apply():
     want = active_toggle
     if leader_active:
         want = NONE                     // leader seq reads keys from base
-    elif active_toggle == L_RUSSIAN and toggle_suspend_depth > 0:
+    elif active_toggle == L_RUSSIAN and mod_ru_suspend_depth > 0:
         want = NONE                     // mods mask only Russian
     if applied_layer == want:
         return                          // nothing changed
@@ -114,20 +114,20 @@ toggle_enable(layer):
 
 toggle_disable():                       // Esc
     active_toggle = NONE
-    toggle_suspend_depth = 0
+    mod_ru_suspend_depth = 0
     toggle_apply()
 
 toggle_reset():                         // leader,space — full reset
     oneshot_cancel()
     toggle_disable()
 
-toggle_suspend():                          // mod down (oneshot Ctrl/Alt/Gui)
-    toggle_suspend_depth += 1
+mod_ru_suspend():                          // mod down (oneshot Ctrl/Alt/Gui)
+    mod_ru_suspend_depth += 1
     toggle_apply()
 
-toggle_resume():                           // mod up
-    if toggle_suspend_depth > 0:
-        toggle_suspend_depth -= 1
+mod_ru_resume():                           // mod up
+    if mod_ru_suspend_depth > 0:
+        mod_ru_suspend_depth -= 1
     toggle_apply()
 
 leader_suspend():                          // leader sequence start
@@ -140,7 +140,7 @@ leader_resume():                           // leader sequence end
 ```
 
 The old `ru_enter/ru_exit/ru_apply/ru_suspend/ru_resume` functions are replaced
-by the above. `toggle_suspend`/`toggle_resume` are called from
+by the above. `mod_ru_suspend`/`mod_ru_resume` are called from
 `oneshot_process_event` (mods, Russian-only mask); `leader_suspend`/
 `leader_resume` are called from `leader_start_user`/`leader_end_user` (mask any
 active layer).
@@ -199,7 +199,7 @@ invisible.
 
 Shift is intentionally excluded from the mod-suspend hook (capitals are valid in
 Russian), exactly as today — only `OS_CTL`/`OS_ALT`/`OS_GUI` call
-`toggle_suspend`/`toggle_resume` from `oneshot_process_event`.
+`mod_ru_suspend`/`mod_ru_resume` from `oneshot_process_event`.
 
 ## Affected code
 
@@ -208,8 +208,8 @@ All changes are in `layouts/shofel/split_3x6_3/shofel/keymap.c`:
 - Replace the Russian state block (`ru_enabled`, `ru_suspend_depth`, `ru_apply`,
   `ru_suspend`, `ru_resume`, `ru_enter`, `ru_exit`) with the uniform state +
   `toggle_apply` / `toggle_enable` / `toggle_disable` / `toggle_reset` /
-  `toggle_suspend` / `toggle_resume` / `leader_suspend` / `leader_resume`.
-- Update `oneshot_process_event` to call `toggle_suspend`/`toggle_resume`
+  `mod_ru_suspend` / `mod_ru_resume` / `leader_suspend` / `leader_resume`.
+- Update `oneshot_process_event` to call `mod_ru_suspend`/`mod_ru_resume`
   (mods, Russian-only mask).
 - Update `leader_start_user` / `leader_end_user` to call `leader_suspend`/
   `leader_resume` (mask any active layer) and the new enable/reset functions;
