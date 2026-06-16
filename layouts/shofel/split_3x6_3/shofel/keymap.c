@@ -455,6 +455,19 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
  *  VIM mode looks and feels awesome, but works only in Vim/Neovim
  *  Linux mode feels clunky in some apps, but kinda works everywhere.
  *  Also, as of time of writing, the vim mode is not in upstream QMK. I sent [a pull-request](https://github.com/qmk/qmk_firmware/pull/25188) which implements it
+ *
+ *
+ * * KEY COMFORT SCORES  —  layout-wide ergonomic weights, higher = easier.
+ *
+ * Scale 0-9 (adjust to taste). Combos resolve from layer 0, so one map serves
+ * every layer. Drives frequency-first symbol placement: rank symbols by how
+ * often you type them, rank free keys by score, then match highest-to-highest.
+ *
+ *          pinky2 pinky  ring   mid  index  inner | inner  index   mid   ring  pinky pinky2
+ *  top        2     4     6      8     6      2   |   2      6      8      6     4     2
+ *  home       4     5     7      9     9      3   |   3      9      9      7     5     3
+ *  bot        1     2     4      5     6      3   |   3      6      5      4     2     1
+ *  thumbs                  · reserved for layer/mod keys, not symbol slots ·
  */
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   [L_BOO] = LAYOUT_split_3x6_3(/** BOO LAYOUT
