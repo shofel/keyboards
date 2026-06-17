@@ -76,6 +76,10 @@ enum unicode_names {
 
   U_DOT,
   U_COMMA,
+
+  U_MDASH,
+  U_NUMERO,
+  U_SECTION,
 };
 
 // unicode_map array is defined in introspection.c
@@ -116,4 +120,9 @@ extern const uint32_t PROGMEM unicode_map[];
 #define RU_YU UP(RU_LC_YU, RU_UC_YU)
 #define RU_YA UP(RU_LC_YA, RU_UC_YA)
 #define RU_DOT UP(U_DOT, U_COMMA)
+
+/* Typographic symbols used on the SYM layer (same glyph for tap and shifted). */
+#define RU_MDASH UP(U_MDASH, U_MDASH)
+#define RU_NUM   UP(U_NUMERO, U_NUMERO)
+#define RU_SECT  UP(U_SECTION, U_SECTION)
 

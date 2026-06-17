@@ -78,5 +78,9 @@ const uint32_t PROGMEM unicode_map[] = {
 
   [U_DOT] = 0x02E,
   [U_COMMA] = 0x02C,
+
+  [U_MDASH] = 0x2014,   // —  em dash
+  [U_NUMERO] = 0x2116,  // №  numero sign
+  [U_SECTION] = 0x00A7, // §  section sign
 };
 

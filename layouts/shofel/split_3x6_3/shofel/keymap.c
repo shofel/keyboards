@@ -25,10 +25,10 @@ void keyboard_post_init_user(void) {
 #define XX KC_NO
 
 enum my_keycodes {
-  KK_GO_DECLARATION = SAFE_RANGE,
-  KK_RIGHT_ARROW,
+  KK_RIGHT_ARROW = SAFE_RANGE,
   KK_FAT_RIGHT_ARROW,
-  KK_NOT_EQUAL,
+  KK_LANGLE,  // « when shifted, < otherwise
+  KK_RANGLE,  // » when shifted, > otherwise
   KK_NOOP,
 
   /* One-shot trigger keys */
@@ -140,9 +140,17 @@ void leader_resume(void) {
 const key_override_t comma_override = ko_make_basic(MOD_MASK_SHIFT, KC_COMMA, KC_DOT);
 const key_override_t dot_override   = ko_make_basic(MOD_MASK_SHIFT, KC_DOT,   KC_COMMA);
 
+// Suppress ? from the base layer: Shift+/ emits a plain /. `?` lives only on SYM,
+// giving it one canonical home that is identical across languages.
+const key_override_t slash_override = ko_make_basic(MOD_MASK_SHIFT, KC_SLSH, KC_SLSH);
+// Backtick from the base layer: Shift+' -> ` . This frees the base `"` slot.
+const key_override_t quote_override = ko_make_basic(MOD_MASK_SHIFT, KC_QUOT, KC_GRV);
+
 const key_override_t *key_overrides[] = {
   &comma_override,
   &dot_override,
+  &slash_override,
+  &quote_override,
 };
 
 /**
@@ -169,10 +177,9 @@ const uint16_t PROGMEM boot_combo_right[] = {KC_ENTER, KK_NOOP, COMBO_END};
 const uint16_t PROGMEM reset_combo_left[]  = {KK_NOOP, KK_SHIFT, COMBO_END};
 const uint16_t PROGMEM reset_combo_right[] = {KC_SPACE, KK_NOOP, COMBO_END};
 /* Digraphs */
-const uint16_t PROGMEM go_declaration_combo[]  = {KC_H, KC_I, COMBO_END}; // :=
 const uint16_t PROGMEM fat_right_arrow_combo[] = {KC_H, KC_M, COMBO_END}; // =>
 const uint16_t PROGMEM right_arrow_combo[]     = {KC_H, KC_K, COMBO_END}; // ->
-const uint16_t PROGMEM not_equal_combo[]       = {KC_H, KC_X, COMBO_END}; // !=
+/* := and != are gone: the SYM `:`->`=` roll and `!` make them unnecessary. */
 /* [(<>)] */
 const uint16_t PROGMEM square_left_combo[]  = {KC_S, KC_W, COMBO_END};
 const uint16_t PROGMEM square_right_combo[] = {KC_N, KC_H, COMBO_END};
@@ -189,9 +196,11 @@ const uint16_t PROGMEM rctl_combo[] = {KC_N, KC_F, COMBO_END};
 const uint16_t PROGMEM rlt2_combo[] = {KC_T, KC_D, COMBO_END};
 const uint16_t PROGMEM ralt_combo[] = {KC_R, KC_L, COMBO_END};
 const uint16_t PROGMEM rgui_combo[] = {KC_I, KC_Y, COMBO_END};
-/* Vertical combos for backspace and fkeys layer */
-const uint16_t PROGMEM lbspc_combo[] = {KC_G, KC_V, COMBO_END};
-const uint16_t PROGMEM fkeys_combo[] = {KC_B, KC_Q, COMBO_END};
+/* G+V -> "  (took over the old backspace slot; backspace now lives on SYM). */
+const uint16_t PROGMEM dquo_combo[] = {KC_G, KC_V, COMBO_END};
+/* Q+B -> one-shot SYM. A right-hand path to SYM alongside the left thumb key.
+ * (FKEYS lost this combo; it is still reachable via Leader,f.) */
+const uint16_t PROGMEM sym_combo[]  = {KC_B, KC_Q, COMBO_END};
 
 /* Indices for all combos (designated initializers) */
 enum combos {
@@ -203,10 +212,8 @@ enum combos {
   CMB_RESET_L,
   CMB_RESET_R,
 
-  CMB_GO_DECL,
   CMB_FAT_ARROW,
   CMB_RIGHT_ARROW,
-  CMB_NOT_EQUAL,
 
   CMB_SQ_L,
   CMB_SQ_R,
@@ -224,8 +231,8 @@ enum combos {
   CMB_RALT,
   CMB_RGUI,
 
-  CMB_LBSPC,
-  CMB_FSYS,
+  CMB_DQUO,
+  CMB_SYM,
 };
 
 combo_t key_combos[] = {
@@ -237,18 +244,16 @@ combo_t key_combos[] = {
   [CMB_RESET_L]    = COMBO(reset_combo_left,  QK_REBOOT),
   [CMB_RESET_R]    = COMBO(reset_combo_right, QK_REBOOT),
 
-  [CMB_GO_DECL]    = COMBO(go_declaration_combo, KK_GO_DECLARATION),
   [CMB_FAT_ARROW]  = COMBO(fat_right_arrow_combo, KK_FAT_RIGHT_ARROW),
   [CMB_RIGHT_ARROW]= COMBO(right_arrow_combo, KK_RIGHT_ARROW),
-  [CMB_NOT_EQUAL]  = COMBO(not_equal_combo, KK_NOT_EQUAL),
 
-  /* ([<>])  NB: {} = shift+[] */
+  /* ([<>])  NB: {} = shift+[] ; <>/« » resolved by KK_LANGLE/KK_RANGLE */
   [CMB_SQ_L]       = COMBO(square_left_combo , KC_LBRC),
   [CMB_SQ_R]       = COMBO(square_right_combo, KC_RBRC),
   [CMB_BR_L]       = COMBO(brace_left_combo, KC_LPRN),
   [CMB_BR_R]       = COMBO(brace_right_combo, KC_RPRN),
-  [CMB_ANG_L]      = COMBO(angle_left_combo, KC_LABK),
-  [CMB_ANG_R]      = COMBO(angle_right_combo, KC_RABK),
+  [CMB_ANG_L]      = COMBO(angle_left_combo, KK_LANGLE),
+  [CMB_ANG_R]      = COMBO(angle_right_combo, KK_RANGLE),
 
   [CMB_LCTL]       = COMBO(lctl_combo, OS_CTL),
   [CMB_LLT2]       = COMBO(llt2_combo, OSL(L_NUM_NAV)),
@@ -259,8 +264,8 @@ combo_t key_combos[] = {
   [CMB_RALT]       = COMBO(ralt_combo, OS_ALT),
   [CMB_RGUI]       = COMBO(rgui_combo, OS_GUI),
 
-  [CMB_LBSPC]      = COMBO(lbspc_combo, KC_BSPC),
-  [CMB_FSYS]       = COMBO(fkeys_combo, OSL(L_FKEYS_SYS)),
+  [CMB_DQUO]       = COMBO(dquo_combo, KC_DQUO),
+  [CMB_SYM]        = COMBO(sym_combo, OSL(L_SYMBOLS)),
 };
 
 /* Oneshot */
@@ -389,11 +394,6 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         toggle_disable(); // exits any active toggle; restores En in vim normal mode
       }
       return true;
-    case KK_GO_DECLARATION:
-      if (record->event.pressed) {
-        SEND_STRING(":=");
-      }
-      return false;
     case KK_RIGHT_ARROW:
       if (record->event.pressed) {
         SEND_STRING("->");
@@ -404,9 +404,23 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         SEND_STRING("=>");
       }
       return false;
-    case KK_NOT_EQUAL:
+    case KK_LANGLE:
+    case KK_RANGLE:
       if (record->event.pressed) {
-        SEND_STRING("!=");
+        /* One-shot shift is in use, so plain get_mods() would miss it — OR in
+         * the pending one-shot mods too. */
+        uint8_t mods = get_mods() | get_oneshot_mods();
+        if (mods & MOD_MASK_SHIFT) {
+          /* Shifted: emit the guillemet. Strip shift (held + one-shot) so the
+           * unicode input sequence isn't corrupted, then restore held mods. */
+          uint8_t held = get_mods();
+          clear_oneshot_mods();
+          del_mods(MOD_MASK_SHIFT);
+          register_unicode(keycode == KK_LANGLE ? 0x00AB : 0x00BB); // « »
+          set_mods(held);
+        } else {
+          tap_code16(keycode == KK_LANGLE ? KC_LABK : KC_RABK); // < >
+        }
       }
       return false;
     default:
@@ -463,22 +477,22 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
  * every layer. Drives frequency-first symbol placement: rank symbols by how
  * often you type them, rank free keys by score, then match highest-to-highest.
  *
- *          pinky2 pinky  ring   mid  index  inner | inner  index   mid   ring  pinky pinky2
- *  top        2     4     6      8     6      2   |   2      6      8      6     4     2
- *  home       4     5     7      9     9      3   |   3      9      9      7     5     3
- *  bot        1     2     4      5     6      3   |   3      6      5      4     2     1
- *  thumbs                  · reserved for layer/mod keys, not symbol slots ·
+ *    pinky2 pinky  ring   mid  index  inner | inner  index   mid   ring  pinky pinky2
+ *       1     4     6      8     6      2   |   2      6      8      6     4     3
+ *       0     5     7      9     9      3   |   3      9      9      7     5     3
+ *       0     1     4      5     6      3   |   3      6      5      4     1     1
+ *                    · reserved for layer/mod keys, not symbol slots ·
  */
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   [L_BOO] = LAYOUT_split_3x6_3(/** BOO LAYOUT
        XX  '   ,   u   c   v                        q   f   d   l   y   /
        XX  a   o   e   s   g                        b   n   t   r   i   -
-   noop  _   x   .   w   z                        p   h   m   k   j   noop
+     noop  ·   x   .   w   z                        p   h   m   k   j   noop
                         __ sft SYMBOLS          ret spc LEAD
        */
            XX , KC_QUOT, KC_COMM,    KC_U,   KC_C,  KC_V,     KC_Q,  KC_F,  KC_D,  KC_L,  KC_Y,   KC_SLASH,
            XX ,    KC_A,    KC_O,    KC_E,   KC_S,  KC_G,     KC_B,  KC_N,  KC_T,  KC_R,  KC_I,   KC_MINUS,
-       KK_NOOP, KC_UNDS,    KC_X,  KC_DOT,   KC_W,  KC_Z,     KC_P,  KC_H,  KC_M,  KC_K,  KC_J,   KK_NOOP,
+       KK_NOOP,     XX,    KC_X,  KC_DOT,   KC_W,  KC_Z,     KC_P,  KC_H,  KC_M,  KC_K,  KC_J,   KK_NOOP,
 
                            QK_LEAD , KK_SHIFT , KK_SYMBO,     KC_ENTER , KC_SPACE, QK_LEAD
   ),
@@ -502,45 +516,48 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   ),
 
   /**
-   * Layer for symbols.
+   * Symbol layer — frequency-first.
    *
-   * Activated by right-most thumb of the left hand.
+   * One-shot: tap KK_SYMBO (left thumb) or the Q+B combo and the next key comes
+   * from SYM, then reverts; hold to keep SYM active. Symbols are ranked by how
+   * often they are pressed *while SYM is active* and matched to the easiest free
+   * keys (see the comfort-score map above). Shiftless: every symbol has its own
+   * key, no Shift needed.
    *
-   * Braces are combos, they are not in this layer.
+   *         pinky2 pinky ring  mid  index inner | inner index  mid  ring  pinky pinky2
+   *  top      ·     ·    #     —     |     ·   |   ·     &     !     ^     ·     /
+   *  home     ·     @    ;     *     :     ·   |   ·     =     ?     +     %     -
+   *  bot      ·     ·    §     $     ~     ·   |   ⌫     \     №     ·     ⌦     ·
    *
-   * On the left hand:
-   * - symbols are placed as on `shift`ed L_NUM_NAV.
-   * -- ? on the right is useful when L_RUSSIAN is active, since `/` is shadowed by `RU_H`
+   * Notes / mnemonics (do not "fix" these):
+   * - `/` and `-` are pinned to their base right-outer positions, so the key is
+   *   identical on every layer (and `_` stays Shift+-). On SYM they mainly serve
+   *   Russian, where the base latin keys are shadowed by Cyrillic.
+   * - `? !` stack on the right-middle column (home `?` / top `!`) — sentence-enders,
+   *   with the more-frequent `?` on the stronger home key.
+   * - `& |` mirror on the index tops — the logical pair.
+   * - `:` (left-index home) -> `=` (right-index home) is the `:=` alternating-hand
+   *   roll (which is why the old `:=` combo was removed).
+   * - `—` (em dash), `№`, `§` are unicode keys: RU_MDASH / RU_NUM / RU_SECT.
+   * - `⌫` backspace (right inner) and `⌦` delete (right pinky) live on the right.
    *
-   * - `*` `!` `#` on the left are kinda paired with
-   *   `+` `?` `=` on the right
+   * Not on SYM (all global, so they work while Russian is active):
+   * - `"`  — the G+V combo (KC_DQUO).
+   * - `« »` — the angle combos via KK_LANGLE / KK_RANGLE (unshifted = `<` `>`).
+   * - `` ` `` — Shift+' (key override).
+   * - `?` is suppressed from base Shift+/, so SYM is its one canonical home.
    *
-   * - `\`` `;` are echoed with their shifted pairs
-   *   `~` `:`
-   *
-   * Everything can be typed without combos, but we have combos for some digraphs: => != := ->
-   * Mnemonics for these combos:
-   *   - `=>` is like `=` plus the key on the right
-   *   - `->` is a lighter arrow, so shifted head key to the weaker finger
-   *   - `!=` `:=` are literally sums of their symbols
-   *
-   * Combos work independently of layers.
-
-   rare: & $ % ^ ! ~ | \ @
-   more: * ; : ? # +
-   most: =
-   maybe: ` "
-
+   * Other combos still work here: `=>` `->`, brackets, mods.
    */
   [L_SYMBOLS] = LAYOUT_split_3x6_3(/*
-       __  `   &   %   #   __                       __  \   +   |   ~   /
-       __  ;   !   __  __  __                       __  __  __  ?   :   -
-       __  __  $   @   ^   󰹿                        󰭜   =   *   __  __  __
+       ·  ·   #   —   |   ·                        ·   &   !   ^   ·   /
+       ·  @   ;   *   :   ·                        ·   =   ?   +   %   -
+       ·  ·   §   $   ~   ·                        ⌫   \   №   ·   ⌦   ·
                             __  __  SYM   __  __  __
        */
-        XX,  KC_GRV,   KC_AMPR,  KC_ASTR,      XX,      XX,       XX,      KC_BSLS,  KC_PLUS,  KC_PIPE, KC_TILD, KC_SLASH,
-        XX, KC_SCLN,    KC_DLR,  KC_PERC, KC_CIRC,      XX,       XX,           XX,       XX,       XX, KC_COLN, KC_MINUS,
-        XX,      XX,   KC_EXLM,    KC_AT, KC_HASH,  KC_DEL,       KC_BSPC,  KC_EQL,       XX,  KC_QUES, XX,      XX,
+        XX,      XX,  KC_HASH, RU_MDASH, KC_PIPE,      XX,            XX,  KC_AMPR,  KC_EXLM,  KC_CIRC,      XX,  KC_SLASH,
+        XX,   KC_AT,  KC_SCLN,  KC_ASTR, KC_COLN,      XX,            XX,   KC_EQL,  KC_QUES,  KC_PLUS, KC_PERC,  KC_MINUS,
+        XX,      XX,  RU_SECT,   KC_DLR, KC_TILD,      XX,       KC_BSPC,  KC_BSLS,   RU_NUM,       XX,  KC_DEL,  XX,
                                       __ ,  __ , KK_SYMBO,         __ ,  __ ,  __
   ),
 
@@ -575,7 +592,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   /**
    * Layer for F keys and multimedia buttons.
    *
-   * One-shot via the B+Q combo; sticky via Leader,f (exit with Esc or Leader,space).
+   * Sticky via Leader,f (exit with Esc or Leader,space). (The old B+Q combo now
+   * activates SYM instead.)
    */
   [L_FKEYS_SYS] = LAYOUT_split_3x6_3(/*
         __ F12  F7  F8  F9  __                       __  br↑ vl↑ __  DBG __
