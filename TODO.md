@@ -3,14 +3,11 @@
 ## Layout
 
 - caps_word_on() on leader seq one key os_sft
-- make `~/` an inward roll on the top row:
-  - `~` = top right pinky
-  - `/` = top right ring
-  - -> and as a consequence, decide where to move `|`?
-- place something cool on the right hand of sym layer. Lot's of empty keys are there
-  - easier underscore , and removeone from left lower pinky
 - employ ucis for emoji: tulip and other flowers, tup=thumbup, ok, think, monocle
 - create a file with text explanations
+
+- problem: leader,k,P fails when Ru is active
+
 ### Free Positions
 - vert combo opposite to fsyslayer
 ### Obsolete

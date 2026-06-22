@@ -51,6 +51,8 @@ enum my_layer_names {
 /* Simple thumb keys. */
 #define KK_SYMBO OSL(L_SYMBOLS)
 #define KK_SHIFT OS_SFT
+/* Right inner thumb: tap = Enter, hold = momentary SYMBOLS. */
+#define KK_RET   LT(L_SYMBOLS, KC_ENTER)
 
 /* Sticky toggle layers */
 
@@ -172,7 +174,7 @@ const key_override_t *key_overrides[] = {
 const uint16_t PROGMEM esc_combo[]      = {KK_SHIFT, KC_SPACE, COMBO_END};
 /* Two outer bottom keys on a single half to get into bootloader. */
 const uint16_t PROGMEM boot_combo_left[]  = {KK_NOOP, KK_SYMBO, COMBO_END};
-const uint16_t PROGMEM boot_combo_right[] = {KC_ENTER, KK_NOOP, COMBO_END};
+const uint16_t PROGMEM boot_combo_right[] = {KK_RET, KK_NOOP, COMBO_END};
 /* On each half: the outermost bottom pinky key + the middle thumb key to reboot the keyboard. */
 const uint16_t PROGMEM reset_combo_left[]  = {KK_NOOP, KK_SHIFT, COMBO_END};
 const uint16_t PROGMEM reset_combo_right[] = {KC_SPACE, KK_NOOP, COMBO_END};
@@ -198,9 +200,9 @@ const uint16_t PROGMEM ralt_combo[] = {KC_R, KC_L, COMBO_END};
 const uint16_t PROGMEM rgui_combo[] = {KC_I, KC_Y, COMBO_END};
 /* G+V -> "  (took over the old backspace slot; backspace now lives on SYM). */
 const uint16_t PROGMEM dquo_combo[] = {KC_G, KC_V, COMBO_END};
-/* Q+B -> one-shot SYM. A right-hand path to SYM alongside the left thumb key.
- * (FKEYS lost this combo; it is still reachable via Leader,f.) */
-const uint16_t PROGMEM sym_combo[]  = {KC_B, KC_Q, COMBO_END};
+/* Q+B -> one-shot FKEYS/SYS layer. SYM no longer needs this combo: it is reached
+ * via the left thumb (KK_SYMBO) and the RET layer-tap (right inner thumb). */
+const uint16_t PROGMEM fkeys_combo[] = {KC_B, KC_Q, COMBO_END};
 
 /* Indices for all combos (designated initializers) */
 enum combos {
@@ -232,7 +234,7 @@ enum combos {
   CMB_RGUI,
 
   CMB_DQUO,
-  CMB_SYM,
+  CMB_FSYS,
 };
 
 combo_t key_combos[] = {
@@ -265,7 +267,7 @@ combo_t key_combos[] = {
   [CMB_RGUI]       = COMBO(rgui_combo, OS_GUI),
 
   [CMB_DQUO]       = COMBO(dquo_combo, KC_DQUO),
-  [CMB_SYM]        = COMBO(sym_combo, OSL(L_SYMBOLS)),
+  [CMB_FSYS]       = COMBO(fkeys_combo, OSL(L_FKEYS_SYS)),
 };
 
 /* Oneshot */
@@ -445,8 +447,13 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
  *  ** Thumbs
  *  On the Cantor the middle thumb is the most comfortable key, so the two most
  *  used thumb actions live there: Space (right middle) and Shift (left middle).
- *  Esc is both middle thumbs at once — the strongest pair. Enter sits on the
- *  inner thumb since it is far less frequent than Space.
+ *  Esc is both middle thumbs at once — the strongest pair. The right inner thumb
+ *  is a SYMBOLS layer-tap (tap = Enter, hold = SYM); Enter lives there since it is
+ *  far less frequent than Space.
+ *
+ *  Punctuation lives mostly on the LEFT hand — `,` `.` on the base layer and the
+ *  bulk of the SYM symbols — opposite the right-thumb Space. So a
+ *  punctuation->Space sequence alternates hands and rolls off cleanly.
  *
  *  ** Unicode Input
  *  *** Why?
@@ -494,7 +501,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
            XX ,    KC_A,    KC_O,    KC_E,   KC_S,  KC_G,     KC_B,  KC_N,  KC_T,  KC_R,  KC_I,   KC_MINUS,
        KK_NOOP,     XX,    KC_X,  KC_DOT,   KC_W,  KC_Z,     KC_P,  KC_H,  KC_M,  KC_K,  KC_J,   KK_NOOP,
 
-                           QK_LEAD , KK_SHIFT , KK_SYMBO,     KC_ENTER , KC_SPACE, QK_LEAD
+                           QK_LEAD , KK_SHIFT , KK_SYMBO,       KK_RET , KC_SPACE, QK_LEAD
   ),
 
   /**
@@ -518,16 +525,17 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   /**
    * Symbol layer — frequency-first.
    *
-   * One-shot: tap KK_SYMBO (left thumb) or the Q+B combo and the next key comes
-   * from SYM, then reverts; hold to keep SYM active. Symbols are ranked by how
+   * Reach SYM two ways: KK_SYMBO (left thumb) — tap for a one-shot (next key from
+   * SYM, then it reverts) or hold to keep it active — and the RET layer-tap (right
+   * inner thumb) — hold for SYM, tap for Enter. Symbols are ranked by how
    * often they are pressed *while SYM is active* and matched to the easiest free
    * keys (see the comfort-score map above). Shiftless: every symbol has its own
    * key, no Shift needed.
    *
    *         pinky2 pinky ring  mid  index inner | inner index  mid  ring  pinky pinky2
-   *  top      ·     ·    #     —     |     ·   |   ·     &     !     ^     ·     /
-   *  home     ·     @    ;     *     :     ·   |   ·     =     ?     +     %     -
-   *  bot      ·     ·    §     $     ~     ·   |   ⌫     \     №     ·     ⌦     ·
+   *  top      ·     `    ^     #     ;     ·   |   ·     &     !     |     \     /
+   *  home     ·     $    —     *     :     ·   |   ·     =     ?     +     %     -
+   *  bot      ·     ·    ·     @     ~     ⌦   |   ⌫     §     №     ·     ·     ·
    *
    * Notes / mnemonics (do not "fix" these):
    * - `/` and `-` are pinned to their base right-outer positions, so the key is
@@ -535,29 +543,29 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    *   Russian, where the base latin keys are shadowed by Cyrillic.
    * - `? !` stack on the right-middle column (home `?` / top `!`) — sentence-enders,
    *   with the more-frequent `?` on the stronger home key.
-   * - `& |` mirror on the index tops — the logical pair.
+   * - `& | \` cluster on the right top row (index, ring, pinky).
    * - `:` (left-index home) -> `=` (right-index home) is the `:=` alternating-hand
    *   roll (which is why the old `:=` combo was removed).
    * - `—` (em dash), `№`, `§` are unicode keys: RU_MDASH / RU_NUM / RU_SECT.
-   * - `⌫` backspace (right inner) and `⌦` delete (right pinky) live on the right.
+   * - backtick (left-pinky top) is new on SYM (also reachable as Shift+').
+   * - `⌫` backspace (right inner) and `⌦` delete (left inner).
    *
    * Not on SYM (all global, so they work while Russian is active):
    * - `"`  — the G+V combo (KC_DQUO).
    * - `« »` — the angle combos via KK_LANGLE / KK_RANGLE (unshifted = `<` `>`).
-   * - `` ` `` — Shift+' (key override).
    * - `?` is suppressed from base Shift+/, so SYM is its one canonical home.
    *
    * Other combos still work here: `=>` `->`, brackets, mods.
    */
   [L_SYMBOLS] = LAYOUT_split_3x6_3(/*
-       ·  ·   #   —   |   ·                        ·   &   !   ^   ·   /
-       ·  @   ;   *   :   ·                        ·   =   ?   +   %   -
-       ·  ·   §   $   ~   ·                        ⌫   \   №   ·   ⌦   ·
+       ·  `   ^   #   ;   ·                        ·   &   !   |   \   /
+       ·  $   —   *   :   ·                        ·   =   ?   +   %   -
+       ·  ·       @   ~   ⌦                        ⌫   §   №           ·
                             __  __  SYM   __  __  __
        */
-        XX,      XX,  KC_HASH, RU_MDASH, KC_PIPE,      XX,            XX,  KC_AMPR,  KC_EXLM,  KC_CIRC,      XX,  KC_SLASH,
-        XX,   KC_AT,  KC_SCLN,  KC_ASTR, KC_COLN,      XX,            XX,   KC_EQL,  KC_QUES,  KC_PLUS, KC_PERC,  KC_MINUS,
-        XX,      XX,  RU_SECT,   KC_DLR, KC_TILD,      XX,       KC_BSPC,  KC_BSLS,   RU_NUM,       XX,  KC_DEL,  XX,
+        XX,  KC_GRV,  KC_CIRC,  KC_HASH, KC_SCLN,      XX,            XX,  KC_AMPR,  KC_EXLM,  KC_PIPE, KC_BSLS,  KC_SLASH,
+        XX,  KC_DLR, RU_MDASH,  KC_ASTR, KC_COLN,      XX,            XX,   KC_EQL,  KC_QUES,  KC_PLUS, KC_PERC,  KC_MINUS,
+        XX,      XX,       XX,    KC_AT,  KC_TILD,  KC_DEL,       KC_BSPC,  RU_SECT,   RU_NUM,       XX,      XX,  XX,
                                       __ ,  __ , KK_SYMBO,         __ ,  __ ,  __
   ),
 
@@ -592,8 +600,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   /**
    * Layer for F keys and multimedia buttons.
    *
-   * Sticky via Leader,f (exit with Esc or Leader,space). (The old B+Q combo now
-   * activates SYM instead.)
+   * Sticky via Leader,f (exit with Esc or Leader,space). Also reachable as a
+   * one-shot via the Q+B combo.
    */
   [L_FKEYS_SYS] = LAYOUT_split_3x6_3(/*
         __ F12  F7  F8  F9  __                       __  br↑ vl↑ __  DBG __
