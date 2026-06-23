@@ -172,19 +172,27 @@ leader,j   (was oneshot_cancel + ru_exit)
 leader,_   (was oneshot_cancel + ru_exit)
 ```
 
-Unchanged: `leader,n` / `leader,s` (Esc), `leader,h` / `leader,w`
-(Ctrl+Esc), and all non-layer sequences (text editing, kitty, print screen).
+`leader,n` / `leader,s` (Esc), `leader,h` / `leader,w` (Ctrl+Esc), and all
+non-layer sequences (text editing, kitty, print screen) keep their key actions.
+
+> **Correction (later):** `leader,n` / `leader,s` were updated to call
+> `toggle_disable()` before `tap_code(KC_ESC)` — see the corrected Esc note
+> below.
 
 ### Esc behavior
 
 `process_record_user` for `KC_ESC` (pressed) calls `toggle_disable()` — Esc
 clears whatever toggle layer is active, not just Russian.
 
-**Sanity-check note:** Esc is also produced by the `shift+space` combo and by
-`leader,n` / `leader,s` (which `tap_code(KC_ESC)` and thus re-enter
-`process_record`). Consequently, hitting Esc while sticky in NUM_NAV / MOUSE /
-FKEYS_SYS now drops to base too. This is the intended "Esc always returns to
-base" behavior; confirm it feels right in practice.
+**Sanity-check note (corrected):** the `shift+space` combo resolves to the
+`KC_ESC` *keycode*, which flows through `process_record` and so hits the
+`toggle_disable()` path above. `leader,n` / `leader,s`, however, emit Esc via
+`tap_code(KC_ESC)` — `register_code` writes the HID report directly and does
+**not** re-enter `process_record`, so the original assumption that they would
+exit the toggle was wrong: they only sent a bare Esc. Fixed by calling
+`toggle_disable()` explicitly in those handlers before `tap_code(KC_ESC)`, so
+"Esc always returns to base" now holds for the leader Esc sequences too, not
+just the thumb combo.
 
 ### Suspend ordering inside leader
 

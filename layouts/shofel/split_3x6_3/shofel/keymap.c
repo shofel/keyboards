@@ -340,11 +340,17 @@ void leader_end_user(void) {
   if (leader_sequence_one_key(KC_SPACE)) {
     toggle_reset();
   }
-  /* Esc / Ctrl+Esc / Sesc — symmetric */
+  /* Esc / Ctrl+Esc / Sesc — symmetric.
+   * Esc mirrors the thumb esc combo: it exits whatever toggle layer is active
+   * (toggle_disable) *and* sends Esc. tap_code(KC_ESC) alone would not — it
+   * goes through register_code, which writes the report directly and never
+   * re-enters process_record, so the KC_ESC->toggle_disable path never fires. */
   if (leader_sequence_one_key(KC_N)) {
+    toggle_disable();
     tap_code(KC_ESC);
   }
   if (leader_sequence_one_key(KC_S)) {
+    toggle_disable();
     tap_code(KC_ESC);
   }
   if (leader_sequence_one_key(KC_H)) {
