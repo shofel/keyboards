@@ -2,24 +2,21 @@
 
 ## Layout
 
-- caps_word_on() on leader seq one key os_sft
 - employ ucis for emoji: tulip and other flowers, tup=thumbup, ok, think, monocle
-- create a file with text explanations
+- leader seq for gui+L_NUM : leader,w
 
-- problem: leader,k,P fails when Ru is active
-
-### Free Positions
-- vert combo opposite to fsyslayer
-### Obsolete
-- 2 mouse: turn one btn1 to a sticky - for selection (activate on tap; deactivate on tap)
-- leader seq for gui+L_NUM
-- handier one-handed alt+`
-- 4 sym: fill the gaps for some useful stuff: _
+### Known / accepted
+- kitty control doesn't work while Ru active: leader,k sends win+T fine, but the
+  follow-up control keys are typed on the Russian layer (come out Cyrillic).
+  Not a leader bug (leader,k itself records correctly). Left as-is — fixing would
+  mean leader,k also dropping the toggle layer first.
 
 ## Modules
 
 - oneshot: allow press two oneshots at a time to schedule both
 - 8 mouse - bisect with digitizer. I see a digitizer in gnome settings. It should work now!
+  - radial mouse
+  - 2 mouse: turn one btn1 to a sticky - for selection (activate on tap; deactivate on tap)
 - 9 rawhid for seamless unicode modes in vim and linux
 - dream: smoother unicode input on Linux outside of vim
   - today: outside vim relies on ibus/UCIS sequences, which are slow and stateful
