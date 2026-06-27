@@ -457,9 +457,10 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
  *  is a SYMBOLS layer-tap (tap = Enter, hold = SYM); Enter lives there since it is
  *  far less frequent than Space.
  *
- *  Punctuation lives mostly on the LEFT hand — `,` `.` on the base layer and the
- *  bulk of the SYM symbols — opposite the right-thumb Space. So a
- *  punctuation->Space sequence alternates hands and rolls off cleanly.
+ *  Punctuation on the SYM layer lives mostly on the RIGHT hand — the same hand as
+ *  the right-thumb Space — so a symbol->Space sequence is a same-hand roll: tap the
+ *  left-thumb one-shot SYM, type the symbol with the right hand, then roll into
+ *  Space. (`,` `.` stay on the LEFT of the base layer.)
  *
  *  ** Unicode Input
  *  *** Why?
@@ -529,31 +530,36 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   ),
 
   /**
-   * Symbol layer — frequency-first.
+   * Symbol layer — frequency-first, punctuation on the RIGHT hand.
    *
    * Reach SYM two ways: KK_SYMBO (left thumb) — tap for a one-shot (next key from
    * SYM, then it reverts) or hold to keep it active — and the RET layer-tap (right
-   * inner thumb) — hold for SYM, tap for Enter. Symbols are ranked by how
-   * often they are pressed *while SYM is active* and matched to the easiest free
-   * keys (see the comfort-score map above). Shiftless: every symbol has its own
+   * inner thumb) — hold for SYM, tap for Enter. Shiftless: every symbol has its own
    * key, no Shift needed.
    *
+   * Punctuation lives on the RIGHT hand so a symbol rolls into the right-thumb Space
+   * on the *same* hand. Best paired with the left-thumb one-shot: tap KK_SYMBO, type
+   * the symbol with the right hand, then roll into Space.
+   *
    *         pinky2 pinky ring  mid  index inner | inner index  mid  ring  pinky pinky2
-   *  top      ·     `    ^     #     ;     ·   |   ·     &     !     |     \     /
-   *  home     ·     $    —     *     :     ·   |   ·     =     ?     +     %     -
-   *  bot      ·     ·    ·     @     ~     ⌦   |   ⌫     §     №     ·     ·     ·
+   *  top      ·     `    —     $     ^     ·   |   ·     !     *     |     &     /
+   *  home     ·          ~     @     #     ·   |   ·     ?     :     +     %     -
+   *  bot      ·     ·    №     §     \     ⌦   |   ⌫     =     ;     ·     ·     ·
    *
    * Notes / mnemonics (do not "fix" these):
+   * - `? !` take the two strongest right keys (index home `?` / top `!`) — the
+   *   sentence-enders are the symbols most reliably followed by Space.
+   * - `=` sits below them (index bot). `:` (mid home) -> `=` (index bot) is still a
+   *   real cross-row roll, so there is no `:=` combo.
+   * - `: ;` stack on the right-mid column (home `:` / bot `;`).
+   * - `| &` pair on the right top row (ring `|` / pinky `&`).
    * - `/` and `-` are pinned to their base right-outer positions, so the key is
    *   identical on every layer (and `_` stays Shift+-). On SYM they mainly serve
    *   Russian, where the base latin keys are shadowed by Cyrillic.
-   * - `? !` stack on the right-middle column (home `?` / top `!`) — sentence-enders,
-   *   with the more-frequent `?` on the stronger home key.
-   * - `& | \` cluster on the right top row (index, ring, pinky).
-   * - `:` (left-index home) -> `=` (right-index home) is the `:=` alternating-hand
-   *   roll (which is why the old `:=` combo was removed).
-   * - `—` (em dash), `№`, `§` are unicode keys: RU_MDASH / RU_NUM / RU_SECT.
-   * - backtick (left-pinky top) is new on SYM (also reachable as Shift+').
+   * - the LEFT hand holds the token-hugging specials `# @ $ ~ ^ \` and backtick,
+   *   plus the unicode `—` `№` `§` (RU_MDASH / RU_NUM / RU_SECT).
+   * - backtick (left-pinky top) sits where base `'` (and Shift+' = `) already live —
+   *   one home for the quote/backtick key across base and SYM.
    * - `⌫` backspace (right inner) and `⌦` delete (left inner).
    *
    * Not on SYM (all global, so they work while Russian is active):
@@ -564,14 +570,14 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    * Other combos still work here: `=>` `->`, brackets, mods.
    */
   [L_SYMBOLS] = LAYOUT_split_3x6_3(/*
-       ·  `   ^   #   ;   ·                        ·   &   !   |   \   /
-       ·  $   —   *   :   ·                        ·   =   ?   +   %   -
-       ·  ·       @   ~   ⌦                        ⌫   §   №           ·
+       ·  `   —   $   ^   ·                        ·   !   *   |   &   /
+       ·      ~   @   #   ·                        ·   ?   :   +   %   -
+       ·  ·   №   §   \   ⌦                        ⌫   =   ;           ·
                             __  __  SYM   __  __  __
        */
-        XX,  KC_GRV,  KC_CIRC,  KC_HASH, KC_SCLN,      XX,            XX,  KC_AMPR,  KC_EXLM,  KC_PIPE, KC_BSLS,  KC_SLASH,
-        XX,  KC_DLR, RU_MDASH,  KC_ASTR, KC_COLN,      XX,            XX,   KC_EQL,  KC_QUES,  KC_PLUS, KC_PERC,  KC_MINUS,
-        XX,      XX,       XX,    KC_AT,  KC_TILD,  KC_DEL,       KC_BSPC,  RU_SECT,   RU_NUM,       XX,      XX,  XX,
+        XX,  KC_GRV, RU_MDASH,   KC_DLR, KC_CIRC,      XX,            XX,  KC_EXLM,  KC_ASTR,  KC_PIPE, KC_AMPR,  KC_SLASH,
+        XX,      XX,  KC_TILD,    KC_AT, KC_HASH,      XX,            XX,  KC_QUES,  KC_COLN,  KC_PLUS, KC_PERC,  KC_MINUS,
+        XX,      XX,   RU_NUM,  RU_SECT, KC_BSLS,  KC_DEL,       KC_BSPC,   KC_EQL,  KC_SCLN,       XX,      XX,  XX,
                                       __ ,  __ , KK_SYMBO,         __ ,  __ ,  __
   ),
 
