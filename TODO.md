@@ -18,10 +18,15 @@
   - radial mouse
   - 2 mouse: turn one btn1 to a sticky - for selection (activate on tap; deactivate on tap)
 - 9 rawhid for seamless unicode modes in vim and linux
-- dream: smoother unicode input on Linux outside of vim
-  - today: outside vim relies on ibus/UCIS sequences, which are slow and stateful
-  - want: type unicode as fluently as in vim — no mode toggles, no hex codes
-  - possible paths: rawhid signal to the host to switch IME, or per-app composer
+- DONE (2026-06-29) dream: smoother unicode input on Linux outside of vim
+  - solved with compose mode (leader,r / leader,c, now the default): each Cyrillic
+    glyph is one X Compose sequence (Compose = Scroll Lock via xkb compose:sclk +
+    generated ~/.XCompose), so rolling Russian no longer mushes like the modal
+    ibus hex path did. leader,v = vim mode; leader,e = back to English.
+  - single source of truth: tools/gen_unicode_compose.py -> C table + ~/.XCompose
+    + cheatsheet. Host config is a home-manager module (nix/cantor-compose-ru.nix)
+    imported by the dotfiles flake.
+  - assumes OS layout is Latin (us) while typing.
 - 88 bug: fast seq [os_sft c a] resolves to [C A], while [C a] expected
 - make ucis and unicodemap work together
 

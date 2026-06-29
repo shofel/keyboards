@@ -40,6 +40,19 @@ SYMBOLS = [
     ("U_SECTION", 0x00A7, "9"),   # §
 ]
 
+# Standalone glyphs emitted by dedicated keycodes (KK_LANGLE/KK_RANGLE), NOT via
+# unicode_map — so they get an XCompose entry + cheatsheet line but no C-table
+# row (the keymap hardcodes their codes). (cp, selector char, glyph)
+EXTRA = [
+    (0x00AB, "[", "«"),
+    (0x00BB, "]", "»"),
+]
+
+# Keysym names for selector chars whose keysym name isn't the char itself.
+KEYSYM = {"[": "bracketleft", "]": "bracketright"}
+def keysym(ch):
+    return KEYSYM.get(ch, ch)
+
 # 33 selectors: a..z then 0..6
 SELECTORS = [chr(ord("a") + i) for i in range(26)] + [str(i) for i in range(7)]
 assert len(SELECTORS) >= len(LETTERS)
@@ -74,7 +87,9 @@ def gen_xcompose():
         "",
     ]
     for _cidx, _code, (p, s), glyph, cp in rows():
-        out.append(f'<Multi_key> <{p}> <{s}> : "{glyph}" U{cp:04X}')
+        out.append(f'<Multi_key> <{keysym(p)}> <{keysym(s)}> : "{glyph}" U{cp:04X}')
+    for cp, s, glyph in EXTRA:
+        out.append(f'<Multi_key> <q> <{keysym(s)}> : "{glyph}" U{cp:04X}')
     return "\n".join(out) + "\n"
 
 
@@ -82,6 +97,8 @@ def gen_cheatsheet():
     out = ["Cantor compose-mode Russian — Compose is Scroll Lock.", ""]
     for _cidx, code, _ks, glyph, cp in rows():
         out.append(f"  {glyph}  U+{cp:04X}   Compose {' '.join(code)}")
+    for cp, s, glyph in EXTRA:
+        out.append(f"  {glyph}  U+{cp:04X}   Compose q {s}")
     return "\n".join(out) + "\n"
 
 

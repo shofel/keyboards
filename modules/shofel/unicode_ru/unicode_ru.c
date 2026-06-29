@@ -20,28 +20,40 @@
 
 ASSERT_COMMUNITY_MODULES_MIN_API_VERSION(1, 0, 0);
 
-bool ru_compose_mode = false;
+/* Default ON: compose is the standard Russian/symbol backend. leader,v flips
+ * it off (vim mode); leader,r/c/e set it back on. */
+bool ru_compose_mode = true;
 
-/* Emit one entry (by `enum unicode_names` index) as a Compose sequence. */
-static void ru_compose_emit_index(uint8_t idx) {
-    /* Strip shift (held + one-shot) so the code's keysyms are unambiguous: the
-     * glyph's case is already encoded in the code (q.. vs Q..), not in a live
-     * shift. Restore the user's mods afterwards. */
+/* Emit `Compose + <code>`, with shift stripped (the glyph's case is encoded in
+ * the code, q.. vs Q.., not in a live shift). Exported so the keymap can emit
+ * standalone glyphs like « » that aren't unicode_map keys. */
+void ru_compose_emit_code(const char *code) {
+    if (code == NULL || code[0] == '\0') {
+        return;
+    }
     uint8_t held = get_mods();
     clear_oneshot_mods();
     del_mods(MOD_MASK_SHIFT);
-
-    if (idx == U_DOT) {
-        send_string(".");
-    } else if (idx == U_COMMA) {
-        send_string(",");
-    } else if (idx < (sizeof(ru_compose_code) / sizeof(ru_compose_code[0])) &&
-               ru_compose_code[idx] != NULL) {
-        tap_code(KC_SCRL);  // Compose (Scroll Lock -> Multi_key via compose:sclk)
-        send_string(ru_compose_code[idx]);
-    }
-
+    tap_code(KC_SCRL);  // Compose (Scroll Lock -> Multi_key via compose:sclk)
+    send_string(code);
     set_mods(held);
+}
+
+/* Emit one entry (by `enum unicode_names` index). */
+static void ru_compose_emit_index(uint8_t idx) {
+    /* '.' / ',' are plain ASCII — send literally (no Compose), shift stripped. */
+    if (idx == U_DOT || idx == U_COMMA) {
+        uint8_t held = get_mods();
+        clear_oneshot_mods();
+        del_mods(MOD_MASK_SHIFT);
+        send_string(idx == U_DOT ? "." : ",");
+        set_mods(held);
+        return;
+    }
+    if (idx < (sizeof(ru_compose_code) / sizeof(ru_compose_code[0])) &&
+        ru_compose_code[idx] != NULL) {
+        ru_compose_emit_code(ru_compose_code[idx]);
+    }
 }
 
 /* When compose mode is active, intercept unicode_map keycodes (the RU_* / U_*

@@ -323,15 +323,12 @@ void leader_start_user(void) {
 void leader_end_user(void) {
   leader_resume();
 
-  /* Ru. Each mode-selecting leader sets the emission backend, so switching
-   * modes is unambiguous (compose vs hex vs vim). */
-  if (leader_sequence_one_key(KC_R)) {
-    ru_compose_mode = false;
-    toggle_enable(L_RUSSIAN);
-  }
-  if (leader_sequence_one_key(KC_L)) {
-    ru_compose_mode = false;
-    set_unicode_input_mode(UNICODE_MODE_LINUX);
+  /* Ru. Compose mode (rolling-safe; host xkb compose:sclk + ~/.XCompose) is the
+   * default Russian backend — leader,r and leader,c both select it. Vim mode
+   * (leader,v) is for vim. All unicode (Cyrillic, « », — № §) goes through
+   * compose now, so the old ibus hex backend (UNICODE_MODE_LINUX) is retired. */
+  if (leader_sequence_one_key(KC_R) || leader_sequence_one_key(KC_C)) {
+    ru_compose_mode = true;
     toggle_enable(L_RUSSIAN);
   }
   if (leader_sequence_one_key(KC_V)) {
@@ -339,11 +336,10 @@ void leader_end_user(void) {
     set_unicode_input_mode(UNICODE_MODE_VIM);
     toggle_enable(L_RUSSIAN);
   }
-  /* Compose mode: each Cyrillic glyph is one self-delimiting Compose sequence
-   * (host xkb compose:sclk). Robust to rolling, unlike the modal hex path. */
-  if (leader_sequence_one_key(KC_C)) {
+  /* Back to English: drop the active toggle layer. */
+  if (leader_sequence_one_key(KC_E)) {
     ru_compose_mode = true;
-    toggle_enable(L_RUSSIAN);
+    toggle_disable();
   }
 
   /* Disable any active toggle layer (one seq for all) */
@@ -434,13 +430,18 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
          * the pending one-shot mods too. */
         uint8_t mods = get_mods() | get_oneshot_mods();
         if (mods & MOD_MASK_SHIFT) {
-          /* Shifted: emit the guillemet. Strip shift (held + one-shot) so the
-           * unicode input sequence isn't corrupted, then restore held mods. */
-          uint8_t held = get_mods();
-          clear_oneshot_mods();
-          del_mods(MOD_MASK_SHIFT);
-          register_unicode(keycode == KK_LANGLE ? 0x00AB : 0x00BB); // « »
-          set_mods(held);
+          /* Shifted: emit the guillemet. Compose mode (default) → rolling-safe
+           * Compose sequence; vim mode → register_unicode. ru_compose_emit_code
+           * strips shift itself; the vim branch strips it manually. */
+          if (ru_compose_mode) {
+            ru_compose_emit_code(keycode == KK_LANGLE ? "q[" : "q]"); // « »
+          } else {
+            uint8_t held = get_mods();
+            clear_oneshot_mods();
+            del_mods(MOD_MASK_SHIFT);
+            register_unicode(keycode == KK_LANGLE ? 0x00AB : 0x00BB); // « »
+            set_mods(held);
+          }
         } else {
           tap_code16(keycode == KK_LANGLE ? KC_LABK : KC_RABK); // < >
         }

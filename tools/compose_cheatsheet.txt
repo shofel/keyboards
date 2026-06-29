@@ -69,3 +69,5 @@ Cantor compose-mode Russian — Compose is Scroll Lock.
   —  U+2014   Compose q 7
   №  U+2116   Compose q 8
   §  U+00A7   Compose q 9
+  «  U+00AB   Compose q [
+  »  U+00BB   Compose q ]

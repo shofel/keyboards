@@ -71,3 +71,5 @@ include "%L"
 <Multi_key> <q> <7> : "—" U2014
 <Multi_key> <q> <8> : "№" U2116
 <Multi_key> <q> <9> : "§" U00A7
+<Multi_key> <q> <bracketleft> : "«" U00AB
+<Multi_key> <q> <bracketright> : "»" U00BB

@@ -90,6 +90,8 @@ extern const uint32_t PROGMEM unicode_map[];
  * process_record_user; when it returns true the key was emitted via Compose. */
 extern bool ru_compose_mode;
 bool ru_compose_process(uint16_t keycode, keyrecord_t *record);
+/* Emit `Compose + <code>` for a standalone glyph (e.g. « ») from the keymap. */
+void ru_compose_emit_code(const char *code);
 
 // Combine lower and upper case letter as a single `unicode pair` key
 #define RU_A UP(RU_LC_A, RU_UC_A)
