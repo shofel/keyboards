@@ -323,16 +323,26 @@ void leader_start_user(void) {
 void leader_end_user(void) {
   leader_resume();
 
-  /* Ru */
+  /* Ru. Each mode-selecting leader sets the emission backend, so switching
+   * modes is unambiguous (compose vs hex vs vim). */
   if (leader_sequence_one_key(KC_R)) {
+    ru_compose_mode = false;
     toggle_enable(L_RUSSIAN);
   }
   if (leader_sequence_one_key(KC_L)) {
+    ru_compose_mode = false;
     set_unicode_input_mode(UNICODE_MODE_LINUX);
     toggle_enable(L_RUSSIAN);
   }
   if (leader_sequence_one_key(KC_V)) {
+    ru_compose_mode = false;
     set_unicode_input_mode(UNICODE_MODE_VIM);
+    toggle_enable(L_RUSSIAN);
+  }
+  /* Compose mode: each Cyrillic glyph is one self-delimiting Compose sequence
+   * (host xkb compose:sclk). Robust to rolling, unlike the modal hex path. */
+  if (leader_sequence_one_key(KC_C)) {
+    ru_compose_mode = true;
     toggle_enable(L_RUSSIAN);
   }
 
@@ -396,6 +406,11 @@ void leader_end_user(void) {
 }
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+  /* Compose-mode Russian: when active, the RU_ and U_ unicode_map keys are
+   * emitted as Compose sequences here (and consumed) before the hex path. */
+  if (ru_compose_process(keycode, record)) {
+    return false;
+  }
   switch (keycode) {
     case KC_ESC:
       if (record->event.pressed) {

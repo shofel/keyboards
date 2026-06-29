@@ -85,6 +85,12 @@ enum unicode_names {
 // unicode_map array is defined in introspection.c
 extern const uint32_t PROGMEM unicode_map[];
 
+/* Compose-mode Russian emission backend (see unicode_ru.c). The keymap toggles
+ * `ru_compose_mode` (leader,c) and calls `ru_compose_process` at the top of
+ * process_record_user; when it returns true the key was emitted via Compose. */
+extern bool ru_compose_mode;
+bool ru_compose_process(uint16_t keycode, keyrecord_t *record);
+
 // Combine lower and upper case letter as a single `unicode pair` key
 #define RU_A UP(RU_LC_A, RU_UC_A)
 #define RU_B UP(RU_LC_B, RU_UC_B)
