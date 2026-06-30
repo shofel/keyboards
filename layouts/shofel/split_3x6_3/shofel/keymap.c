@@ -587,12 +587,12 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    */
   [L_SYMBOLS] = LAYOUT_split_3x6_3(/*
        ·  `   —   $   ^   ·                        ·   !   *   |   &   /
-       ·      ~   @   #   ·                        ·   ?   :   +   %   -
+       ·      ~   @   #   ·                        ·   :   ?   +   %   -
        ·  ·   №   §   \   ⌦                        ⌫   =   ;           ·
                             __  __  SYM   __  __  __
        */
         XX,  KC_GRV, RU_MDASH,   KC_DLR, KC_CIRC,      XX,            XX,  KC_EXLM,  KC_ASTR,  KC_PIPE, KC_AMPR,  KC_SLASH,
-        XX,      XX,  KC_TILD,    KC_AT, KC_HASH,      XX,            XX,  KC_QUES,  KC_COLN,  KC_PLUS, KC_PERC,  KC_MINUS,
+        XX,      XX,  KC_TILD,    KC_AT, KC_HASH,      XX,            XX,  KC_COLN,  KC_QUES,  KC_PLUS, KC_PERC,  KC_MINUS,
         XX,      XX,   RU_NUM,  RU_SECT, KC_BSLS,  KC_DEL,       KC_BSPC,   KC_EQL,  KC_SCLN,       XX,      XX,  XX,
                                       __ ,  __ , KK_SYMBO,         __ ,  __ ,  __
   ),
