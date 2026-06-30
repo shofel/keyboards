@@ -2,7 +2,6 @@
 
 ## Layout
 
-- employ ucis for emoji: tulip and other flowers, tup=thumbup, ok, think, monocle
 - leader seq for gui+L_NUM : leader,w
 
 ### Known / accepted
@@ -14,21 +13,12 @@
 ## Modules
 
 - oneshot: allow press two oneshots at a time to schedule both
-- 8 mouse - bisect with digitizer. I see a digitizer in gnome settings. It should work now!
-  - radial mouse
-  - 2 mouse: turn one btn1 to a sticky - for selection (activate on tap; deactivate on tap)
-- 9 rawhid for seamless unicode modes in vim and linux
-- DONE (2026-06-29) dream: smoother unicode input on Linux outside of vim
-  - solved with compose mode (leader,r / leader,c, now the default): each Cyrillic
-    glyph is one X Compose sequence (Compose = Scroll Lock via xkb compose:sclk +
-    generated ~/.XCompose), so rolling Russian no longer mushes like the modal
-    ibus hex path did. leader,v = vim mode; leader,e = back to English.
-  - single source of truth: tools/gen_unicode_compose.py -> C table + ~/.XCompose
-    + cheatsheet. Host config is a home-manager module (nix/cantor-compose-ru.nix)
-    imported by the dotfiles flake.
-  - assumes OS layout is Latin (us) while typing.
+- 8 mouse
+  - bisect with digitizer. I see a digitizer in gnome settings. It should work now!
+  - radial mouse by gautrier
 - 88 bug: fast seq [os_sft c a] resolves to [C A], while [C a] expected
 - make ucis and unicodemap work together
+  - then: employ ucis for emoji: tulip and other flowers, tup=thumbup, ok, think, monocle
 
 ## Dactyl
 
