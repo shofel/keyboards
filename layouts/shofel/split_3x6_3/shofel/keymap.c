@@ -7,6 +7,8 @@
 #include QMK_KEYBOARD_H
 #include "introspection.h"
 #include "modules/shofel/unicode_ru/introspection.h"
+#include "digitizer.h"
+#include "bisect_geom.h"
 
 /*
  * Runtime debug logging — all off by default.
@@ -36,6 +38,18 @@ enum my_keycodes {
   OS_ALT,
   OS_GUI,
   OS_SFT,
+
+  /* Mouse mode switch (live on the mouse layers) */
+  KK_MM_STOCK,
+  KK_MM_BISECT,
+
+  /* Bisect mode actions */
+  KK_BI_L,
+  KK_BI_R,
+  KK_BI_U,
+  KK_BI_D,
+  KK_BI_CLICK,
+  KK_BI_RESET,
 };
 
 /* Layer names */
@@ -46,6 +60,7 @@ enum my_layer_names {
   L_NUM_NAV,
   L_FKEYS_SYS,
   L_MOUSE,
+  L_MOUSE_BISECT,
 };
 
 /* Simple thumb keys. */
@@ -369,7 +384,7 @@ void leader_end_user(void) {
     toggle_enable(L_FKEYS_SYS);
   }
   if (leader_sequence_one_key(KC_M)) {
-    toggle_enable(L_MOUSE);
+    toggle_enable(L_MOUSE_BISECT);
   }
   if (leader_sequence_one_key(KC_T)) {
     toggle_enable(L_NUM_NAV);
@@ -399,6 +414,15 @@ void leader_end_user(void) {
   }
 
   /* UCIS emoji — disabled (module conflict with unicodemap) */
+}
+
+/* Mouse: bisect mode — binary-search absolute positioning via the digitizer.
+ * The box lives here; layer_state_set_user arms/releases the digitizer when
+ * entering/leaving L_MOUSE_BISECT. */
+static bisect_box_t bi_box;
+
+static void bisect_move(void) {
+  digitizer_set_position(bisect_cx(&bi_box), bisect_cy(&bi_box));
 }
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
@@ -447,11 +471,58 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         }
       }
       return false;
+
+    /* Mouse mode switch */
+    case KK_MM_STOCK:
+      if (record->event.pressed) { toggle_enable(L_MOUSE); }
+      return false;
+    case KK_MM_BISECT:
+      if (record->event.pressed) { toggle_enable(L_MOUSE_BISECT); }
+      return false;
+
+    /* Bisect: halve the box and re-center the pointer; click holds the tip. */
+    case KK_BI_L:
+      if (record->event.pressed) { bisect_left(&bi_box);  bisect_move(); }
+      return false;
+    case KK_BI_R:
+      if (record->event.pressed) { bisect_right(&bi_box); bisect_move(); }
+      return false;
+    case KK_BI_U:
+      if (record->event.pressed) { bisect_up(&bi_box);    bisect_move(); }
+      return false;
+    case KK_BI_D:
+      if (record->event.pressed) { bisect_down(&bi_box);  bisect_move(); }
+      return false;
+    case KK_BI_RESET:
+      if (record->event.pressed) { bisect_reset(&bi_box); bisect_move(); }
+      return false;
+    case KK_BI_CLICK:
+      if (record->event.pressed) { digitizer_tip_switch_on(); }
+      else                       { digitizer_tip_switch_off(); }
+      return false;
+
     default:
       break;
   }
 
   return true;
+}
+
+/* Arm the digitizer while in bisect mode; release it on the way out (however
+ * the layer is left — mode switch, Esc, or leader,space). */
+layer_state_t layer_state_set_user(layer_state_t state) {
+  static bool bisect_was_on = false;
+  bool bisect_on = layer_state_cmp(state, L_MOUSE_BISECT);
+  if (bisect_on && !bisect_was_on) {
+    digitizer_in_range_on();
+    bisect_reset(&bi_box);
+    bisect_move();
+  } else if (!bisect_on && bisect_was_on) {
+    digitizer_tip_switch_off();  // release a held click before leaving
+    digitizer_in_range_off();
+  }
+  bisect_was_on = bisect_on;
+  return state;
 }
 
 /**
@@ -644,21 +715,46 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   ),
 
   /**
-   * Mouse layer.
+   * Mouse layer — STOCK mode (QMK mousekeys).
    *
-   * Activated by Leader,m (sticky). Exit with Esc (shift+space combo) or Leader,space.
+   * Reached via Leader,m, which starts in BISECT. Top-row left keys switch mode:
+   *   `,` = stock (this layer)   `c` = bisect.
+   * Exit any mouse mode with Esc (shift+space combo) or Leader,space.
    *
    * Left hand can apply modifiers, to perform shift+click, or ctrl+wheelup.
+   * (a2/a0/a1 = mousekey acceleration MS_ACL2/0/1.)
    */
   [L_MOUSE] = LAYOUT_split_3x6_3(/*
-        __  a2  __  __  __  __                       __  w↑  ↑  w↓  __  __
-        __  a1  __  __  __  __                       __  <-  c  ->  b2  __
-        __  a0  __  __  __  __                       __  b3  ↓  __  __  __
+        __  __  stk __  bis __                       __  w↑  ↑   w↓  __  __
+        __  __  a2  a0  a1  __                       __  <-  b1  ->  b2  __
+        __  __  __  __  __  __                       __  b3  ↓   __  __  __
                              __  __  __     __  __  __
        */
-        XX,      XX,        XX,       XX,      XX,  XX,       XX, MS_WHLU,  MS_UP  ,  MS_WHLD,      XX,  XX,
-        XX,      XX,   MS_ACL2,  MS_ACL0, MS_ACL1,  XX,       XX, MS_LEFT,  MS_BTN1,  MS_RGHT, MS_BTN2,  __,
-        XX,      XX,        XX,       XX,      XX,  XX,       XX, MS_BTN3,  MS_DOWN,       XX,      XX,  XX,
+        XX, XX, KK_MM_STOCK,      XX, KK_MM_BISECT, XX,   XX, MS_WHLU, MS_UP  , MS_WHLD,      XX, XX,
+        XX, XX,     MS_ACL2, MS_ACL0,      MS_ACL1, XX,   XX, MS_LEFT, MS_BTN1, MS_RGHT, MS_BTN2, __,
+        XX, XX,          XX,      XX,           XX, XX,   XX, MS_BTN3, MS_DOWN,      XX,      XX, XX,
+
+                                   __ ,    __ ,   __ ,         __ ,  __ ,  __
+  ),
+
+  /**
+   * Mouse layer — BISECT mode (digitizer binary search). DEFAULT via Leader,m.
+   *
+   * Pointer starts at screen center. The right-hand arrow cross halves the
+   * screen and re-centers each press:  ↑=up  <-=left  ->=right  ↓=down.
+   * clk = click (holds the digitizer tip; hold to drag).  rst = reset to full
+   * screen.  `,` switches to stock. Leaving bisect releases the digitizer
+   * (layer_state_set_user).
+   */
+  [L_MOUSE_BISECT] = LAYOUT_split_3x6_3(/*
+        __  __  stk __  bis __                       __  __  ↑    __   __  __
+        __  __  __  __  __  __                       __  <-  clk  ->   rst __
+        __  __  __  __  __  __                       __  __  ↓    __   __  __
+                             __  __  __     __  __  __
+       */
+        XX, XX, KK_MM_STOCK, XX, KK_MM_BISECT, XX,   XX,      XX,     KK_BI_U,      XX,          XX, XX,
+        XX, XX,          XX, XX,           XX, XX,   XX, KK_BI_L, KK_BI_CLICK, KK_BI_R, KK_BI_RESET, __,
+        XX, XX,          XX, XX,           XX, XX,   XX,      XX,     KK_BI_D,      XX,          XX, XX,
 
                                    __ ,    __ ,   __ ,         __ ,  __ ,  __
   ),
