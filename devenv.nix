@@ -2,7 +2,7 @@
 
 {
   # https://devenv.sh/packages/
-  packages = [ pkgs.qmk ];
+  packages = [ pkgs.qmk pkgs.dos2unix ];
 
   # To install qmk udev rules, add to your nixos configuration:
   # hardware.keyboard.qmk.enable = true;
