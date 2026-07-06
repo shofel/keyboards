@@ -21,16 +21,9 @@ TODO move to a docs
 - oneshot: allow press two oneshots at a time to schedule both
 TODO document a pitfall: the oneshot layer is not being stacked + explain why
 
-TODO next
-- mouse
-  - come up with keys to enable bisect and radial mouse modes
-    - use three top-row keys of the strong fingers on the left hand (, u c). The layer is mouse. comfort of the keys: u > c > ,
-      - , -> stock mode
-      - u -> radial mouse
-      - c -> bisect
-      - default is bisect
-  - bisect with digitizer. I see a digitizer in gnome settings. It should work now!. I mean the feature is about position the pointer like a binary search
-  - radial mouse by gautrier (plug his module)
+- mouse: radial mode (orbital_mouse) — deferred. It reuses the MS_* keycodes and
+  forces mousekeys off, so it can't coexist with stock. Revisit if willing to
+  drop stock. (Stock + bisect modes shipped — see docs/superpowers/specs.)
 
 - 88 bug: fast seq [os_sft c a] resolves to [C A], while [C a] expected
 - make ucis and unicodemap work together

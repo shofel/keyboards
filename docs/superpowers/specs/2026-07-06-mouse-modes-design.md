@@ -4,43 +4,40 @@ Date: 2026-07-06
 
 ## Goal
 
-Give the mouse layer three switchable **pointer modes**, selected from three
-top-row keys of the left hand's strong fingers (`,` `u` `c`, comfort u > c > ,):
+Give the mouse layer switchable **pointer modes**, selected from top-row keys of
+the left hand's strong fingers:
 
-- `,` (ring)  → **stock**  — the current QMK mousekeys (`MS_*`).
-- `u` (mid)   → **radial** — [getreuer's Orbital Mouse][om] community module (`OM_*`).
+- `,` (ring)  → **stock**  — the existing QMK mousekeys (`MS_*`), unchanged.
 - `c` (index) → **bisect** — binary-search absolute positioning via the QMK digitizer.
 
 **Default is bisect**: `leader,m` enters bisect every time (mode is not persisted).
 
-[om]: https://getreuer.info/posts/keyboards/orbital-mouse/index.html
+> **Radial mode (`u`) was dropped.** See "Radial — deferred" below.
 
-## Modes as three toggle sub-layers
+## Modes as toggle sub-layers
 
-Stock, radial and bisect each want their own *native* keycodes live on the layer
-(`MS_*`, `OM_*`, custom), so each mode is its own layer rather than one layer with
-a runtime flag:
+Stock and bisect each want their own native keycodes live on the layer (`MS_*`
+vs custom), so each mode is its own layer:
 
-    L_MOUSE          stock  (existing MS_* layer, unchanged except mode keys added)
-    L_MOUSE_RADIAL   radial (OM_* keys)
+    L_MOUSE          stock  (existing MS_* layer, + mode keys)
     L_MOUSE_BISECT   bisect (custom KK_BI_* keys)
 
-Layer count goes 6 → 8, which exactly fits `LAYER_STATE_8BIT`.
+Layer count goes 6 → 7 (fits `LAYER_STATE_8BIT`).
 
-These are ordinary **toggle layers** driven by the existing single-active-toggle
-system (`toggle_enable` / `toggle_disable`, one at a time, leader-masked). The three
-mode keys are custom keycodes present on **all three** sub-layers (top-left cols
-2/3/4, currently empty), each calling `toggle_enable(<its layer>)`. Switching mode
-therefore swaps the one active toggle layer. `leader,m` calls
-`toggle_enable(L_MOUSE_BISECT)`. Exit stays as today: Esc (shift+space combo) or
+These are ordinary **toggle layers** on the existing single-active-toggle system
+(`toggle_enable` / `toggle_disable`, one at a time, leader-masked). The two mode
+keys are custom keycodes (`KK_MM_STOCK`, `KK_MM_BISECT`) present on **both**
+sub-layers (top-left cols 2/4, `,` and `c`), each calling `toggle_enable(<its
+layer>)`. Switching mode swaps the one active toggle layer. `leader,m` calls
+`toggle_enable(L_MOUSE_BISECT)`. Exit is unchanged: Esc (shift+space combo) or
 `leader,space` → `toggle_disable` / `toggle_reset`.
 
 ## Bisect — algorithm
 
 Keep a normalized bounding box `{x0,x1,y0,y1}` in digitizer coordinates (0..1,
 origin top-left). Each halving key discards the far half along one axis and moves
-the absolute pointer to the **center of the surviving box** ("halve & re-center" —
-literal binary search):
+the absolute pointer to the **center of the surviving box** ("halve & re-center"
+— literal binary search):
 
     left   : x1 = (x0+x1)/2
     right  : x0 = (x0+x1)/2
@@ -49,42 +46,40 @@ literal binary search):
     reset  : box = full screen
     (after every one) digitizer_set_position((x0+x1)/2, (y0+y1)/2)
 
-Key placement on `L_MOUSE_BISECT` mirrors the stock arrow cluster (right hand):
-up / left / down / right for the four halvings, index = **click**, plus a **reset**
-key. Click holds the digitizer tip switch (down on press, up on release) — a real
-click duration, drag-capable.
-
-The box geometry is pure integer-free float math extracted into a header-only
-module `bisect_geom.h`, unit-tested off-target (see Testing).
+Keys mirror the stock arrow cluster (right hand): up / left / down / right for
+the four halvings, index = **click**, plus a **reset** key. Click holds the
+digitizer tip switch (down on press, up on release) — a real click duration,
+drag-capable. The box math lives in header-only `bisect_geom.h`, unit-tested
+off-target (see Testing).
 
 ## Enter / exit hook
 
 `layer_state_set_user` watches `L_MOUSE_BISECT`:
 
 - became active   → `digitizer_in_range_on()`, reset box, center pointer.
-- became inactive → `digitizer_in_range_off()`.
+- became inactive → release a held tip, then `digitizer_in_range_off()`.
 
-This fires however the layer is left (mode switch, Esc, `leader,space`), so the
-digitizer is always released when leaving bisect.
+Fires however the layer is left (mode switch, Esc, `leader,space`), so the
+digitizer is always released when leaving bisect. Outside bisect the digitizer
+is out of range, so the host ignores it and normal input is unaffected.
 
-## Radial — Orbital Mouse integration
+## Radial — deferred
 
-- Vendor `getreuer/qmk-modules` as a git submodule at `modules/getreuer`
-  (upstream-prescribed install; the repo's own `shofel/*` modules stay in-tree).
-- Register `"getreuer/orbital_mouse"` in `keymap.json` `modules`.
-- `L_MOUSE_RADIAL` uses `OM_U/OM_D` (move along heading), `OM_L/OM_R` (steer),
-  `OM_BTN1/2`, wheel `OM_W_*`, mapped onto the mouse layout.
-- Keep `MOUSEKEY_ENABLE = yes` (stock mode needs it); orbital coexists.
-- Requires QMK community modules (≥ 0.28.0). Build note: `git submodule update
-  --init` after clone.
+The plan was to add a radial/polar mode via getreuer's Orbital Mouse community
+module (`getreuer/orbital_mouse`). Dropped after inspecting the module: its
+`OM_*` keycodes are **aliases of the `MS_*` mousekeys** (`OM_U == MS_UP`, …) and
+its `qmk_module.json` sets `"mousekey": false` — it *replaces* QMK mousekeys and
+repurposes their keycodes. So "stock mousekeys" and "orbital radial" cannot both
+be live modes in one firmware. Keeping true stock mousekeys (with the tuned
+`MK_*` config) was chosen over radial. Revisit only if willing to drop stock, in
+which case orbital's cardinal (`OM_CS_*`) keys can stand in for a stock-like feel.
 
 ## Testing
 
 - **Unit (off-target, test-first):** `tools/test_bisect_geom.c` compiles
   `bisect_geom.h` with plain `gcc` and asserts halving sequences + centers,
-  including axis direction (catches an inverted up/down). Run: `make test-bisect`
-  (or `gcc` one-liner documented in the test).
-- **Compile:** `make build` must compile cleanly (verification bar for this PR).
+  including axis direction. Run: `make test-bisect`.
+- **Compile:** `make build` compiles cleanly (verification bar for this PR).
 - **Hardware QA (owner: user):** flash (`make flash`) and physically verify on the
   Cantor. Automated tests cannot validate real pointer behavior.
 
@@ -95,12 +90,11 @@ digitizer is always released when leaving bisect.
    (one line). Flagged, not pre-solved.
 2. **Multi-monitor:** the host maps 0..1 across the whole virtual desktop, so
    "center" is the middle of all displays, not the focused one.
-3. **Orbital feel / speed curve** is tunable in `config.h` after trying it.
-4. **Flash size:** mousekeys + orbital + digitizer together; LTO is on. `make build`
-   confirms it fits.
+3. **Flash size:** mousekeys + digitizer together; LTO is on. `make build` confirms
+   it fits (≈37.8 KB).
 
 ## Out of scope
 
-- No auto-reset of the bisect box after a click (reset is one key; keeps it
-  predictable). Revisit if QA wants it.
+- No auto-reset of the bisect box after a click (reset is one key; predictable).
 - No persistence of the last-used mode (always start in bisect, by request).
+- `u` is unused on the mouse layers (was to be radial).
