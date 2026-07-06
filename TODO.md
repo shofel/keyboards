@@ -1,10 +1,16 @@
 # TODO
 
+TODO: for each layer: sync comment docs and code
+      - can we do it with a cheap and fast haiku?
+      - shall we do it as a follow-up for each PR/feature?
+
 ## Layout
 
+TODO: just remove this point. It's useful with plain yi+dt+{x . w}
 - leader seq for gui+L_NUM : leader,w
 
 ### Known / accepted
+TODO move to a docs
 - kitty control doesn't work while Ru active: leader,k sends win+T fine, but the
   follow-up control keys are typed on the Russian layer (come out Cyrillic).
   Not a leader bug (leader,k itself records correctly). Left as-is — fixing would
@@ -13,9 +19,19 @@
 ## Modules
 
 - oneshot: allow press two oneshots at a time to schedule both
-- 8 mouse
-  - bisect with digitizer. I see a digitizer in gnome settings. It should work now!
-  - radial mouse by gautrier
+TODO document a pitfall: the oneshot layer is not being stacked + explain why
+
+TODO next
+- mouse
+  - come up with keys to enable bisect and radial mouse modes
+    - use three top-row keys of the strong fingers on the left hand (, u c). The layer is mouse. comfort of the keys: u > c > ,
+      - , -> stock mode
+      - u -> radial mouse
+      - c -> bisect
+      - default is bisect
+  - bisect with digitizer. I see a digitizer in gnome settings. It should work now!. I mean the feature is about position the pointer like a binary search
+  - radial mouse by gautrier (plug his module)
+
 - 88 bug: fast seq [os_sft c a] resolves to [C A], while [C a] expected
 - make ucis and unicodemap work together
   - then: employ ucis for emoji: tulip and other flowers, tup=thumbup, ok, think, monocle
