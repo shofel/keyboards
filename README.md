@@ -84,7 +84,13 @@ To regenerate `compile_commands.json`:
 qmk compile -kb cantor -km shofel --compiledb
 ```
 
-See [TODO.md](TODO.md) for planned improvements and tasks.
+### Conventions
+
+- Keep each layer's ASCII comment in sync with its `LAYOUT` array. When a PR
+  changes a layer, resync that layer's comment block in the same PR.
+
+See [TODO.md](TODO.md) for planned improvements, and
+[docs/known-limitations.md](docs/known-limitations.md) for accepted quirks.
 
 ## Reference
 

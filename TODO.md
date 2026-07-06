@@ -1,25 +1,8 @@
 # TODO
 
-TODO: for each layer: sync comment docs and code
-      - can we do it with a cheap and fast haiku?
-      - shall we do it as a follow-up for each PR/feature?
-
-## Layout
-
-TODO: just remove this point. It's useful with plain yi+dt+{x . w}
-- leader seq for gui+L_NUM : leader,w
-
-### Known / accepted
-TODO move to a docs
-- kitty control doesn't work while Ru active: leader,k sends win+T fine, but the
-  follow-up control keys are typed on the Russian layer (come out Cyrillic).
-  Not a leader bug (leader,k itself records correctly). Left as-is — fixing would
-  mean leader,k also dropping the toggle layer first.
-
 ## Modules
 
 - oneshot: allow press two oneshots at a time to schedule both
-TODO document a pitfall: the oneshot layer is not being stacked + explain why
 
 TODO next
 - mouse
