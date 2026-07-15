@@ -215,9 +215,11 @@ const uint16_t PROGMEM ralt_combo[] = {KC_R, KC_L, COMBO_END};
 const uint16_t PROGMEM rgui_combo[] = {KC_I, KC_Y, COMBO_END};
 /* G+V -> "  (took over the old backspace slot; backspace now lives on SYM). */
 const uint16_t PROGMEM dquo_combo[] = {KC_G, KC_V, COMBO_END};
-/* Q+B -> one-shot FKEYS/SYS layer. SYM no longer needs this combo: it is reached
- * via the left thumb (KK_SYMBO) and the RET layer-tap (right inner thumb). */
-const uint16_t PROGMEM fkeys_combo[] = {KC_B, KC_Q, COMBO_END};
+/* / + - -> one-shot FKEYS/SYS layer. A vertical same-column combo on the right
+ * pinky column ('/' top-right pinky, '-' home-row right pinky). SYM no longer needs
+ * this combo: it is reached via the left thumb (KK_SYMBO) and the RET layer-tap
+ * (right inner thumb). */
+const uint16_t PROGMEM fkeys_combo[] = {KC_SLASH, KC_MINUS, COMBO_END};
 
 /* Indices for all combos (designated initializers) */
 enum combos {
