@@ -73,3 +73,6 @@ include "%L"
 <Multi_key> <q> <9> : "§" U00A7
 <Multi_key> <q> <bracketleft> : "«" U00AB
 <Multi_key> <q> <bracketright> : "»" U00BB
+<Multi_key> <dollar> <l> : "₺" U20BA
+<Multi_key> <dollar> <r> : "₽" U20BD
+<Multi_key> <dollar> <e> : "€" U20AC

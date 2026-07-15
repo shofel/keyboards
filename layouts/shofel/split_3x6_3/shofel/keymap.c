@@ -388,6 +388,11 @@ void leader_end_user(void) {
   if (leader_sequence_one_key(KC_M)) {
     toggle_enable(L_MOUSE_BISECT);
   }
+  /* Currency signs (money): leader,m,<l|r|e> -> ₺ ₽ € via Compose. Two-key
+   * sequences, so they coexist with leader,m (mouse-layer toggle, one key). */
+  if (leader_sequence_two_keys(KC_M, KC_L)) { ru_compose_emit_code("$l"); } // ₺ lira  (TRY)
+  if (leader_sequence_two_keys(KC_M, KC_R)) { ru_compose_emit_code("$r"); } // ₽ ruble (RUB)
+  if (leader_sequence_two_keys(KC_M, KC_E)) { ru_compose_emit_code("$e"); } // € euro  (EUR)
   if (leader_sequence_one_key(KC_T)) {
     toggle_enable(L_NUM_NAV);
   }

@@ -14,7 +14,7 @@ endif
 
 # Convenience targets — build and flash the Cantor keymap.
 # Flash: put the keyboard in bootloader mode (double-tap reset) before running.
-.PHONY: build flash test-bisect
+.PHONY: build flash test-bisect test-compose
 
 build:
 	qmk compile -kb cantor -km shofel
@@ -25,6 +25,9 @@ flash: build
 # Off-target unit test for bisect_geom.h (pure host math; no QMK, no hardware).
 test-bisect:
 	gcc -Wall -Wextra -Ilayouts/shofel/split_3x6_3/shofel -o /tmp/test_bisect_geom tools/test_bisect_geom.c -lm && /tmp/test_bisect_geom
+
+test-compose:
+	python3 tools/test_gen_compose.py
 
 %:
 	+$(MAKE) -C $(QMK_FIRMWARE_ROOT) $(MAKECMDGOALS) QMK_USERSPACE=$(QMK_USERSPACE)

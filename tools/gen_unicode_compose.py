@@ -48,8 +48,17 @@ EXTRA = [
     (0x00BB, "]", "»"),
 ]
 
+# Currency signs — emitted by leader seqs (leader,m,<l|r|e>) via
+# ru_compose_emit_code. Standalone glyphs under a private '$' prefix
+# (self-documenting: $ = money). Like EXTRA: XCompose + cheatsheet, no C-table row.
+CURRENCY = [
+    (0x20BA, "l", "₺"),  # Turkish lira (leader,m,l — TRY)
+    (0x20BD, "r", "₽"),  # ruble        (leader,m,r — RUB)
+    (0x20AC, "e", "€"),  # euro         (leader,m,e — EUR)
+]
+
 # Keysym names for selector chars whose keysym name isn't the char itself.
-KEYSYM = {"[": "bracketleft", "]": "bracketright"}
+KEYSYM = {"[": "bracketleft", "]": "bracketright", "$": "dollar"}
 def keysym(ch):
     return KEYSYM.get(ch, ch)
 
@@ -90,6 +99,8 @@ def gen_xcompose():
         out.append(f'<Multi_key> <{keysym(p)}> <{keysym(s)}> : "{glyph}" U{cp:04X}')
     for cp, s, glyph in EXTRA:
         out.append(f'<Multi_key> <q> <{keysym(s)}> : "{glyph}" U{cp:04X}')
+    for cp, s, glyph in CURRENCY:
+        out.append(f'<Multi_key> <dollar> <{keysym(s)}> : "{glyph}" U{cp:04X}')
     return "\n".join(out) + "\n"
 
 
@@ -99,6 +110,8 @@ def gen_cheatsheet():
         out.append(f"  {glyph}  U+{cp:04X}   Compose {' '.join(code)}")
     for cp, s, glyph in EXTRA:
         out.append(f"  {glyph}  U+{cp:04X}   Compose q {s}")
+    for cp, s, glyph in CURRENCY:
+        out.append(f"  {glyph}  U+{cp:04X}   Compose $ {s}")
     return "\n".join(out) + "\n"
 
 
