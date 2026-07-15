@@ -6,7 +6,7 @@ SPACE_CADET_ENABLE = no
 GRAVE_ESC_ENABLE = no
 MAGIC_ENABLE = no
 
-MOUSEKEY_ENABLE = yes      # Mouse keys
+MOUSEKEY_ENABLE = no       # stock mousekeys replaced by getreuer/orbital_mouse (polar)
 EXTRAKEY_ENABLE = yes      # Audio control and System control
 DIGITIZER_ENABLE = yes     # Touchscreen. For bisection
 

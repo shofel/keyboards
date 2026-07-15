@@ -7,26 +7,26 @@ Date: 2026-07-06
 Give the mouse layer switchable **pointer modes**, selected from top-row keys of
 the left hand's strong fingers:
 
-- `,` (ring)  → **stock**  — the existing QMK mousekeys (`MS_*`), unchanged.
+- `,` (ring)  → **polar**  — Orbital Mouse (`getreuer/orbital_mouse`), a heading-based pointer (`OM_*`).
 - `c` (index) → **bisect** — binary-search absolute positioning via the QMK digitizer.
 
 **Default is bisect**: `leader,m` enters bisect every time (mode is not persisted).
 
-> **Radial mode (`u`) was dropped.** See "Radial — deferred" below.
+> **Polar mode replaced the original "stock" QMK mousekeys.** See "Polar (Orbital Mouse) — shipped" below.
 
 ## Modes as toggle sub-layers
 
-Stock and bisect each want their own native keycodes live on the layer (`MS_*`
+Polar and bisect each want their own native keycodes live on the layer (`OM_*`
 vs custom), so each mode is its own layer:
 
-    L_MOUSE          stock  (existing MS_* layer, + mode keys)
+    L_MOUSE          polar  (Orbital Mouse OM_* layer, + mode keys)
     L_MOUSE_BISECT   bisect (custom KK_BI_* keys)
 
 Layer count goes 6 → 7 (fits `LAYER_STATE_8BIT`).
 
 These are ordinary **toggle layers** on the existing single-active-toggle system
 (`toggle_enable` / `toggle_disable`, one at a time, leader-masked). The two mode
-keys are custom keycodes (`KK_MM_STOCK`, `KK_MM_BISECT`) present on **both**
+keys are custom keycodes (`KK_MM_POLAR`, `KK_MM_BISECT`) present on **both**
 sub-layers (top-left cols 2/4, `,` and `c`), each calling `toggle_enable(<its
 layer>)`. Switching mode swaps the one active toggle layer. `leader,m` calls
 `toggle_enable(L_MOUSE_BISECT)`. Exit is unchanged: Esc (shift+space combo) or
@@ -63,16 +63,21 @@ Fires however the layer is left (mode switch, Esc, `leader,space`), so the
 digitizer is always released when leaving bisect. Outside bisect the digitizer
 is out of range, so the host ignores it and normal input is unaffected.
 
-## Radial — deferred
+## Polar (Orbital Mouse) — shipped
 
-The plan was to add a radial/polar mode via getreuer's Orbital Mouse community
-module (`getreuer/orbital_mouse`). Dropped after inspecting the module: its
-`OM_*` keycodes are **aliases of the `MS_*` mousekeys** (`OM_U == MS_UP`, …) and
-its `qmk_module.json` sets `"mousekey": false` — it *replaces* QMK mousekeys and
-repurposes their keycodes. So "stock mousekeys" and "orbital radial" cannot both
-be live modes in one firmware. Keeping true stock mousekeys (with the tuned
-`MK_*` config) was chosen over radial. Revisit only if willing to drop stock, in
-which case orbital's cardinal (`OM_CS_*`) keys can stand in for a stock-like feel.
+`L_MOUSE` is now **polar** control via getreuer's Orbital Mouse community module
+(`getreuer/orbital_mouse`, vendored under `modules/getreuer/`). The pointer moves
+along a heading: `OM_U`/`OM_D` go forward/backward, `OM_L`/`OM_R` steer, and
+`OM_SLOW`/`OM_FAST` change speed while held; buttons and wheel are `OM_BTN*` /
+`OM_W_*`.
+
+Orbital's `OM_*` keycodes are **aliases of the `MS_*` mousekeys** (`OM_U == MS_UP`,
+…) and its `qmk_module.json` sets `"mousekey": false` — it *replaces* QMK
+mousekeys. So stock mousekeys and orbital cannot both be live; adopting polar
+meant dropping stock. Accordingly `MOUSEKEY_ENABLE = no`, and the old `MK_*`
+tuning in `config.h` was removed. Bisect is unaffected (it uses the digitizer,
+not mousekeys), and `leader,m` still defaults to bisect — press the `,` mode key
+for polar.
 
 ## Testing
 

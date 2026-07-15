@@ -7,6 +7,7 @@
 #include QMK_KEYBOARD_H
 #include "introspection.h"
 #include "modules/shofel/unicode_ru/introspection.h"
+#include "modules/getreuer/orbital_mouse/introspection.h"
 #include "digitizer.h"
 #include "bisect_geom.h"
 
@@ -40,7 +41,7 @@ enum my_keycodes {
   OS_SFT,
 
   /* Mouse mode switch (live on the mouse layers) */
-  KK_MM_STOCK,
+  KK_MM_POLAR,
   KK_MM_BISECT,
 
   /* Bisect mode actions */
@@ -480,7 +481,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
       return false;
 
     /* Mouse mode switch */
-    case KK_MM_STOCK:
+    case KK_MM_POLAR:
       if (record->event.pressed) { toggle_enable(L_MOUSE); }
       return false;
     case KK_MM_BISECT:
@@ -722,24 +723,25 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   ),
 
   /**
-   * Mouse layer — STOCK mode (QMK mousekeys).
+   * Mouse layer — POLAR mode (Orbital Mouse, getreuer/orbital_mouse).
    *
    * Reached via Leader,m, which starts in BISECT. Top-row left keys switch mode:
-   *   `,` = stock (this layer)   `c` = bisect.
+   *   `,` = polar (this layer)   `c` = bisect.
    * Exit any mouse mode with Esc (shift+space combo) or Leader,space.
    *
-   * Left hand can apply modifiers, to perform shift+click, or ctrl+wheelup.
-   * (a2/a0/a1 = mousekey acceleration MS_ACL2/0/1.)
+   * Polar/heading control: fwd/bwd move the pointer forward/backward along a
+   * heading; ←/→ steer that heading; slo/fst change speed while held. Left hand
+   * can apply modifiers (shift+click, ctrl+wheelup).
    */
   [L_MOUSE] = LAYOUT_split_3x6_3(/*
-        __  __  stk __  bis __                       __  w↑  ↑   w↓  __  __
-        __  __  a2  a0  a1  __                       __  <-  b1  ->  b2  __
-        __  __  __  __  __  __                       __  b3  ↓   __  __  __
+        __  __  pol __  bis __                       __  w↑  fwd w↓  __  __
+        __  __  slo __  fst __                       __  ←   b1  →   b2  __
+        __  __  __  __  __  __                       __  b3  bwd __  __  __
                              __  __  __     __  __  __
        */
-        XX, XX, KK_MM_STOCK,      XX, KK_MM_BISECT, XX,   XX, MS_WHLU, MS_UP  , MS_WHLD,      XX, XX,
-        XX, XX,     MS_ACL2, MS_ACL0,      MS_ACL1, XX,   XX, MS_LEFT, MS_BTN1, MS_RGHT, MS_BTN2, __,
-        XX, XX,          XX,      XX,           XX, XX,   XX, MS_BTN3, MS_DOWN,      XX,      XX, XX,
+        XX, XX, KK_MM_POLAR,      XX, KK_MM_BISECT, XX,   XX, OM_W_U, OM_U   , OM_W_D,      XX, XX,
+        XX, XX,     OM_SLOW,      XX,      OM_FAST, XX,   XX, OM_L  , OM_BTN1, OM_R   , OM_BTN2, __,
+        XX, XX,          XX,      XX,           XX, XX,   XX, OM_BTN3, OM_D   ,      XX,      XX, XX,
 
                                    __ ,    __ ,   __ ,         __ ,  __ ,  __
   ),
@@ -750,16 +752,16 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    * Pointer starts at screen center. The right-hand arrow cross halves the
    * screen and re-centers each press:  ↑=up  <-=left  ->=right  ↓=down.
    * clk = click (holds the digitizer tip; hold to drag).  rst = reset to full
-   * screen.  `,` switches to stock. Leaving bisect releases the digitizer
+   * screen.  `,` switches to polar. Leaving bisect releases the digitizer
    * (layer_state_set_user).
    */
   [L_MOUSE_BISECT] = LAYOUT_split_3x6_3(/*
-        __  __  stk __  bis __                       __  __  ↑    __   __  __
+        __  __  pol __  bis __                       __  __  ↑    __   __  __
         __  __  __  __  __  __                       __  <-  clk  ->   rst __
         __  __  __  __  __  __                       __  __  ↓    __   __  __
                              __  __  __     __  __  __
        */
-        XX, XX, KK_MM_STOCK, XX, KK_MM_BISECT, XX,   XX,      XX,     KK_BI_U,      XX,          XX, XX,
+        XX, XX, KK_MM_POLAR, XX, KK_MM_BISECT, XX,   XX,      XX,     KK_BI_U,      XX,          XX, XX,
         XX, XX,          XX, XX,           XX, XX,   XX, KK_BI_L, KK_BI_CLICK, KK_BI_R, KK_BI_RESET, __,
         XX, XX,          XX, XX,           XX, XX,   XX,      XX,     KK_BI_D,      XX,          XX, XX,
 
