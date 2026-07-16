@@ -6,11 +6,9 @@ TODO: for each layer: sync comment docs and code
 
 ## Layout
 
-TODO: just remove this point. It's useful with plain yi+dt+{x . w}
-- leader seq for gui+L_NUM : leader,w
-
 ### Known / accepted
 TODO move to a docs
+
 - kitty control doesn't work while Ru active: leader,k sends win+T fine, but the
   follow-up control keys are typed on the Russian layer (come out Cyrillic).
   Not a leader bug (leader,k itself records correctly). Left as-is — fixing would
@@ -21,11 +19,8 @@ TODO move to a docs
 - oneshot: allow press two oneshots at a time to schedule both
 TODO document a pitfall: the oneshot layer is not being stacked + explain why
 
-- mouse: radial mode (orbital_mouse) — deferred. It reuses the MS_* keycodes and
-  forces mousekeys off, so it can't coexist with stock. Revisit if willing to
-  drop stock. (Stock + bisect modes shipped — see docs/superpowers/specs.)
-
 - 88 bug: fast seq [os_sft c a] resolves to [C A], while [C a] expected
+
 - make ucis and unicodemap work together
   - then: employ ucis for emoji: tulip and other flowers, tup=thumbup, ok, think, monocle
 
