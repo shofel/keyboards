@@ -1,19 +1,23 @@
 #!/usr/bin/env python3
 """
-Single source of truth for Cantor "compose mode" Russian unicode input.
+Single source of truth for Cantor "compose mode" unicode emission.
+
+Despite the ru_* naming, this covers every glyph the Cantor emits via Compose,
+not just Russian: Cyrillic, typographic symbols (« » — № §), and currency (₺ ₽ €).
 
 Emits, from one table:
   --table     <path>  C array `ru_compose_code[]` indexed by `enum unicode_names`
                       (include from the unicode_ru module).
   --xcompose  <path>  ~/.XCompose block mapping each Compose sequence -> glyph.
-  --cheatsheet<path>  human-readable Cyrillic -> sequence reference.
+  --cheatsheet<path>  human-readable glyph -> sequence reference.
 
-Scheme (collision-free, 3 keystrokes/letter):
+Scheme (collision-free private prefixes; every sequence is exactly 3 keys):
   Compose(=Scroll Lock via xkb compose:sclk) + prefix + selector
-    prefix 'q'  -> lowercase Cyrillic / typographic symbols
+    prefix 'q'  -> lowercase Cyrillic / typographic symbols (« » via q[ q])
     prefix 'Q'  -> uppercase Cyrillic   (Shift+q -> keysym Q)
-  Every sequence is exactly 3 keys, so no sequence is a prefix of another, and
-  the private 'q'/'Q' namespace does not collide with the included system table.
+    prefix '$'  -> currency (₺ ₽ €), self-documenting money prefix
+  No sequence is a prefix of another, and the private prefixes do not collide
+  with the included system table.
 """
 import argparse
 

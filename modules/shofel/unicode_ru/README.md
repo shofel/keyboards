@@ -1,6 +1,10 @@
-# Russian Unicode Support Community Module
+# Compose Unicode Community Module (`unicode_ru`)
 
-Provides Russian Unicode input and related functionality for QMK keymaps with unicode_map definitions for Cyrillic alphabet.
+Provides Compose-based Unicode emission for QMK keymaps. Despite the `unicode_ru`
+name, it covers Russian Cyrillic **and** the typographic symbols (« » — № §) and
+currency signs (₺ ₽ €) the Cantor emits — all as rolling-safe Compose sequences.
+Cyrillic is driven by `unicode_map`; standalone glyphs (symbols, currency) are
+emitted directly via the exported `ru_compose_emit_code`.
 
 ## Documentation
 
