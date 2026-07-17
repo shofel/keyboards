@@ -1,8 +1,19 @@
 # TODO
 
-## Triage — ranked (2026-07-17)
+## Triage method (reproducible — for humans and agents)
 
-Ranked by a weighted composite score: **Impact×0.45 + Ease×0.30 + Leverage×0.15 + Clarity×0.10** (each factor 1–5). Impact = daily friction removed; Ease = cheapness to do; Leverage = unblocks other work; Clarity = how well-defined the task is. Reweight and the order moves — bugs float up because this is a daily driver.
+Each task scores **S = Impact×0.45 + Ease×0.30 + Leverage×0.15 + Clarity×0.10**, every factor an integer 1–5:
+
+- **Impact** — daily friction removed if done (5 = bites every day; 1 = never noticed).
+- **Ease** — cheapness, i.e. inverse effort (5 = minutes; 1 = weeks, hardware, or a rewrite).
+- **Leverage** — how much it unblocks or simplifies other tasks (5 = foundational; 1 = self-contained dead-end).
+- **Clarity** — how well-defined the work is (5 = exact fix known; 1 = vague idea needing its own design).
+
+Procedure: score the four factors per task, take the weighted sum, round to 2 decimals, sort
+descending; on ties the earlier-listed task stays first. Re-rank whenever a task is added or an
+estimate changes. Bugs tend to top the list because Impact carries the most weight on a daily driver.
+
+## Ranked — 2026-07-17
 
 | # | Score | Task | Where |
 |---|-------|------|-------|
