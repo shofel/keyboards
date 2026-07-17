@@ -81,9 +81,10 @@ enum my_layer_names {
  *                          toggle layer so the sequence keys read from the base
  *                          layout (else e.g. leader,t would read num/nav's key
  *                          at that position instead of KC_T)
- *   mod_ru_suspend_depth — nested mod holds: mask Russian only, so Ctrl/Alt/Gui
- *                          fall through to the Latin base while num/nav etc.
- *                          stay put
+ *   mod one-shots        — while a Ctrl/Alt/Gui one-shot holds its mod, mask
+ *                          Russian only, so the mod falls through to the Latin
+ *                          base while num/nav etc. stay put. Derived from
+ *                          one-shot state (mod_ru_suspended), never a counter.
  * applied_layer is the overlay we physically turned on. The reconcile only ever
  * touches our own layer, so it never disturbs a native OSL momentary layer or
  * the base layer (no layer_move).
@@ -93,13 +94,28 @@ enum my_layer_names {
 static uint8_t active_toggle        = TOGGLE_NONE;
 static uint8_t applied_layer        = TOGGLE_NONE;
 static bool    leader_active        = false;
-static uint8_t mod_ru_suspend_depth = 0;
+
+/* Russian is masked while any Ctrl/Alt/Gui one-shot physically holds its mod, so
+ * that chord falls through to the Latin base. Derived from one-shot state rather
+ * than a +1/-1 counter, which used to leak (stuck > 0) when a mod one-shot was
+ * re-tapped while queued — leaving Russian impossible to re-enable until a
+ * toggle_disable (leader,e / Esc / leader,space) forced the counter back to 0. */
+static bool mod_ru_suspended(void) {
+    for (size_t i = 0; i < oneshot_state_entries_size; i++) {
+        uint16_t trigger = oneshot_state_entries[i].trigger;
+        if ((trigger == OS_CTL || trigger == OS_ALT || trigger == OS_GUI) &&
+            oneshot_mod_held(oneshot_state_entries[i].state)) {
+            return true;
+        }
+    }
+    return false;
+}
 
 static void toggle_apply(void) {
     uint8_t want = active_toggle;
     if (leader_active) {
         want = TOGGLE_NONE;
-    } else if (active_toggle == L_RUSSIAN && mod_ru_suspend_depth > 0) {
+    } else if (active_toggle == L_RUSSIAN && mod_ru_suspended()) {
         want = TOGGLE_NONE;
     }
     if (applied_layer == want) {
@@ -121,25 +137,12 @@ static void toggle_enable(uint8_t layer) {
 
 static void toggle_disable(void) {
     active_toggle = TOGGLE_NONE;
-    mod_ru_suspend_depth = 0;
     toggle_apply();
 }
 
 static void toggle_reset(void) {
     oneshot_cancel();
     toggle_disable();
-}
-
-void mod_ru_suspend(void) {
-    mod_ru_suspend_depth += 1;
-    toggle_apply();
-}
-
-void mod_ru_resume(void) {
-    if (mod_ru_suspend_depth > 0) {
-        mod_ru_suspend_depth -= 1;
-    }
-    toggle_apply();
 }
 
 void leader_suspend(void) {
@@ -319,16 +322,15 @@ bool is_oneshot_ignored_key(uint16_t keycode) {
 }
 
 void oneshot_process_event(oneshot_state_entry_t *oneshot) {
+  /* A Ctrl/Alt/Gui one-shot changing state may flip whether Russian should be
+   * masked, so re-derive it from the current one-shot states. (Shift does not
+   * suspend Russian.) mod_ru_suspended() reads the states directly, so there is
+   * no counter to keep balanced. */
   if ((oneshot->trigger == OS_CTL) ||
       (oneshot->trigger == OS_ALT) ||
       (oneshot->trigger == OS_GUI))
   {
-    switch (oneshot->state) {
-      case os_down_unused: mod_ru_suspend(); break;
-      case os_down_used: break;
-      case os_up_queued: break;
-      case os_up_unqueued: mod_ru_resume(); break;
-    }
+    toggle_apply();
   }
 }
 
