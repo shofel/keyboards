@@ -432,15 +432,7 @@ void leader_end_user(void) {
 static bisect_box_t bi_box;
 
 static void bisect_move(void) {
-  float cx = bisect_cx(&bi_box), cy = bisect_cy(&bi_box);
-  /* Ground-up debug for "bisect does nothing": flip debug_enable in
-   * keyboard_post_init_user, rebuild, and watch `qmk console`. If these lines
-   * print on each arrow but the cursor does not move, the keys, box math and
-   * digitizer calls are all firing — the gap is BELOW the firmware (USB
-   * digitizer endpoint or host tablet/pen handling), not in this file. If they
-   * do NOT print, the keycode/layer never reached here. Inert unless debug_enable. */
-  dprintf("bisect: move -> (%d, %d)/1000\n", (int)(cx * 1000), (int)(cy * 1000));
-  digitizer_set_position(cx, cy);
+  digitizer_set_position(bisect_cx(&bi_box), bisect_cy(&bi_box));
 }
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
@@ -515,8 +507,8 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
       if (record->event.pressed) { bisect_reset(&bi_box); bisect_move(); }
       return false;
     case KK_BI_CLICK:
-      if (record->event.pressed) { dprintf("bisect: tip DOWN\n"); digitizer_tip_switch_on(); }
-      else                       { dprintf("bisect: tip UP\n");   digitizer_tip_switch_off(); }
+      if (record->event.pressed) { digitizer_tip_switch_on(); }
+      else                       { digitizer_tip_switch_off(); }
       return false;
 
     default:
@@ -532,12 +524,10 @@ layer_state_t layer_state_set_user(layer_state_t state) {
   static bool bisect_was_on = false;
   bool bisect_on = layer_state_cmp(state, L_MOUSE_BISECT);
   if (bisect_on && !bisect_was_on) {
-    dprintf("bisect: layer ON, digitizer armed (in_range)\n");
     digitizer_in_range_on();
     bisect_reset(&bi_box);
     bisect_move();
   } else if (!bisect_on && bisect_was_on) {
-    dprintf("bisect: layer OFF, digitizer released\n");
     digitizer_tip_switch_off();  // release a held click before leaving
     digitizer_in_range_off();
   }
