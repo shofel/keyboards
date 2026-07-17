@@ -3,30 +3,12 @@
 #include <stdint.h>
 #include QMK_KEYBOARD_H
 
+/* oneshot_state_t / oneshot_event_t and the pure transition table (oneshot_fsm.h)
+ * are header-only and QMK-free so the state machine can be unit-tested off-target
+ * (see tools/test_oneshot_fsm.c), mirroring bisect_geom.h. */
+#include "oneshot_fsm.h"
+
 #define ONESHOT_STATE_SIZE 10
-
-/**
- * State of a oneshot trigger
- *
- * ## Transitions
- * os_up_unqueued -> os_down_unused
- * os_down_unused -> os_down_used
- *                -> os_up_queued
- * os_up_queued -> os_up_unqueued
- */
-typedef enum {
-    os_up_unqueued,
-    os_up_queued,
-    os_down_unused,
-    os_down_used,
-} oneshot_state_t;
-
-typedef enum {
-    os_trigger_down,
-    os_trigger_up,
-    os_other_up,
-    os_ignore,
-} oneshot_event_t;
 
 typedef struct {
   uint16_t trigger; /* key to watch */

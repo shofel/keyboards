@@ -45,7 +45,7 @@ void oneshot_process_record(
     else if (is_trigger && !pressed) { event = os_trigger_up; }
     else if (is_ignored_key)         { event = os_ignore; }
     else if (!pressed)               { event = os_other_up; }
-    else                             { event = os_ignore; }
+    else                             { event = os_other_down; }
 
     oneshot_state_t saved_state = oneshot->state;
 
@@ -60,43 +60,19 @@ void oneshot_process_record(
   return;
 }
 
-/* Process record against a single given oneshot trigger. */
+/* Process record against a single given oneshot trigger. The transition table
+ * and effect rule are the pure oneshot_fsm.h (unit-tested off-target); this only
+ * applies the resulting register/unregister to the wire. */
 static void oneshot_process_record_single(
     oneshot_state_entry_t *oneshot,
     oneshot_event_t event
 ) {
-    switch (event) {
-      case os_trigger_down:
-        oneshot->state = os_down_unused;
-        break;
-      case os_trigger_up:
-        switch (oneshot->state) {
-          case os_down_unused:
-            oneshot->state = os_up_queued; break;
-          case os_down_used:
-            oneshot->state = os_up_unqueued; break;
-          default: break;
-        }
-        break;
-      case os_other_up:
-        switch (oneshot->state) {
-          case os_down_unused:
-            oneshot->state = os_down_used; break;
-          case os_up_queued:
-            oneshot->state = os_up_unqueued; break;
-          default: break;
-        }
-        break;
-      case os_ignore:
-        break;
-    }
+    oneshot->state = oneshot_next_state(oneshot->state, event);
 
-    /* Perform effects: apply and release the triggee. */
-    if (oneshot->state == os_down_unused) {
-      register_code16(oneshot->triggee);
-    }
-    if (oneshot->state == os_up_unqueued) {
-      unregister_code16(oneshot->triggee);
+    switch (oneshot_effect(oneshot->state)) {
+      case os_fx_register:   register_code16(oneshot->triggee);   break;
+      case os_fx_unregister: unregister_code16(oneshot->triggee); break;
+      case os_fx_none: break;
     }
 }
 
