@@ -33,9 +33,7 @@
     setup-qmk
   '';
 
-  # Keymap drawer # https://github.com/caksoylar/keymap-drawer
+  # python3 for the tools/ scripts (compose-table generator + its test). They
+  # import stdlib only, so there is nothing to resolve and no dep manager here.
   languages.python.enable = true;
-  languages.python.poetry.enable = true;
-  languages.python.poetry.activate.enable = true;
-  languages.python.poetry.install.enable = true;
 }

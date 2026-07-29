@@ -18,18 +18,15 @@ estimate changes. Bugs tend to top the list because Impact carries the most weig
 | # | Score | Task | Where |
 |---|-------|------|-------|
 | 1 | 2.95 | Teach the host to bind the Cantor digitizer (libwacom quirk for `usb:feed:0000`) — unblocks bisect | Layout |
-| 2 | 2.80 | Remove visual rendering of the keymap (unused) | top |
-| 3 | 2.60 | Make ucis and unicodemap work together (→ then emoji via ucis) | Modules |
-| 3 | 2.60 | Generate clean schemes from layer definitions (kill manual drift) | Dactyl |
-| 5 | 2.55 | oneshot: press two oneshots at a time to schedule both | Modules |
-| 6 | 2.30 | Shared layout for cantor & dactyl (keymap transform program + tests) | Dactyl |
-| 7 | 2.25 | Cleanup readme (nix flake run, initial flash guide L/R) | Dactyl |
-| 7 | 2.25 | Draw the layers diagram by hand | Ideas |
-| 9 | 2.05 | Big dream: employ zig for modules / whole keymap | Big dream |
-| 10 | 2.00 | Sturdier cantor case with quieter sound | Hardware |
-| 11 | 1.55 | Make animations to explain tricks | Ideas |
-
-TODO: remove visual rendering of the keymap. I don't use it
+| 2 | 2.60 | Make ucis and unicodemap work together (→ then emoji via ucis) | Modules |
+| 2 | 2.60 | Generate clean schemes from layer definitions (kill manual drift) | Dactyl |
+| 4 | 2.55 | oneshot: press two oneshots at a time to schedule both | Modules |
+| 5 | 2.30 | Shared layout for cantor & dactyl (keymap transform program + tests) | Dactyl |
+| 6 | 2.25 | Cleanup readme (nix flake run, initial flash guide L/R) | Dactyl |
+| 6 | 2.25 | Draw the layers diagram by hand | Ideas |
+| 8 | 2.05 | Big dream: employ zig for modules / whole keymap | Big dream |
+| 9 | 2.00 | Sturdier cantor case with quieter sound | Hardware |
+| 10 | 1.55 | Make animations to explain tricks | Ideas |
 
 ## Layout
 

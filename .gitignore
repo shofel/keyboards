@@ -21,3 +21,6 @@ compile_commands.json
 build/
 
 .cache
+
+# Claude Code runtime lock (PID-bearing, machine-local)
+.claude/scheduled_tasks.lock
