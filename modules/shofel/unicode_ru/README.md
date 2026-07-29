@@ -1,10 +1,32 @@
-# Compose Unicode Community Module (`unicode_ru`)
+# Userspace Unicode Community Module (`unicode_ru`)
 
-Provides Compose-based Unicode emission for QMK keymaps. Despite the `unicode_ru`
-name, it covers Russian Cyrillic **and** the typographic symbols (« » — № §) and
-currency signs (₺ ₽ €) the Cantor emits — all as rolling-safe Compose sequences.
-Cyrillic is driven by `unicode_map`; standalone glyphs (symbols, currency) are
-emitted directly via the exported `ru_compose_emit_code`.
+Emits Unicode from userspace, bypassing QMK's own input-mode machinery. Despite
+the `unicode_ru` name it covers Russian Cyrillic **and** the typographic symbols
+(« » — № §) and currency signs (₺ ₽ €) the Cantor emits. Cyrillic is driven by
+`unicode_map`; standalone glyphs go through `ru_emit_glyph`.
+
+## Backends
+
+Which one is live is held in `ru_backend`:
+
+| | `RU_BACKEND_COMPOSE` (default) | `RU_BACKEND_VIM` |
+|---|---|---|
+| Emits | `Compose` + a private 2-char code | `i_CTRL-V U <8 hex>` |
+| Works in | anything, host-wide | vim / neovim only |
+| Needs | host xkb `compose:sclk` + `~/.XCompose` | nothing |
+
+Compose is rolling-safe: its commit boundary doesn't depend on modifier timing,
+unlike the ibus hex handshake it replaced. Vim mode needs no host setup at all,
+which is the whole point of having it.
+
+Both are emitted here in userspace, so neither `UNICODE_MODE_LINUX` nor the
+out-of-tree `UNICODE_MODE_VIM` patch is involved.
+
+The backend is per-session state, not a persisted setting: the keymap selects it
+when entering the Russian layer and resets it to compose on the way out. That
+matters because a few `unicode_map` keys (`—` `№` `§`) live on the symbol layer
+and stay reachable with Russian off — a sticky vim backend would type raw
+`Ctrl-V` escapes into ordinary apps.
 
 ## Documentation
 
@@ -32,6 +54,10 @@ The module provides (via `introspection.h`):
 - `enum unicode_names` - Enumeration of Russian Unicode characters (RU_LC_* for lowercase, RU_UC_* for uppercase, U_DOT, U_COMMA)
 - `unicode_map[]` - PROGMEM array mapping enum values to Unicode code points
 - `RU_*` macros - Convenience macros for Russian letters (RU_A, RU_B, RU_V, etc.) that combine lowercase and uppercase variants using `UP()`. Also includes `RU_DOT` which combines U_DOT and U_COMMA.
+- `ru_backend` / `ru_backend_t` - the active emission backend (see above)
+- `ru_unicode_process(keycode, record)` - call first in `process_record_user`; returns true when it consumed a `unicode_map` key, in which case stop processing
+- `ru_emit_glyph(compose_code, codepoint)` - emit one standalone glyph via whichever backend is active
+- `ru_compose_emit_code(code)` / `ru_vim_emit_codepoint(cp)` - the per-backend emitters, if you need to force one
 
 Use these in your keymap layers like:
 

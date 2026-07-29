@@ -64,16 +64,31 @@ static void ru_compose_emit_index(uint8_t idx) {
  * `U` form waits for exactly 8 hex digits, then commits itself — no leading key,
  * no terminator (see `:h i_CTRL-V_digit`). Mirrors the old out-of-tree
  * UNICODE_MODE_VIM emission so the firmware no longer needs the QMK fork for it.
- * Held/one-shot mods are cleared (and restored) so a pending one-shot shift
- * can't corrupt the Ctrl-V. */
+ *
+ * `clear_mods()` is what actually protects the sequence: a one-shot that has
+ * already fired holds its modifier in the real mod state, and a live Shift or
+ * Ctrl there would turn Ctrl-V into something else. `clear_oneshot_mods()` is
+ * separate — it stops a still-pending one-shot from being spent on our own
+ * keystrokes. Both are restored afterwards, weak mods included.
+ *
+ * Caps Lock is neutralised for the same reason: it inverts letter case on the
+ * host, so Shift-U would arrive as lowercase `u` and select the 4-digit form
+ * instead — our trailing 4 digits would then land in the buffer as literal
+ * text. Hex digits themselves are case-insensitive to vim, so only the selector
+ * matters. */
 void ru_vim_emit_codepoint(uint32_t cp) {
     if (cp > 0x10FFFF) {
         return;
     }
     uint8_t held = get_mods();
+    uint8_t weak = get_weak_mods();
+    bool    caps = host_keyboard_led_state().caps_lock;
     clear_oneshot_mods();
     clear_mods();
     clear_weak_mods();
+    if (caps) {
+        tap_code(KC_CAPS);
+    }
     tap_code16(LCTL(KC_V));  // Ctrl-V
     tap_code16(LSFT(KC_U));  // Shift-U -> i_CTRL-V_U (8 hex digits)
     char buf[9];
@@ -82,7 +97,11 @@ void ru_vim_emit_codepoint(uint32_t cp) {
     }
     buf[8] = '\0';
     send_string(buf);
+    if (caps) {
+        tap_code(KC_CAPS);
+    }
     set_mods(held);
+    set_weak_mods(weak);
 }
 
 /* Emit a standalone glyph (e.g. « ») via the active backend: compose uses its
