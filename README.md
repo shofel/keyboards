@@ -27,24 +27,17 @@ This repository follows the [official QMK userspace template](https://github.com
    make build
    ```
 
-3. Flash a keymap. The Cantor is a **split**: the half plugged into USB is the
-   half that gets flashed, so run this **once per half**, each connected
-   directly (not over TRRS). Both halves must carry the same firmware.
+3. Flash a keymap. The Cantor is a split — whichever half is plugged into USB is
+   the one flashed, so run this once per half, connected directly rather than
+   over TRRS.
 
-   `make flash` waits for the bootloader, so start it first and trigger the
-   bootloader after. To get a half in:
+   `make flash` polls for the bootloader, so start it first and enter the
+   bootloader after:
 
-   - **Normal:** the QMK boot combo — the two outer bottom keys on that half
-     (`boot_combo_left` / `boot_combo_right` in `keymap.c`). Needs working
-     firmware.
-   - **Blank/bricked half:** hold `BOOT0`, plug in USB while holding, release
-     after ~2s. (Or hold `BOOT0`, tap `NRST`, release `BOOT0`.) The STM32 ROM
-     bootloader can't be erased, so a half with no firmware is always
-     recoverable this way — the boot combo isn't, as there's no firmware left
-     to run it.
-
-   Note: it is *not* "double-tap reset" — that's a Pro Micro / RP2040 idiom and
-   does not apply to the Blackpill STM32F401.
+   - **Boot combo** — the two outer bottom keys on that half
+     (`boot_combo_left` / `boot_combo_right` in `keymap.c`).
+   - **Half with no firmware** — the combo needs firmware to run, so hold
+     `BOOT0` while plugging in USB instead.
 
    ```bash
    # Build + flash one half (Cantor only):

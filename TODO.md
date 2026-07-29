@@ -17,12 +17,12 @@ estimate changes. Bugs tend to top the list because Impact carries the most weig
 
 | # | Score | Task | Where |
 |---|-------|------|-------|
-| 1 | 3.35 | Apply the libwacom hotswap (already written + build-verified in the dotfiles flake) and verify the cursor moves in bisect | Layout |
-| 2 | 2.60 | Make ucis and unicodemap work together (→ then emoji via ucis) | Modules |
-| 2 | 2.60 | Generate clean schemes from layer definitions (kill manual drift) | Dactyl |
-| 4 | 2.55 | oneshot: press two oneshots at a time to schedule both | Modules |
+| 1 | 2.60 | Make ucis and unicodemap work together (→ then emoji via ucis) | Modules |
+| 1 | 2.60 | Generate clean schemes from layer definitions (kill manual drift) | Dactyl |
+| 3 | 2.55 | oneshot: press two oneshots at a time to schedule both | Modules |
+| 3 | 2.55 | Absolute-mouse HID descriptor so bisect needs no host config | Layout |
 | 5 | 2.30 | Shared layout for cantor & dactyl (keymap transform program + tests) | Dactyl |
-| 6 | 2.25 | Cleanup readme (nix flake run, initial flash guide L/R) | Dactyl |
+| 6 | 2.25 | Cleanup readme (nix flake run) | Dactyl |
 | 6 | 2.25 | Draw the layers diagram by hand | Ideas |
 | 8 | 2.05 | Big dream: employ zig for modules / whole keymap | Big dream |
 | 9 | 2.00 | Sturdier cantor case with quieter sound | Hardware |
@@ -30,12 +30,10 @@ estimate changes. Bugs tend to top the list because Impact carries the most weig
 
 ## Layout
 
-- Bisect needs a host-side libwacom entry for `usb:feed:0000`. The `.tablet`
-  file is written and the NixOS hotswap is build-verified in the dotfiles flake
-  (`nixos/modules/libwacom-cantor.nix`); what remains is `nixos-rebuild switch`,
-  a log out/in (Wayland mutter won't reload libwacom mid-session), then checking
-  whether the cursor actually moves. If Mutter still refuses, the fallback is a
-  firmware absolute-mouse descriptor.
+- Bisect needs the host to bind the digitizer. libwacom is exhausted — a
+  matching `.tablet` entry did not get the cursor moving, and that lane is
+  closed. The remaining option is to stop presenting as a digitizer and emit an
+  absolute-mouse HID descriptor instead, which needs no host config on any OS.
   See [docs/known-limitations.md](docs/known-limitations.md).
 
 ## Modules

@@ -22,12 +22,13 @@ Why: the Cantor presents its digitizer as `usb:feed:0000`, and libwacom has no
 entry for that ID, so Linux never binds the device as a tablet. Hover motion
 from an unbound digitizer drives no system cursor.
 
-Not fixable in firmware. Polar (Orbital Mouse) is therefore the default mouse
-mode; bisect stays one keypress away on `c`.
+Polar (Orbital Mouse) is therefore the default mouse mode; bisect stays one
+keypress away on `c`.
 
-The host-side fix exists but is not applied yet: a libwacom `.tablet` entry
-matching `usb|feed|0000`, delivered as a NixOS hotswap from the dotfiles flake.
-See TODO.md for what remains.
+The libwacom route is exhausted: a matching `.tablet` entry did not get the
+cursor moving. What is left is to stop presenting as a digitizer at all and emit
+an absolute-mouse HID descriptor instead — the pointer type a VM's "USB Tablet"
+uses, which every OS drives without configuration. See TODO.md.
 
 ## Oneshot layers do not stack (only oneshot modifiers do)
 
