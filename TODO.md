@@ -24,9 +24,8 @@ estimate changes. Bugs tend to top the list because Impact carries the most weig
 | 5 | 2.30 | Shared layout for cantor & dactyl (keymap transform program + tests) | Dactyl |
 | 6 | 2.25 | Cleanup readme (nix flake run) | Dactyl |
 | 6 | 2.25 | Draw the layers diagram by hand | Ideas |
-| 8 | 2.05 | Big dream: employ zig for modules / whole keymap | Big dream |
-| 9 | 2.00 | Sturdier cantor case with quieter sound | Hardware |
-| 10 | 1.55 | Make animations to explain tricks | Ideas |
+| 8 | 2.00 | Sturdier cantor case with quieter sound | Hardware |
+| 9 | 1.55 | Make animations to explain tricks | Ideas |
 
 ## Layout
 
@@ -54,21 +53,12 @@ estimate changes. Bugs tend to top the list because Impact carries the most weig
     - which is covered by tests
 - cleanup readme
   - nix flake run
-  - guide for initial flash for left and right
 - generate clean schemes from layer definitions.
   - Now they are good, but manual and prone to be outdated.
 
 ## TODO cantor hardware
 
 - a sturdier case with quieter sound
-
-## Big dream: employ zig
-
-- implement modules for keymap in zig
-- make the whole keymap in zig
-- from QMK use only low-level (keyboard support and matrix poll)
-  - the rest features and a keymap implement in zig
-- ? replace gcc with zig.build
 
 ## Ideas
 
