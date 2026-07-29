@@ -137,6 +137,11 @@ static void toggle_enable(uint8_t layer) {
 
 static void toggle_disable(void) {
     active_toggle = TOGGLE_NONE;
+    /* Vim mode is only meaningful while Russian is on, but `—` `№` `§` are
+     * unicode_map keys living on SYM — reachable with Russian off. A sticky
+     * RU_BACKEND_VIM would emit `Ctrl-V U 00002014` into ordinary apps, so the
+     * backend dies with the layer rather than outliving it. */
+    ru_backend = RU_BACKEND_COMPOSE;
     toggle_apply();
 }
 
@@ -392,11 +397,12 @@ void leader_end_user(void) {
   if (leader_sequence_one_key(KC_M)) {
     toggle_enable(L_MOUSE);
   }
-  /* Currency signs (money): leader,m,<l|r|e> -> ₺ ₽ € via Compose. Two-key
-   * sequences, so they coexist with leader,m (mouse-layer toggle, one key). */
-  if (leader_sequence_two_keys(KC_M, KC_L)) { ru_compose_emit_code("$l"); } // ₺ lira  (TRY)
-  if (leader_sequence_two_keys(KC_M, KC_R)) { ru_compose_emit_code("$r"); } // ₽ ruble (RUB)
-  if (leader_sequence_two_keys(KC_M, KC_E)) { ru_compose_emit_code("$e"); } // € euro  (EUR)
+  /* Currency signs (money): leader,m,<l|r|e> -> ₺ ₽ € via the active backend.
+   * Two-key sequences, so they coexist with leader,m (mouse-layer toggle, one
+   * key). */
+  if (leader_sequence_two_keys(KC_M, KC_L)) { ru_emit_glyph("$l", 0x20BA); } // ₺ lira  (TRY)
+  if (leader_sequence_two_keys(KC_M, KC_R)) { ru_emit_glyph("$r", 0x20BD); } // ₽ ruble (RUB)
+  if (leader_sequence_two_keys(KC_M, KC_E)) { ru_emit_glyph("$e", 0x20AC); } // € euro  (EUR)
   if (leader_sequence_one_key(KC_T)) {
     toggle_enable(L_NUM_NAV);
   }
