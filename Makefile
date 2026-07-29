@@ -28,7 +28,8 @@ build:
 # Start this first and enter the bootloader after: it polls (FLASH_TIMEOUT)
 # instead of needing the device up front, which used to mean racing the reset
 # against a ~40s compile. Retries cover the STM32 occasionally enumerating with
-# a broken descriptor set; a failed attempt writes nothing.
+# a broken descriptor set. A retry rewrites the whole image, so a half-written
+# flash from an interrupted attempt is recovered rather than compounded.
 FLASH_TIMEOUT ?= 120
 
 flash: build
@@ -38,8 +39,7 @@ flash: build
 	    sleep 1; \
 	    for try in 1 2 3; do \
 	      dfu-util -d 0483:df11 -a 0 -s 0x08000000:leave -D $(QMK_FIRMWARE_ROOT)/cantor_shofel.bin && exit 0; \
-	      echo "dfu-util attempt $$try failed — retrying in 2s" >&2; \
-	      sleep 2; \
+	      if test $$try -lt 3; then echo "dfu-util attempt $$try failed — retrying in 2s" >&2; sleep 2; fi; \
 	    done; \
 	    echo "dfu-util failed 3x. Unplug/replug the Cantor, then run make flash again." >&2; \
 	    exit 1; \

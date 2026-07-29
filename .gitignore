@@ -24,3 +24,6 @@ build/
 
 # Claude Code runtime lock (PID-bearing, machine-local)
 .claude/scheduled_tasks.lock
+
+# Created by `make test-compose` importing the generator module
+__pycache__/

@@ -19,13 +19,12 @@ estimate changes. Bugs tend to top the list because Impact carries the most weig
 |---|-------|------|-------|
 | 1 | 2.60 | Make ucis and unicodemap work together (→ then emoji via ucis) | Modules |
 | 1 | 2.60 | Generate clean schemes from layer definitions (kill manual drift) | Dactyl |
-| 3 | 2.55 | oneshot: press two oneshots at a time to schedule both | Modules |
 | 3 | 2.55 | Absolute-mouse HID descriptor so bisect needs no host config | Layout |
-| 5 | 2.30 | Shared layout for cantor & dactyl (keymap transform program + tests) | Dactyl |
-| 6 | 2.25 | Cleanup readme (nix flake run) | Dactyl |
-| 6 | 2.25 | Draw the layers diagram by hand | Ideas |
-| 8 | 2.00 | Sturdier cantor case with quieter sound | Hardware |
-| 9 | 1.55 | Make animations to explain tricks | Ideas |
+| 4 | 2.30 | Shared layout for cantor & dactyl (keymap transform program + tests) | Dactyl |
+| 5 | 2.25 | Cleanup readme (nix flake run) | Dactyl |
+| 5 | 2.25 | Draw the layers diagram by hand | Ideas |
+| 7 | 2.00 | Sturdier cantor case with quieter sound | Hardware |
+| 8 | 1.55 | Make animations to explain tricks | Ideas |
 
 ## Layout
 
@@ -36,8 +35,6 @@ estimate changes. Bugs tend to top the list because Impact carries the most weig
   See [docs/known-limitations.md](docs/known-limitations.md).
 
 ## Modules
-
-- oneshot: allow press two oneshots at a time to schedule both
 
 - make ucis and unicodemap work together
   - then: employ ucis for emoji: tulip and other flowers, tup=thumbup, ok, think, monocle
