@@ -23,8 +23,11 @@ entry for that ID, so Linux never binds the device as a tablet. Hover motion
 from an unbound digitizer drives no system cursor.
 
 Not fixable in firmware. Polar (Orbital Mouse) is therefore the default mouse
-mode; bisect stays one keypress away on `c` and becomes usable the moment the
-host learns the device (a libwacom quirk — see TODO.md).
+mode; bisect stays one keypress away on `c`.
+
+The host-side fix exists but is not applied yet: a libwacom `.tablet` entry
+matching `usb|feed|0000`, delivered as a NixOS hotswap from the dotfiles flake.
+See TODO.md for what remains.
 
 ## Oneshot layers do not stack (only oneshot modifiers do)
 

@@ -17,7 +17,7 @@ estimate changes. Bugs tend to top the list because Impact carries the most weig
 
 | # | Score | Task | Where |
 |---|-------|------|-------|
-| 1 | 2.95 | Teach the host to bind the Cantor digitizer (libwacom quirk for `usb:feed:0000`) — unblocks bisect | Layout |
+| 1 | 3.35 | Apply the libwacom hotswap (already written + build-verified in the dotfiles flake) and verify the cursor moves in bisect | Layout |
 | 2 | 2.60 | Make ucis and unicodemap work together (→ then emoji via ucis) | Modules |
 | 2 | 2.60 | Generate clean schemes from layer definitions (kill manual drift) | Dactyl |
 | 4 | 2.55 | oneshot: press two oneshots at a time to schedule both | Modules |
@@ -30,8 +30,13 @@ estimate changes. Bugs tend to top the list because Impact carries the most weig
 
 ## Layout
 
-- Write a libwacom quirk so Linux binds the Cantor digitizer (`usb:feed:0000`)
-  and bisect mode works. See [docs/known-limitations.md](docs/known-limitations.md).
+- Bisect needs a host-side libwacom entry for `usb:feed:0000`. The `.tablet`
+  file is written and the NixOS hotswap is build-verified in the dotfiles flake
+  (`nixos/modules/libwacom-cantor.nix`); what remains is `nixos-rebuild switch`,
+  a log out/in (Wayland mutter won't reload libwacom mid-session), then checking
+  whether the cursor actually moves. If Mutter still refuses, the fallback is a
+  firmware absolute-mouse descriptor.
+  See [docs/known-limitations.md](docs/known-limitations.md).
 
 ## Modules
 
