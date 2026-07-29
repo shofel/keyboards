@@ -389,7 +389,7 @@ void leader_end_user(void) {
     toggle_enable(L_FKEYS_SYS);
   }
   if (leader_sequence_one_key(KC_M)) {
-    toggle_enable(L_MOUSE_BISECT);
+    toggle_enable(L_MOUSE);
   }
   /* Currency signs (money): leader,m,<l|r|e> -> ₺ ₽ € via Compose. Two-key
    * sequences, so they coexist with leader,m (mouse-layer toggle, one key). */
@@ -725,9 +725,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   ),
 
   /**
-   * Mouse layer — POLAR mode (Orbital Mouse, getreuer/orbital_mouse).
+   * Mouse layer — POLAR mode (Orbital Mouse, getreuer/orbital_mouse). DEFAULT.
    *
-   * Reached via Leader,m, which starts in BISECT. Top-row left keys switch mode:
+   * Reached via Leader,m, which starts here. Top-row left keys switch mode:
    *   `,` = polar (this layer)   `c` = bisect.
    * Exit any mouse mode with Esc (shift+space combo) or Leader,space.
    *
@@ -749,7 +749,11 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   ),
 
   /**
-   * Mouse layer — BISECT mode (digitizer binary search). DEFAULT via Leader,m.
+   * Mouse layer — BISECT mode (digitizer binary search). Opt-in via the `c` key.
+   *
+   * Non-default: Linux does not bind the digitizer (libwacom has no entry for
+   * usb:feed:0000), so the pointer does not move on this host. Kept because the
+   * firmware side is proven correct — it needs only a host-side quirk.
    *
    * Pointer starts at screen center. The right-hand arrow cross halves the
    * screen and re-centers each press:  ↑=up  <-=left  ->=right  ↓=down.

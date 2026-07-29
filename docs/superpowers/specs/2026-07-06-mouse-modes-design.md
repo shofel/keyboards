@@ -10,7 +10,8 @@ the left hand's strong fingers:
 - `,` (ring)  → **polar**  — Orbital Mouse (`getreuer/orbital_mouse`), a heading-based pointer (`OM_*`).
 - `c` (index) → **bisect** — binary-search absolute positioning via the QMK digitizer.
 
-**Default is bisect**: `leader,m` enters bisect every time (mode is not persisted).
+**Default is polar**: `leader,m` enters polar every time (mode is not persisted).
+It was bisect originally; see "Why polar became the default" below.
 
 > **Polar mode replaced the original "stock" QMK mousekeys.** See "Polar (Orbital Mouse) — shipped" below.
 
@@ -29,7 +30,7 @@ These are ordinary **toggle layers** on the existing single-active-toggle system
 keys are custom keycodes (`KK_MM_POLAR`, `KK_MM_BISECT`) present on **both**
 sub-layers (top-left cols 2/4, `,` and `c`), each calling `toggle_enable(<its
 layer>)`. Switching mode swaps the one active toggle layer. `leader,m` calls
-`toggle_enable(L_MOUSE_BISECT)`. Exit is unchanged: Esc (shift+space combo) or
+`toggle_enable(L_MOUSE)`. Exit is unchanged: Esc (shift+space combo) or
 `leader,space` → `toggle_disable` / `toggle_reset`.
 
 ## Bisect — algorithm
@@ -76,8 +77,20 @@ Orbital's `OM_*` keycodes are **aliases of the `MS_*` mousekeys** (`OM_U == MS_U
 mousekeys. So stock mousekeys and orbital cannot both be live; adopting polar
 meant dropping stock. Accordingly `MOUSEKEY_ENABLE = no`, and the old `MK_*`
 tuning in `config.h` was removed. Bisect is unaffected (it uses the digitizer,
-not mousekeys), and `leader,m` still defaults to bisect — press the `,` mode key
-for polar.
+not mousekeys).
+
+## Why polar became the default
+
+Bisect was the original default, but it does nothing on this host. The Cantor
+presents its digitizer as `usb:feed:0000`, which libwacom has no entry for, so
+Linux never binds it as a tablet and the hover motion drives no cursor. The
+firmware side was instrumented and proven correct end to end — keycodes, box
+math, digitizer calls and the USB endpoint budget all check out — so this is
+purely a host-side gap.
+
+Landing in a dead mode on every `leader,m` is a bad default, so `leader,m` now
+enters **polar**, which works today. Bisect stays one keypress away on `c`, and
+becomes a viable default again the moment the host recognises the device.
 
 ## Testing
 
@@ -101,5 +114,5 @@ for polar.
 ## Out of scope
 
 - No auto-reset of the bisect box after a click (reset is one key; predictable).
-- No persistence of the last-used mode (always start in bisect, by request).
+- No persistence of the last-used mode (always start in polar).
 - `u` is unused on the mouse layers (was to be radial).
