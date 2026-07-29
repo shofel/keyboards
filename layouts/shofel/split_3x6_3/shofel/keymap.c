@@ -345,20 +345,21 @@ void leader_end_user(void) {
 
   /* Ru. Compose mode (rolling-safe; host xkb compose:sclk + ~/.XCompose) is the
    * default Russian backend — leader,r and leader,c both select it. Vim mode
-   * (leader,v) is for vim. All unicode (Cyrillic, « », — № §) goes through
-   * compose now, so the old ibus hex backend (UNICODE_MODE_LINUX) is retired. */
+   * (leader,v) emits vim-native unicode for typing Cyrillic inside vim/neovim.
+   * Both backends are emitted in userspace by the unicode_ru module; the old
+   * ibus hex backend (UNICODE_MODE_LINUX) and the out-of-tree UNICODE_MODE_VIM
+   * are no longer used. */
   if (leader_sequence_one_key(KC_R) || leader_sequence_one_key(KC_C)) {
-    ru_compose_mode = true;
+    ru_backend = RU_BACKEND_COMPOSE;
     toggle_enable(L_RUSSIAN);
   }
   if (leader_sequence_one_key(KC_V)) {
-    ru_compose_mode = false;
-    set_unicode_input_mode(UNICODE_MODE_VIM);
+    ru_backend = RU_BACKEND_VIM;
     toggle_enable(L_RUSSIAN);
   }
   /* Back to English: drop the active toggle layer. */
   if (leader_sequence_one_key(KC_E)) {
-    ru_compose_mode = true;
+    ru_backend = RU_BACKEND_COMPOSE;
     toggle_disable();
   }
 
@@ -436,9 +437,9 @@ static void bisect_move(void) {
 }
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
-  /* Compose-mode Russian: when active, the RU_ and U_ unicode_map keys are
-   * emitted as Compose sequences here (and consumed) before the hex path. */
-  if (ru_compose_process(keycode, record)) {
+  /* Russian: the RU_ and U_ unicode_map keys are emitted in userspace by the
+   * active backend (compose or vim) here, and consumed before QMK's hex path. */
+  if (ru_unicode_process(keycode, record)) {
     return false;
   }
   switch (keycode) {
@@ -464,18 +465,10 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
          * the pending one-shot mods too. */
         uint8_t mods = get_mods() | get_oneshot_mods();
         if (mods & MOD_MASK_SHIFT) {
-          /* Shifted: emit the guillemet. Compose mode (default) → rolling-safe
-           * Compose sequence; vim mode → register_unicode. ru_compose_emit_code
-           * strips shift itself; the vim branch strips it manually. */
-          if (ru_compose_mode) {
-            ru_compose_emit_code(keycode == KK_LANGLE ? "q[" : "q]"); // « »
-          } else {
-            uint8_t held = get_mods();
-            clear_oneshot_mods();
-            del_mods(MOD_MASK_SHIFT);
-            register_unicode(keycode == KK_LANGLE ? 0x00AB : 0x00BB); // « »
-            set_mods(held);
-          }
+          /* Shifted: emit the guillemet via the active backend (it strips shift
+           * itself). Compose uses the private code; vim emits the codepoint. */
+          ru_emit_glyph(keycode == KK_LANGLE ? "q[" : "q]",
+                        keycode == KK_LANGLE ? 0x00AB : 0x00BB); // « »
         } else {
           tap_code16(keycode == KK_LANGLE ? KC_LABK : KC_RABK); // < >
         }
@@ -576,10 +569,11 @@ layer_state_t layer_state_set_user(layer_state_t state) {
  *  A separate layer with Russian letters.
  *  https://docs.qmk.fm/features/unicode#input-subsystems
  *
- *  Switch between `Linux` and `Vim` input modes
- *  VIM mode looks and feels awesome, but works only in Vim/Neovim
- *  Linux mode feels clunky in some apps, but kinda works everywhere.
- *  Also, as of time of writing, the vim mode is not in upstream QMK. I sent [a pull-request](https://github.com/qmk/qmk_firmware/pull/25188) which implements it
+ *  Two backends, selected by leader (see the unicode_ru module): compose mode
+ *  (default, rolling-safe, host-wide) and vim mode (leader,v). Vim mode emits
+ *  vim's native `i_CTRL-V U <hex>`, so it types Cyrillic inside vim/neovim with
+ *  no host compose setup. Both are emitted in userspace; the firmware no longer
+ *  needs the out-of-tree UNICODE_MODE_VIM patch (QMK PR #25188).
  *
  *
  * * KEY COMFORT SCORES  —  layout-wide ergonomic weights, higher = easier.

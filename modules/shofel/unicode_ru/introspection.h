@@ -85,13 +85,24 @@ enum unicode_names {
 // unicode_map array is defined in introspection.c
 extern const uint32_t PROGMEM unicode_map[];
 
-/* Compose-mode Russian emission backend (see unicode_ru.c). The keymap toggles
- * `ru_compose_mode` (leader,c) and calls `ru_compose_process` at the top of
- * process_record_user; when it returns true the key was emitted via Compose. */
-extern bool ru_compose_mode;
-bool ru_compose_process(uint16_t keycode, keyrecord_t *record);
-/* Emit `Compose + <code>` for a standalone glyph (e.g. « ») from the keymap. */
+/* Userspace Russian emission backends (see unicode_ru.c). The keymap selects a
+ * backend via `ru_backend` (leader,c = compose, leader,v = vim) and calls
+ * `ru_unicode_process` at the top of process_record_user; when it returns true
+ * the unicode_map key was emitted in userspace and must not be processed further.
+ * Both backends are self-contained — QMK's unicode input-mode machinery (and the
+ * out-of-tree UNICODE_MODE_VIM) is no longer used. */
+typedef enum {
+  RU_BACKEND_COMPOSE,  // Compose + private code (rolling-safe, host-wide)
+  RU_BACKEND_VIM,      // vim `i_CTRL-V U <hex>` (vim/neovim only, no host setup)
+} ru_backend_t;
+extern ru_backend_t ru_backend;
+bool ru_unicode_process(uint16_t keycode, keyrecord_t *record);
+
+/* Emit a standalone glyph (e.g. « ») via the active backend. */
+void ru_emit_glyph(const char *compose_code, uint32_t cp);
+/* Lower-level per-backend emitters. */
 void ru_compose_emit_code(const char *code);
+void ru_vim_emit_codepoint(uint32_t cp);
 
 // Combine lower and upper case letter as a single `unicode pair` key
 #define RU_A UP(RU_LC_A, RU_UC_A)
