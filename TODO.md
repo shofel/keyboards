@@ -13,18 +13,17 @@ Procedure: score the four factors per task, take the weighted sum, round to 2 de
 descending; on ties the earlier-listed task stays first. Re-rank whenever a task is added or an
 estimate changes. Bugs tend to top the list because Impact carries the most weight on a daily driver.
 
-## Ranked — 2026-07-29
+## Ranked — 2026-08-04
 
 | # | Score | Task | Where |
 |---|-------|------|-------|
-| 1 | 2.60 | Generate clean schemes from layer definitions (kill manual drift) | Dactyl |
-| 2 | 2.55 | Absolute-mouse HID descriptor so bisect needs no host config | Layout |
-| 3 | 2.50 | Document leader sequences + emoji in one synced reference | Docs |
-| 4 | 2.30 | Shared layout for cantor & dactyl (keymap transform program + tests) | Dactyl |
-| 5 | 2.25 | Cleanup readme (nix flake run) | Dactyl |
+| 1 | 2.55 | Absolute-mouse HID descriptor so bisect needs no host config | Layout |
+| 2 | 2.50 | Document leader sequences + emoji in one synced reference | Docs |
+| 3 | 2.30 | Shared layout for cantor & dactyl (keymap transform program + tests) | Dactyl |
+| 4 | 2.25 | Cleanup readme (nix flake run) | Dactyl |
 | 5 | 2.25 | Draw the layers diagram by hand | Ideas |
-| 7 | 2.00 | Sturdier cantor case with quieter sound | Hardware |
-| 8 | 1.55 | Make animations to explain tricks | Ideas |
+| 6 | 2.00 | Sturdier cantor case with quieter sound | Hardware |
+| 7 | 1.55 | Make animations to explain tricks | Ideas |
 
 ## Layout
 
@@ -54,8 +53,6 @@ estimate changes. Bugs tend to top the list because Impact carries the most weig
     - which is covered by tests
 - cleanup readme
   - nix flake run
-- generate clean schemes from layer definitions.
-  - Now they are good, but manual and prone to be outdated.
 
 ## TODO cantor hardware
 
