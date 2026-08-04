@@ -18,7 +18,8 @@ estimate changes. Bugs tend to top the list because Impact carries the most weig
 | # | Score | Task | Where |
 |---|-------|------|-------|
 | 1 | 2.60 | Generate clean schemes from layer definitions (kill manual drift) | Dactyl |
-| 3 | 2.55 | Absolute-mouse HID descriptor so bisect needs no host config | Layout |
+| 2 | 2.55 | Absolute-mouse HID descriptor so bisect needs no host config | Layout |
+| 3 | 2.50 | Document leader sequences + emoji in one synced reference | Docs |
 | 4 | 2.30 | Shared layout for cantor & dactyl (keymap transform program + tests) | Dactyl |
 | 5 | 2.25 | Cleanup readme (nix flake run) | Dactyl |
 | 5 | 2.25 | Draw the layers diagram by hand | Ideas |
@@ -40,6 +41,15 @@ estimate changes. Bugs tend to top the list because Impact carries the most weig
   through the ibus-hex path this firmware abandoned. Dissolved by not using UCIS —
   emoji are standalone glyphs in the existing Compose backend (`leader,{a|i},<sel>`
   → 🌷…🤝). See docs/superpowers/specs/2026-08-04-emoji-via-compose-design.md.
+
+## Docs
+
+- Document all leader sequences + emoji in one synced reference. Today they're
+  scattered — README covers Russian + emoji, but the rest lives only in
+  keymap.c's `leader_end_user`. Cover the mode toggles and the mirror pairs
+  (s·n = Esc, w·h = Ctrl+Esc, a·i = emoji, m·. = mouse/currency), the text-edit
+  seqs, and the emoji `@`-codes — and keep it in sync with keymap.c (extend the
+  "resync the layer comment in the same PR" convention to this reference).
 
 ## Dactyl
 
