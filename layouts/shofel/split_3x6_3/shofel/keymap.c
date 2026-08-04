@@ -394,15 +394,18 @@ void leader_end_user(void) {
   if (leader_sequence_one_key(KC_F)) {
     toggle_enable(L_FKEYS_SYS);
   }
-  if (leader_sequence_one_key(KC_M)) {
+  /* Mouse layer. `.` (KC_DOT) is m's geometric mirror, bound as a full pair so
+   * mouse (and the currency seqs below) reach from either hand — like the Esc
+   * (s/n) and Ctrl+Esc (w/h) pairs. */
+  if (leader_sequence_one_key(KC_M) || leader_sequence_one_key(KC_DOT)) {
     toggle_enable(L_MOUSE);
   }
-  /* Currency signs (money): leader,m,<l|r|e> -> ₺ ₽ € via the active backend.
-   * Two-key sequences, so they coexist with leader,m (mouse-layer toggle, one
-   * key). */
-  if (leader_sequence_two_keys(KC_M, KC_L)) { ru_emit_glyph("$l", 0x20BA); } // ₺
-  if (leader_sequence_two_keys(KC_M, KC_R)) { ru_emit_glyph("$r", 0x20BD); } // ₽
-  if (leader_sequence_two_keys(KC_M, KC_E)) { ru_emit_glyph("$e", 0x20AC); } // €
+  /* Currency signs (money): leader,{m|.},<l|r|e> -> ₺ ₽ € via the active backend.
+   * Two-key sequences, so they coexist with leader,{m|.} (mouse-layer toggle,
+   * one key). */
+  if (leader_sequence_two_keys(KC_M, KC_L) || leader_sequence_two_keys(KC_DOT, KC_L)) { ru_emit_glyph("$l", 0x20BA); } // ₺
+  if (leader_sequence_two_keys(KC_M, KC_R) || leader_sequence_two_keys(KC_DOT, KC_R)) { ru_emit_glyph("$r", 0x20BD); } // ₽
+  if (leader_sequence_two_keys(KC_M, KC_E) || leader_sequence_two_keys(KC_DOT, KC_E)) { ru_emit_glyph("$e", 0x20AC); } // €
   if (leader_sequence_one_key(KC_T)) {
     toggle_enable(L_NUM_NAV);
   }
@@ -430,7 +433,30 @@ void leader_end_user(void) {
     tap_code(KC_PSCR);
   }
 
-  /* UCIS emoji — disabled (module conflict with unicodemap) */
+  /* Emoji: leader,{a|i},<sel> -> a flower or reaction, host-wide, via the
+   * compose backend (Compose + a private '@' code; the code<->glyph map lives in
+   * tools/gen_unicode_compose.py and the generated ~/.XCompose). `a` (left home)
+   * and `i` (right home) are a mirror pair, so either hand triggers it. Always
+   * compose — emoji go to chat/host apps, so the vim backend is irrelevant. */
+  static const struct { uint16_t sel; const char *code; } emoji_seqs[] = {
+    {KC_T, "@t"},  // 🌷 tulip
+    {KC_R, "@r"},  // 🌹 rose
+    {KC_C, "@c"},  // 🌸 cherry
+    {KC_H, "@h"},  // 🌺 hibiscus
+    {KC_S, "@s"},  // 🌻 sunflower
+    {KC_D, "@d"},  // 🌼 daisy
+    {KC_U, "@u"},  // 👍 thumbup
+    {KC_O, "@o"},  // 👌 ok
+    {KC_K, "@k"},  // 🤔 think
+    {KC_M, "@m"},  // 🧐 monocle
+    {KC_N, "@n"},  // 🤝 handshake
+  };
+  for (size_t i = 0; i < sizeof(emoji_seqs) / sizeof(emoji_seqs[0]); i++) {
+    if (leader_sequence_two_keys(KC_A, emoji_seqs[i].sel) ||
+        leader_sequence_two_keys(KC_I, emoji_seqs[i].sel)) {
+      ru_compose_emit_code(emoji_seqs[i].code);
+    }
+  }
 }
 
 /* Mouse: bisect mode — binary-search absolute positioning via the digitizer.
