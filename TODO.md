@@ -18,12 +18,11 @@ estimate changes. Bugs tend to top the list because Impact carries the most weig
 | # | Score | Task | Where |
 |---|-------|------|-------|
 | 1 | 2.55 | Absolute-mouse HID descriptor so bisect needs no host config | Layout |
-| 2 | 2.50 | Document leader sequences + emoji in one synced reference | Docs |
-| 3 | 2.30 | Shared layout for cantor & dactyl (keymap transform program + tests) | Dactyl |
-| 4 | 2.25 | Cleanup readme (nix flake run) | Dactyl |
-| 5 | 2.25 | Draw the layers diagram by hand | Ideas |
-| 6 | 2.00 | Sturdier cantor case with quieter sound | Hardware |
-| 7 | 1.55 | Make animations to explain tricks | Ideas |
+| 2 | 2.30 | Shared layout for cantor & dactyl (keymap transform program + tests) | Dactyl |
+| 3 | 2.25 | Cleanup readme (nix flake run) | Dactyl |
+| 4 | 2.25 | Draw the layers diagram by hand | Ideas |
+| 5 | 2.00 | Sturdier cantor case with quieter sound | Hardware |
+| 6 | 1.55 | Make animations to explain tricks | Ideas |
 
 ## Layout
 
@@ -32,15 +31,6 @@ estimate changes. Bugs tend to top the list because Impact carries the most weig
   closed. The remaining option is to stop presenting as a digitizer and emit an
   absolute-mouse HID descriptor instead, which needs no host config on any OS.
   See [docs/known-limitations.md](docs/known-limitations.md).
-
-## Docs
-
-- Document all leader sequences + emoji in one synced reference. Today they're
-  scattered — README covers Russian + emoji, but the rest lives only in
-  keymap.c's `leader_end_user`. Cover the mode toggles and the mirror pairs
-  (s·n = Esc, w·h = Ctrl+Esc, a·i = emoji, m·. = mouse/currency), the text-edit
-  seqs, and the emoji `@`-codes — and keep it in sync with keymap.c (extend the
-  "resync the layer comment in the same PR" convention to this reference).
 
 ## Dactyl
 
