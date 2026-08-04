@@ -141,6 +141,81 @@ def glyph(token):
     die(f"no glyph for keycode {token!r} — add it to GLYPHS")
 
 
+COMBO_OUT = {  # combo outputs that aren't plain layer glyphs
+    "KC_ESC": "Esc", "QK_BOOT": "bootloader", "QK_REBOOT": "reboot",
+    "KK_FAT_RIGHT_ARROW": "=>", "KK_RIGHT_ARROW": "->",
+    "KC_LBRC": "[", "KC_RBRC": "]", "KC_LPRN": "(", "KC_RPRN": ")",
+    "KK_LANGLE": "< (« when shifted)", "KK_RANGLE": "> (» when shifted)",
+    "OS_CTL": "one-shot Ctrl", "OS_ALT": "one-shot Alt", "OS_GUI": "one-shot Gui",
+    "OSL(L_NUM_NAV)": "one-shot NUM_NAV", "OSL(L_FKEYS_SYS)": "one-shot FKEYS_SYS",
+    "KC_DQUO": '"',
+}
+
+
+def combo_out(token):
+    if token in COMBO_OUT:
+        return COMBO_OUT[token]
+    if token in GLYPHS or re.fullmatch(r"KC_([A-Z]|\d|F\d{1,2})", token):
+        return glyph(token)
+    die(f"no description for combo output {token!r} — add it to COMBO_OUT")
+
+
+def extract_combos(src):
+    """[( [trigger keycodes], output token )] in key_combos[] order."""
+    arrays = {}
+    for m in re.finditer(
+            r"const uint16_t PROGMEM (\w+)\[\]\s*=\s*\{([^}]*)\};", src):
+        toks = split_tokens(strip_comments(m.group(2)))
+        if toks and toks[-1] == "COMBO_END":
+            arrays[m.group(1)] = toks[:-1]
+    body_m = re.search(r"combo_t key_combos\[\]\s*=\s*\{(.*?)\n\};", src, re.S)
+    if not body_m:
+        die("key_combos[] not found")
+    combos = []
+    for m in re.finditer(r"COMBO\((\w+)\s*,\s*([^)]+?(?:\([^)]*\))?)\)",
+                         strip_comments(body_m.group(1))):
+        name, out = m.group(1), m.group(2).strip()
+        if name not in arrays:
+            die(f"combo key array {name!r} not found")
+        combos.append((arrays[name], out))
+    return combos
+
+
+def extract_leader_seqs(src):
+    """[( [1-2 keycodes], doc )] from the leader_seqs[] table."""
+    body_m = re.search(r"leader_seq_t leader_seqs\[\]\s*=\s*\{(.*?)\n\};", src, re.S)
+    if not body_m:
+        die("leader_seqs[] not found")
+    seqs = []
+    for m in re.finditer(r'\{\s*(\w+),\s*(\w+),\s*\w+,\s*"([^"]*)"\s*\}',
+                         strip_comments(body_m.group(1))):
+        k1, k2, doc = m.groups()
+        seqs.append(([k1] if k2 == "KC_NO" else [k1, k2], doc))
+    if not seqs:
+        die("leader_seqs[] parsed empty")
+    return seqs
+
+
+def extract_emoji(src):
+    """[(selector char, glyph)] joining keymap.c emoji_seqs with the compose table."""
+    import gen_unicode_compose as compose
+    glyph_by_sel = {sel: gl for _cp, sel, gl in compose.EMOJI}
+    body_m = re.search(r"\}\s*emoji_seqs\[\]\s*=\s*\{(.*?)\n\s*\};", src, re.S)
+    if not body_m:
+        die("emoji_seqs[] not found")
+    emo = []
+    for m in re.finditer(r'\{KC_(\w),\s*"@(\w)"\}', strip_comments(body_m.group(1))):
+        key, sel = m.group(1).lower(), m.group(2)
+        if key != sel:
+            die(f"emoji selector mismatch: KC_{m.group(1)} vs @{sel}")
+        if sel not in glyph_by_sel:
+            die(f"emoji @{sel} missing from gen_unicode_compose.EMOJI")
+        emo.append((sel, glyph_by_sel[sel]))
+    if not emo:
+        die("emoji_seqs[] parsed empty")
+    return emo
+
+
 GAP = " " * 8
 
 
@@ -202,6 +277,31 @@ def gen_doc(src):
         out.append(render_grid(toks))
         out.append("```")
         out.append("")
+    out.append("## Combos")
+    out.append("")
+    out.append("Chord both keys at once (positions are base-layer keys).")
+    out.append("")
+    for keys, action in extract_combos(src):
+        trig = " + ".join(f"`{glyph(k)}`" for k in keys)
+        out.append(f"- {trig} → {combo_out(action)}")
+    out.append("")
+    out.append("## Leader sequences")
+    out.append("")
+    out.append("Tap `LEAD`, then the keys in order.")
+    out.append("")
+    for keys, doc in extract_leader_seqs(src):
+        seq = ", ".join(glyph(k) for k in keys)
+        out.append(f"- `LEAD, {seq}` — {doc}")
+    out.append("")
+    out.append("## Emoji")
+    out.append("")
+    out.append("`LEAD, a, <sel>` or `LEAD, i, <sel>` (mirror pair), via the Compose backend.")
+    out.append("")
+    out.append("| sel | emoji |")
+    out.append("|-----|-------|")
+    for sel, gl in extract_emoji(src):
+        out.append(f"| `{sel}` | {gl} |")
+    out.append("")
     return "\n".join(out)
 
 
