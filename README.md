@@ -10,7 +10,7 @@ This repository follows the [official QMK userspace template](https://github.com
 - `layouts/` - Contains a 6x3_3 keymap, which is used for both Cantor and Dactyl (see [QMK layouts documentation](https://docs.qmk.fm/feature_layouts#supporting-a-layout))
 - `modules/shofel/` - QMK community modules (oneshot, unicode_ru)
 - `qmk.json` - Build targets configuration
-- `docs/reference.md` - generated keymap reference (layers; combos+leader in phase 2)
+- `docs/reference.md` - generated keymap reference
 
 ## Setup
 
@@ -69,6 +69,8 @@ Russian is typed on a firmware layer and emitted as keystrokes. Backends, by lea
 - `leader,a,<sel>` / `leader,i,<sel>` — **emoji** (host-wide, via the same Compose
   backend). `a`/`i` are a home-row mirror pair, so either hand works:
   `t`🌷 `r`🌹 `c`🌸 `h`🌺 `s`🌻 `d`🌼 · `u`👍 `o`👌 `k`🤔 `m`🧐 `n`🤝.
+- All leader sequences, combos and layer schemes: see
+  [docs/reference.md](docs/reference.md) (generated).
 
 The old ibus-hex backend (`UNICODE_MODE_LINUX`) is retired — it corrupted when
 letters rolled. Host setup is a home-manager module in this repo, imported by the
