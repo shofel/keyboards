@@ -621,12 +621,16 @@ layer_state_t layer_state_set_user(layer_state_t state) {
  *                    · reserved for layer/mod keys, not symbol slots ·
  */
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
-  [L_BOO] = LAYOUT_split_3x6_3(/** BOO LAYOUT
-       XX  '   ,   u   c   v                        q   f   d   l   y   /
-       XX  a   o   e   s   g                        b   n   t   r   i   -
-     noop  ·   x   .   w   z                        p   h   m   k   j   noop
-                        __ sft SYMBOLS          ret spc LEAD
-       */
+  /**
+   * Base layer — the [BOO layout](https://ballerboo.github.io/boolayout/):
+   * Dvorak modified for more rollover.
+   */
+  [L_BOO] = LAYOUT_split_3x6_3(/* GENERATED scheme — edit the array, then `make gen-docs`.
+       ·   '  ,  u  c  v        q  f  d  l  y  /
+       ·   a  o  e  s  g        b  n  t  r  i  -
+       np  ·  x  .  w  z        p  h  m  k  j  np
+          LEAD  sft  SYM        ret  spc  LEAD
+  */
            XX , KC_QUOT, KC_COMM,    KC_U,   KC_C,  KC_V,     KC_Q,  KC_F,  KC_D,  KC_L,  KC_Y,   KC_SLASH,
            XX ,    KC_A,    KC_O,    KC_E,   KC_S,  KC_G,     KC_B,  KC_N,  KC_T,  KC_R,  KC_I,   KC_MINUS,
        KK_NOOP,     XX,    KC_X,  KC_DOT,   KC_W,  KC_Z,     KC_P,  KC_H,  KC_M,  KC_K,  KC_J,   KK_NOOP,
@@ -639,13 +643,12 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    *
    * Activate and deactivate with leader seqs.
    */
-  [L_RUSSIAN] = LAYOUT_split_3x6_3(/** Russian layer ```
-       ё   й   ц   у   к   е                        н   г   ш   щ   з   х
-       __  ф   ы   в   а   п                        р   о   л   д   ж   э
-       __  я   ч   с   м   и                        т   ь   б   ю   .   ъ
-                            __  __  __    __  __  __
-       ```
-       */
+  [L_RUSSIAN] = LAYOUT_split_3x6_3(/* GENERATED scheme — edit the array, then `make gen-docs`.
+       ё   й  ц  у  к  е        н  г  ш  щ  з  х
+       __  ф  ы  в  а  п        р  о  л  д  ж  э
+       __  я  ч  с  м  и        т  ь  б  ю  .  ъ
+              __  __  __        __  __  __
+  */
          RU_YO,   RU_Y,    RU_TS,    RU_U,   RU_K,  RU_E,     RU_N,  RU_G,   RU_SH, RU_SHCH,RU_Z,   RU_H,
            __ ,   RU_F,    RU_YERU,  RU_V,   RU_A,  RU_P,     RU_R,  RU_O,   RU_L,  RU_D,   RU_ZH,  RU_EE,
            __ ,   RU_YA,   RU_CH,    RU_S,   RU_M,  RU_I,     RU_T,  RU_SOFT,RU_B,  RU_YU,  RU_DOT, RU_HARD,
@@ -663,11 +666,6 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    * Punctuation lives on the RIGHT hand so a symbol rolls into the right-thumb Space
    * on the *same* hand. Best paired with the left-thumb one-shot: tap KK_SYMBO, type
    * the symbol with the right hand, then roll into Space.
-   *
-   *         pinky2 pinky ring  mid  index inner | inner index  mid  ring  pinky pinky2
-   *  top      ·     `    —     $     ^     ·   |   ·     !     *     |     &     /
-   *  home     ·          ~     @     #     ·   |   ·     ?     :     +     %     -
-   *  bot      ·     ·    №     §     \     ⌦   |   ⌫     =     ;     ·     ·     ·
    *
    * Notes / mnemonics (do not "fix" these):
    * - `? !` take the two strongest right keys (index home `?` / top `!`) — the
@@ -692,12 +690,12 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    *
    * Other combos still work here: `=>` `->`, brackets, mods.
    */
-  [L_SYMBOLS] = LAYOUT_split_3x6_3(/*
-       ·  `   —   $   ^   ·                        ·   !   *   |   &   /
-       ·      ~   @   #   ·                        ·   :   ?   +   %   -
-       ·  ·   №   §   \   ⌦                        ⌫   =   ;           ·
-                            __  __  SYM   __  __  __
-       */
+  [L_SYMBOLS] = LAYOUT_split_3x6_3(/* GENERATED scheme — edit the array, then `make gen-docs`.
+       ·  `  —  $  ^  ·        ·  !  *  |  &  /
+       ·  ·  ~  @  #  ·        ·  :  ?  +  %  -
+       ·  ·  №  §  \  ⌦        ⌫  =  ;  ·  ·  ·
+            __  __  SYM        __  __  __
+  */
         XX,  KC_GRV, RU_MDASH,   KC_DLR, KC_CIRC,      XX,            XX,  KC_EXLM,  KC_ASTR,  KC_PIPE, KC_AMPR,  KC_SLASH,
         XX,      XX,  KC_TILD,    KC_AT, KC_HASH,      XX,            XX,  KC_COLN,  KC_QUES,  KC_PLUS, KC_PERC,  KC_MINUS,
         XX,      XX,   RU_NUM,  RU_SECT, KC_BSLS,  KC_DEL,       KC_BSPC,   KC_EQL,  KC_SCLN,       XX,      XX,  XX,
@@ -721,12 +719,12 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    *   - with the right hand tap KC_GRV
    *   - while still holding alt and L_NUM_NAV, you can tap left and right arrows with the right hand
    */
-  [L_NUM_NAV] = LAYOUT_split_3x6_3(/*
-       __  __  7   8   9   /                        `   pg↑ ↑   pg↓ __  __
-       __  0   4   5   6   :                        ⇤-  ←   ⏎   →   -⇥  __
-       __  ,   1   2   3   .                        __  ⮀   ↓   __  __  __
-                            __  __  __    __  __  __
-       */
+  [L_NUM_NAV] = LAYOUT_split_3x6_3(/* GENERATED scheme — edit the array, then `make gen-docs`.
+       ·  '  7  8  9  /        `  pg↑  ↑  pg↓  ·  __
+       ·  0  4  5  6  :        ⇤  ←    ⏎  →    ⇥  __
+       ·  ,  1  2  3  .        ·  ⮀    ↓  ·    ·  ·
+             __  __  __        __  __  __
+  */
        XX,KC_QUOT,  KC_7,  KC_8,  KC_9, KC_SLASH,      KC_GRV,  KC_PGUP,  KC_UP,    KC_PGDN, XX,      __,
        XX,   KC_0,  KC_4,  KC_5,  KC_6, KC_COLN,       KC_HOME, KC_LEFT,  KC_ENTER, KC_RGHT, KC_END,  __,
        XX,KC_COMM,  KC_1,  KC_2,  KC_3,  KC_DOT,       XX,      KC_TAB,   KC_DOWN,  XX,      XX,      XX,
@@ -738,12 +736,12 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    * Sticky via Leader,f (exit with Esc or Leader,space). Also reachable as a
    * one-shot via the Q+B combo.
    */
-  [L_FKEYS_SYS] = LAYOUT_split_3x6_3(/*
-        __ F12  F7  F8  F9  __                       __  br↑ vl↑ __  DBG __
-        __ F11  F4  F5  F6  __                       __  __  __  __  __  __
-       bot F10  F1  F2  F3  __                       __  br↓ vl↓ vl0 __  bot
-                             __  __  __     __  __  __
-       */
+  [L_FKEYS_SYS] = LAYOUT_split_3x6_3(/* GENERATED scheme — edit the array, then `make gen-docs`.
+       ·     F12  F7  F8  F9  ·        ·  br↑  vl↑  ·     DBG  ·
+       ·     F11  F4  F5  F6  ·        ·  ·    ·    ·     ·    __
+       boot  F10  F1  F2  F3  ·        ·  br↓  vl↓  mute  ·    boot
+                     __  __  __        __  __  __
+  */
         XX,  KC_F12,  KC_F7,  KC_F8,  KC_F9,     XX,       XX, KC_BRIU,  KC_VOLU,       XX,  DB_TOGG, XX,
         XX,  KC_F11,  KC_F4,  KC_F5,  KC_F6,     XX,       XX,      XX,       XX,       XX,       XX, __,
    QK_BOOT,  KC_F10,  KC_F1,  KC_F2,  KC_F3,     XX,       XX, KC_BRID,  KC_VOLD,  KC_MUTE,  XX, QK_BOOT,
@@ -761,12 +759,12 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    * heading; ←/→ steer that heading; slo/fst change speed while held. Left hand
    * can apply modifiers (shift+click, ctrl+wheelup).
    */
-  [L_MOUSE] = LAYOUT_split_3x6_3(/*
-        __  __  pol __  bis __                       __  w↑  fwd w↓  __  __
-        __  __  slo __  fst __                       __  ←   b1  →   b2  __
-        __  __  __  __  __  __                       __  b3  bwd __  __  __
-                             __  __  __     __  __  __
-       */
+  [L_MOUSE] = LAYOUT_split_3x6_3(/* GENERATED scheme — edit the array, then `make gen-docs`.
+       ·  ·  pol  ·  bis  ·        ·  w↑  fwd  w↓  ·   ·
+       ·  ·  slo  ·  fst  ·        ·  ←   b1   →   b2  __
+       ·  ·  ·    ·  ·    ·        ·  b3  bwd  ·   ·   ·
+                 __  __  __        __  __  __
+  */
         XX, XX, KK_MM_POLAR,      XX, KK_MM_BISECT, XX,   XX, OM_W_U, OM_U   , OM_W_D,      XX, XX,
         XX, XX,     OM_SLOW,      XX,      OM_FAST, XX,   XX, OM_L  , OM_BTN1, OM_R   , OM_BTN2, __,
         XX, XX,          XX,      XX,           XX, XX,   XX, OM_BTN3, OM_D   ,      XX,      XX, XX,
@@ -787,12 +785,12 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    * screen.  `,` switches to polar. Leaving bisect releases the digitizer
    * (layer_state_set_user).
    */
-  [L_MOUSE_BISECT] = LAYOUT_split_3x6_3(/*
-        __  __  pol __  bis __                       __  __  ↑    __   __  __
-        __  __  __  __  __  __                       __  <-  clk  ->   rst __
-        __  __  __  __  __  __                       __  __  ↓    __   __  __
-                             __  __  __     __  __  __
-       */
+  [L_MOUSE_BISECT] = LAYOUT_split_3x6_3(/* GENERATED scheme — edit the array, then `make gen-docs`.
+       ·  ·  pol  ·  bis  ·        ·  ·  ↑    ·  ·    ·
+       ·  ·  ·    ·  ·    ·        ·  ←  clk  →  rst  __
+       ·  ·  ·    ·  ·    ·        ·  ·  ↓    ·  ·    ·
+                 __  __  __        __  __  __
+  */
         XX, XX, KK_MM_POLAR, XX, KK_MM_BISECT, XX,   XX,      XX,     KK_BI_U,      XX,          XX, XX,
         XX, XX,          XX, XX,           XX, XX,   XX, KK_BI_L, KK_BI_CLICK, KK_BI_R, KK_BI_RESET, __,
         XX, XX,          XX, XX,           XX, XX,   XX,      XX,     KK_BI_D,      XX,          XX, XX,
