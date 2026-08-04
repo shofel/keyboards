@@ -10,6 +10,7 @@ This repository follows the [official QMK userspace template](https://github.com
 - `layouts/` - Contains a 6x3_3 keymap, which is used for both Cantor and Dactyl (see [QMK layouts documentation](https://docs.qmk.fm/feature_layouts#supporting-a-layout))
 - `modules/shofel/` - QMK community modules (oneshot, unicode_ru)
 - `qmk.json` - Build targets configuration
+- `docs/reference.md` - generated keymap reference (layers; combos+leader in phase 2)
 
 ## Setup
 
@@ -117,8 +118,10 @@ qmk compile -kb cantor -km shofel --compiledb
 
 ### Conventions
 
-- Keep each layer's ASCII comment in sync with its `LAYOUT` array. When a PR
-  changes a layer, resync that layer's comment block in the same PR.
+- Layer schemes — the in-`LAYOUT` comments in `keymap.c` and
+  [docs/reference.md](docs/reference.md) — are GENERATED from the `LAYOUT`
+  arrays by `tools/gen_layer_schemes.py`. After changing a layer, run
+  `make gen-docs` in the same PR; `make test` (and CI) fail on drift.
 
 See [TODO.md](TODO.md) for planned improvements, and
 [docs/known-limitations.md](docs/known-limitations.md) for accepted quirks.
