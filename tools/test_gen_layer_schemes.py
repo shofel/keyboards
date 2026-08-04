@@ -70,7 +70,27 @@ def test_real_keymap_fully_covered():
         for t in toks:
             g.glyph(t)  # SystemExit here = missing glyph for a real keycode
 
+def test_render_grid_golden():
+    toks = (
+        ["KC_Q", "KC_W", "KC_E", "KC_R", "KC_T", "KC_Y"] + ["KC_U", "KC_I", "KC_O", "KC_P", "KC_A", "KC_S"]
+        + ["XX", "KC_PGUP", "KC_D", "KC_F", "KC_G", "KC_H"] + ["KC_J", "KC_K", "KC_L", "KC_Z", "KC_X", "KC_C"]
+        + ["__"] * 12
+        + ["QK_LEAD", "KK_SHIFT", "KK_SYMBO", "KK_RET", "KC_SPACE", "QK_LEAD"]
+    )
+    # Golden derived from the renderer rules: per-column width = widest glyph
+    # in that column over the 3 main rows ([2,3,2,2,...] here), cells joined by
+    # 2 spaces, padded halves joined by 8 spaces, trailing whitespace stripped,
+    # left thumb cluster right-aligned to the left half's end.
+    expected = "\n".join([
+        "q   w    e   r   t   y         u   i   o   p   a   s",
+        "·   pg↑  d   f   g   h         j   k   l   z   x   c",
+        "__  __   __  __  __  __        __  __  __  __  __  __",
+        "         LEAD  sft  SYM        ret  spc  LEAD",
+    ])
+    assert g.render_grid(toks) == expected
+
 if __name__ == "__main__":
     test_layer_names(); test_extract_layers(); test_wrong_token_count_fatal()
     test_glyph_rules(); test_unknown_keycode_fatal(); test_real_keymap_fully_covered()
+    test_render_grid_golden()
     print("ok")
