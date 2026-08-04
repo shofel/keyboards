@@ -345,92 +345,73 @@ void leader_start_user(void) {
   leader_suspend();
 }
 
+/* Leader sequences — data so tools/gen_layer_schemes.py can extract them into
+ * docs/reference.md. k2 == KC_NO marks a one-key sequence; doc strings appear
+ * verbatim in the generated reference. Mirror pairs (s·n, w·h, m·.) are two
+ * rows sharing an action, so either hand can trigger them. */
+typedef struct {
+  uint16_t k1, k2;
+  void (*act)(void);
+  const char *doc;
+} leader_seq_t;
+
+/* Ru compose is the default backend; see the unicode_ru module. */
+static void lead_ru(void)       { ru_backend = RU_BACKEND_COMPOSE; toggle_enable(L_RUSSIAN); }
+static void lead_vim(void)      { ru_backend = RU_BACKEND_VIM; toggle_enable(L_RUSSIAN); }
+static void lead_en(void)       { ru_backend = RU_BACKEND_COMPOSE; toggle_disable(); }
+static void lead_reset(void)    { toggle_reset(); }
+/* Esc mirrors the thumb esc combo: exits the toggle layer AND sends Esc.
+ * tap_code alone would not re-enter process_record, so the KC_ESC ->
+ * toggle_disable path would never fire. */
+static void lead_esc(void)      { toggle_disable(); tap_code(KC_ESC); }
+static void lead_ctl_esc(void)  { tap_code16(LCTL(KC_ESC)); }
+static void lead_fkeys(void)    { toggle_enable(L_FKEYS_SYS); }
+static void lead_mouse(void)    { toggle_enable(L_MOUSE); }
+static void lead_num(void)      { toggle_enable(L_NUM_NAV); }
+static void lead_lira(void)     { ru_emit_glyph("$l", 0x20BA); }
+static void lead_rub(void)      { ru_emit_glyph("$r", 0x20BD); }
+static void lead_eur(void)      { ru_emit_glyph("$e", 0x20AC); }
+static void lead_del_all(void)  { tap_code16(LCTL(KC_A)); tap_code16(KC_DEL); }
+static void lead_del_line(void) { tap_code16(LSFT(KC_HOME)); tap_code16(KC_DEL); }
+static void lead_del_word(void) { tap_code16(LCTL(KC_BSPC)); }
+static void lead_kitty(void)    { tap_code16(LGUI(KC_T)); }
+static void lead_pscr(void)     { tap_code(KC_PSCR); }
+
+static const leader_seq_t leader_seqs[] = {
+  {KC_R,     KC_NO, lead_ru,       "Russian — compose backend (default)"},
+  {KC_C,     KC_NO, lead_ru,       "Russian — compose backend (mirror of r)"},
+  {KC_V,     KC_NO, lead_vim,      "Russian — vim backend (vim-native unicode)"},
+  {KC_E,     KC_NO, lead_en,       "back to English (drop the toggle layer)"},
+  {KC_SPACE, KC_NO, lead_reset,    "disable any toggle layer, cancel one-shots"},
+  {KC_S,     KC_NO, lead_esc,      "Esc + exit toggle layer (mirror pair s·n)"},
+  {KC_N,     KC_NO, lead_esc,      "Esc + exit toggle layer (mirror pair s·n)"},
+  {KC_W,     KC_NO, lead_ctl_esc,  "Ctrl+Esc (mirror pair w·h)"},
+  {KC_H,     KC_NO, lead_ctl_esc,  "Ctrl+Esc (mirror pair w·h)"},
+  {KC_F,     KC_NO, lead_fkeys,    "F-keys / system layer (sticky)"},
+  {KC_M,     KC_NO, lead_mouse,    "mouse layer, polar mode (mirror pair m·.)"},
+  {KC_DOT,   KC_NO, lead_mouse,    "mouse layer, polar mode (mirror pair m·.)"},
+  {KC_T,     KC_NO, lead_num,      "num/nav layer (sticky)"},
+  {KC_M,     KC_L,  lead_lira,     "₺ lira"},
+  {KC_DOT,   KC_L,  lead_lira,     "₺ lira (mirror)"},
+  {KC_M,     KC_R,  lead_rub,      "₽ ruble"},
+  {KC_DOT,   KC_R,  lead_rub,      "₽ ruble (mirror)"},
+  {KC_M,     KC_E,  lead_eur,      "€ euro"},
+  {KC_DOT,   KC_E,  lead_eur,      "€ euro (mirror)"},
+  {KC_D,     KC_A,  lead_del_all,  "delete all (Ctrl+A, Del)"},
+  {KC_D,     KC_U,  lead_del_line, "delete to line start (like Ctrl-U)"},
+  {KC_D,     KC_W,  lead_del_word, "delete word (Ctrl+Backspace)"},
+  {KC_K,     KC_NO, lead_kitty,    "kitty terminal (Gui+T)"},
+  {KC_P,     KC_NO, lead_pscr,     "Print Screen"},
+};
+
 void leader_end_user(void) {
   leader_resume();
 
-  /* Ru. Compose mode (rolling-safe; host xkb compose:sclk + ~/.XCompose) is the
-   * default Russian backend — leader,r and leader,c both select it. Vim mode
-   * (leader,v) emits vim-native unicode for typing Cyrillic inside vim/neovim.
-   * Both backends are emitted in userspace by the unicode_ru module; the old
-   * ibus hex backend (UNICODE_MODE_LINUX) and the out-of-tree UNICODE_MODE_VIM
-   * are no longer used. */
-  if (leader_sequence_one_key(KC_R) || leader_sequence_one_key(KC_C)) {
-    ru_backend = RU_BACKEND_COMPOSE;
-    toggle_enable(L_RUSSIAN);
-  }
-  if (leader_sequence_one_key(KC_V)) {
-    ru_backend = RU_BACKEND_VIM;
-    toggle_enable(L_RUSSIAN);
-  }
-  /* Back to English: drop the active toggle layer. */
-  if (leader_sequence_one_key(KC_E)) {
-    ru_backend = RU_BACKEND_COMPOSE;
-    toggle_disable();
-  }
-
-  /* Disable any active toggle layer (one seq for all) */
-  if (leader_sequence_one_key(KC_SPACE)) {
-    toggle_reset();
-  }
-  /* Esc / Ctrl+Esc / Sesc — symmetric.
-   * Esc mirrors the thumb esc combo: it exits whatever toggle layer is active
-   * (toggle_disable) *and* sends Esc. tap_code(KC_ESC) alone would not — it
-   * goes through register_code, which writes the report directly and never
-   * re-enters process_record, so the KC_ESC->toggle_disable path never fires. */
-  if (leader_sequence_one_key(KC_N)) {
-    toggle_disable();
-    tap_code(KC_ESC);
-  }
-  if (leader_sequence_one_key(KC_S)) {
-    toggle_disable();
-    tap_code(KC_ESC);
-  }
-  if (leader_sequence_one_key(KC_H)) {
-    tap_code16(LCTL(KC_ESC));
-  }
-  if (leader_sequence_one_key(KC_W)) {
-    tap_code16(LCTL(KC_ESC));
-  }
-  if (leader_sequence_one_key(KC_F)) {
-    toggle_enable(L_FKEYS_SYS);
-  }
-  /* Mouse layer. `.` (KC_DOT) is m's geometric mirror, bound as a full pair so
-   * mouse (and the currency seqs below) reach from either hand — like the Esc
-   * (s/n) and Ctrl+Esc (w/h) pairs. */
-  if (leader_sequence_one_key(KC_M) || leader_sequence_one_key(KC_DOT)) {
-    toggle_enable(L_MOUSE);
-  }
-  /* Currency signs (money): leader,{m|.},<l|r|e> -> ₺ ₽ € via the active backend.
-   * Two-key sequences, so they coexist with leader,{m|.} (mouse-layer toggle,
-   * one key). */
-  if (leader_sequence_two_keys(KC_M, KC_L) || leader_sequence_two_keys(KC_DOT, KC_L)) { ru_emit_glyph("$l", 0x20BA); } // ₺
-  if (leader_sequence_two_keys(KC_M, KC_R) || leader_sequence_two_keys(KC_DOT, KC_R)) { ru_emit_glyph("$r", 0x20BD); } // ₽
-  if (leader_sequence_two_keys(KC_M, KC_E) || leader_sequence_two_keys(KC_DOT, KC_E)) { ru_emit_glyph("$e", 0x20AC); } // €
-  if (leader_sequence_one_key(KC_T)) {
-    toggle_enable(L_NUM_NAV);
-  }
-
-  /* Text editing */
-  if (leader_sequence_two_keys(KC_D, KC_A)) { // Delete All
-    tap_code16(LCTL(KC_A));
-    tap_code16(KC_DEL);
-  }
-  if (leader_sequence_two_keys(KC_D, KC_U)) { // Like ctrl-u
-    tap_code16(LSFT(KC_HOME));
-    tap_code16(KC_DEL);
-  }
-  if (leader_sequence_two_keys(KC_D, KC_W)) { // Delete Word
-    tap_code16(LCTL(KC_BSPC));
-  }
-
-  /* Kitty */
-  if (leader_sequence_one_key(KC_K)) {
-    tap_code16(LGUI(KC_T));
-  }
-
-  /* Print Screen */
-  if (leader_sequence_one_key(KC_P)) {
-    tap_code(KC_PSCR);
+  for (size_t i = 0; i < sizeof(leader_seqs) / sizeof(leader_seqs[0]); i++) {
+    const leader_seq_t *e = &leader_seqs[i];
+    bool hit = (e->k2 == KC_NO) ? leader_sequence_one_key(e->k1)
+                                : leader_sequence_two_keys(e->k1, e->k2);
+    if (hit) { e->act(); }
   }
 
   /* Emoji: leader,{a|i},<sel> -> a flower or reaction, host-wide, via the
