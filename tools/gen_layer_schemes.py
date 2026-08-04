@@ -93,6 +93,54 @@ def extract_layers(src):
     return layers
 
 
+CYR = {
+    "A": "а", "B": "б", "V": "в", "G": "г", "D": "д", "E": "е", "YO": "ё",
+    "ZH": "ж", "Z": "з", "I": "и", "Y": "й", "K": "к", "L": "л", "M": "м",
+    "N": "н", "O": "о", "P": "п", "R": "р", "S": "с", "T": "т", "U": "у",
+    "F": "ф", "H": "х", "TS": "ц", "CH": "ч", "SH": "ш", "SHCH": "щ",
+    "YERU": "ы", "SOFT": "ь", "HARD": "ъ", "EE": "э", "YU": "ю", "YA": "я",
+}
+
+GLYPHS = {
+    "__": "__", "XX": "·", "KK_NOOP": "np",
+    "KC_QUOT": "'", "KC_COMM": ",", "KC_DOT": ".", "KC_SLASH": "/", "KC_MINUS": "-",
+    "QK_LEAD": "LEAD", "KK_SHIFT": "sft", "KK_SYMBO": "SYM",
+    "KK_RET": "ret", "LT(L_SYMBOLS, KC_ENTER)": "ret", "KC_SPACE": "spc",
+    "RU_DOT": ".", "RU_MDASH": "—", "RU_NUM": "№", "RU_SECT": "§",
+    "KC_GRV": "`", "KC_DLR": "$", "KC_CIRC": "^", "KC_EXLM": "!", "KC_ASTR": "*",
+    "KC_PIPE": "|", "KC_AMPR": "&", "KC_TILD": "~", "KC_AT": "@", "KC_HASH": "#",
+    "KC_COLN": ":", "KC_QUES": "?", "KC_PLUS": "+", "KC_PERC": "%",
+    "KC_BSLS": "\\", "KC_DEL": "⌦", "KC_BSPC": "⌫", "KC_EQL": "=", "KC_SCLN": ";",
+    "KC_PGUP": "pg↑", "KC_PGDN": "pg↓", "KC_UP": "↑", "KC_DOWN": "↓",
+    "KC_LEFT": "←", "KC_RGHT": "→", "KC_HOME": "⇤", "KC_END": "⇥",
+    "KC_ENTER": "⏎", "KC_TAB": "⮀",
+    "KC_BRIU": "br↑", "KC_BRID": "br↓", "KC_VOLU": "vl↑", "KC_VOLD": "vl↓",
+    "KC_MUTE": "mute", "DB_TOGG": "DBG", "QK_BOOT": "boot",
+    "KK_MM_POLAR": "pol", "KK_MM_BISECT": "bis",
+    "OM_U": "fwd", "OM_D": "bwd", "OM_L": "←", "OM_R": "→",
+    "OM_W_U": "w↑", "OM_W_D": "w↓", "OM_SLOW": "slo", "OM_FAST": "fst",
+    "OM_BTN1": "b1", "OM_BTN2": "b2", "OM_BTN3": "b3",
+    "KK_BI_L": "←", "KK_BI_R": "→", "KK_BI_U": "↑", "KK_BI_D": "↓",
+    "KK_BI_CLICK": "clk", "KK_BI_RESET": "rst",
+}
+
+
+def glyph(token):
+    if token in GLYPHS:
+        return GLYPHS[token]
+    m = re.fullmatch(r"KC_([A-Z])$", token)
+    if m:
+        return m.group(1).lower()
+    if re.fullmatch(r"KC_\d", token):
+        return token[3:]
+    if re.fullmatch(r"KC_F\d{1,2}", token):
+        return token[3:]
+    m = re.fullmatch(r"RU_(\w+)", token)
+    if m and m.group(1) in CYR:
+        return CYR[m.group(1)]
+    die(f"no glyph for keycode {token!r} — add it to GLYPHS")
+
+
 def main():
     pass
 
