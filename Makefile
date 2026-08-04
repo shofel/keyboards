@@ -7,13 +7,10 @@ ifeq ($(QMK_USERSPACE),)
     QMK_USERSPACE := $(shell pwd)
 endif
 
-QMK_FIRMWARE_ROOT = $(shell qmk config -ro user.qmk_home | cut -d= -f2 | sed -e 's@^None$$@@g')
-ifeq ($(QMK_FIRMWARE_ROOT),)
-    $(error Cannot determine qmk_firmware location. `qmk config -ro user.qmk_home` is not set)
-endif
+QMK_FIRMWARE_ROOT = $(shell qmk config -ro user.qmk_home 2>/dev/null | cut -d= -f2 | sed -e 's@^None$$@@g')
 
 # Convenience targets — build and flash the Cantor keymap.
-.PHONY: build flash test test-bisect test-oneshot test-compose
+.PHONY: build flash test test-bisect test-oneshot test-compose test-schemes gen-docs
 
 build:
 	qmk compile -kb cantor -km shofel
@@ -33,6 +30,7 @@ build:
 FLASH_TIMEOUT ?= 120
 
 flash: build
+	@test -n "$(QMK_FIRMWARE_ROOT)" || { echo "qmk_firmware not configured: qmk config user.qmk_home" >&2; exit 1; }
 	echo "Enter the bootloader on the half to flash — boot combo, or BOOT0 while plugging in. Waiting $(FLASH_TIMEOUT)s..."
 	for i in $$(seq 1 $(FLASH_TIMEOUT)); do \
 	  if dfu-util -l 2>/dev/null | grep -q 0483:df11; then \
@@ -50,7 +48,7 @@ flash: build
 	exit 1
 
 # All off-target host tests (pure logic; no QMK, no hardware).
-test: test-bisect test-oneshot test-compose
+test: test-bisect test-oneshot test-compose test-schemes
 
 # Off-target unit test for bisect_geom.h (pure host math; no QMK, no hardware).
 test-bisect:
@@ -63,6 +61,14 @@ test-oneshot:
 test-compose:
 	python3 tools/test_gen_compose.py
 
+test-schemes:
+	python3 tools/gen_layer_schemes.py --check
+
+# Regenerate docs/reference.md + the in-LAYOUT scheme comments from keymap.c.
+gen-docs:
+	python3 tools/gen_layer_schemes.py --write
+
 %:
+	@test -n "$(QMK_FIRMWARE_ROOT)" || { echo "qmk_firmware not configured: qmk config user.qmk_home" >&2; exit 1; }
 	+$(MAKE) -C $(QMK_FIRMWARE_ROOT) $(MAKECMDGOALS) QMK_USERSPACE=$(QMK_USERSPACE)
 
