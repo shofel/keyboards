@@ -3,7 +3,8 @@
 Single source of truth for Cantor "compose mode" unicode emission.
 
 Despite the ru_* naming, this covers every glyph the Cantor emits via Compose,
-not just Russian: Cyrillic, typographic symbols (« » — № §), and currency (₺ ₽ €).
+not just Russian: Cyrillic, typographic symbols (« » — № §), currency (₺ ₽ €),
+and emoji (flowers + reactions).
 
 Emits, from one table:
   --table     <path>  C array `ru_compose_code[]` indexed by `enum unicode_names`
@@ -16,6 +17,7 @@ Scheme (collision-free private prefixes; every sequence is exactly 3 keys):
     prefix 'q'  -> lowercase Cyrillic / typographic symbols (« » via q[ q])
     prefix 'Q'  -> uppercase Cyrillic   (Shift+q -> keysym Q)
     prefix '$'  -> currency (₺ ₽ €), self-documenting money prefix
+    prefix '@'  -> emoji (flowers + reactions), zero-collision private prefix
   No sequence is a prefix of another, and the private prefixes do not collide
   with the included system table.
 """
@@ -61,8 +63,25 @@ CURRENCY = [
     (0x20AC, "e", "€"),  # euro         (leader,m,e — EUR)
 ]
 
+# Emoji — emitted by leader seqs (leader,{a|i},<sel>) via ru_compose_emit_code.
+# Standalone glyphs under a private '@' prefix (zero-collision, chosen like '$').
+# Like EXTRA/CURRENCY: XCompose + cheatsheet, no C-table row. (cp, selector, glyph)
+EMOJI = [
+    (0x1F337, "t", "🌷"),  # tulip
+    (0x1F339, "r", "🌹"),  # rose
+    (0x1F338, "c", "🌸"),  # cherry blossom
+    (0x1F33A, "h", "🌺"),  # hibiscus
+    (0x1F33B, "s", "🌻"),  # sunflower
+    (0x1F33C, "d", "🌼"),  # daisy
+    (0x1F44D, "u", "👍"),  # thumbup
+    (0x1F44C, "o", "👌"),  # ok
+    (0x1F914, "k", "🤔"),  # think
+    (0x1F9D0, "m", "🧐"),  # monocle
+    (0x1F91D, "n", "🤝"),  # handshake
+]
+
 # Keysym names for selector chars whose keysym name isn't the char itself.
-KEYSYM = {"[": "bracketleft", "]": "bracketright", "$": "dollar"}
+KEYSYM = {"[": "bracketleft", "]": "bracketright", "$": "dollar", "@": "at"}
 def keysym(ch):
     return KEYSYM.get(ch, ch)
 
@@ -105,6 +124,8 @@ def gen_xcompose():
         out.append(f'<Multi_key> <q> <{keysym(s)}> : "{glyph}" U{cp:04X}')
     for cp, s, glyph in CURRENCY:
         out.append(f'<Multi_key> <dollar> <{keysym(s)}> : "{glyph}" U{cp:04X}')
+    for cp, s, glyph in EMOJI:
+        out.append(f'<Multi_key> <at> <{keysym(s)}> : "{glyph}" U{cp:04X}')
     return "\n".join(out) + "\n"
 
 
@@ -116,6 +137,8 @@ def gen_cheatsheet():
         out.append(f"  {glyph}  U+{cp:04X}   Compose q {s}")
     for cp, s, glyph in CURRENCY:
         out.append(f"  {glyph}  U+{cp:04X}   Compose $ {s}")
+    for cp, s, glyph in EMOJI:
+        out.append(f"  {glyph}  U+{cp:04X}   Compose @ {s}")
     return "\n".join(out) + "\n"
 
 
