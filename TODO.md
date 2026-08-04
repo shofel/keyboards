@@ -34,14 +34,6 @@ estimate changes. Bugs tend to top the list because Impact carries the most weig
   absolute-mouse HID descriptor instead, which needs no host config on any OS.
   See [docs/known-limitations.md](docs/known-limitations.md).
 
-## Modules
-
-- ~~make ucis and unicodemap work together → emoji~~ **DONE 2026-08-04.**
-  Not via UCIS: QMK hard-`#error`s UCIS + unicodemap together, and UCIS emits
-  through the ibus-hex path this firmware abandoned. Dissolved by not using UCIS —
-  emoji are standalone glyphs in the existing Compose backend (`leader,{a|i},<sel>`
-  → 🌷…🤝). See docs/superpowers/specs/2026-08-04-emoji-via-compose-design.md.
-
 ## Docs
 
 - Document all leader sequences + emoji in one synced reference. Today they're
