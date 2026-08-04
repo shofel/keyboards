@@ -141,6 +141,24 @@ def glyph(token):
     die(f"no glyph for keycode {token!r} — add it to GLYPHS")
 
 
+GAP = " " * 8
+
+
+def render_grid(tokens):
+    gl = [glyph(t) for t in tokens]
+    rows, thumbs = [gl[0:12], gl[12:24], gl[24:36]], gl[36:42]
+    w = [max(len(r[c]) for r in rows) for c in range(12)]
+
+    def half(cells, widths):
+        return "  ".join(c.ljust(wd) for c, wd in zip(cells, widths))
+
+    lines = [(half(r[:6], w[:6]) + GAP + half(r[6:], w[6:])).rstrip() for r in rows]
+    left_w = len(half(["x" * wd for wd in w[:6]], w[:6]))
+    lt, rt = "  ".join(thumbs[:3]), "  ".join(thumbs[3:])
+    lines.append(" " * max(0, left_w - len(lt)) + lt + GAP + rt)
+    return "\n".join(lines)
+
+
 def main():
     pass
 
