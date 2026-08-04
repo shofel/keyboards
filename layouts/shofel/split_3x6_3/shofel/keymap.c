@@ -400,9 +400,9 @@ void leader_end_user(void) {
   /* Currency signs (money): leader,m,<l|r|e> -> ₺ ₽ € via the active backend.
    * Two-key sequences, so they coexist with leader,m (mouse-layer toggle, one
    * key). */
-  if (leader_sequence_two_keys(KC_M, KC_L)) { ru_emit_glyph("$l", 0x20BA); } // ₺ lira  (TRY)
-  if (leader_sequence_two_keys(KC_M, KC_R)) { ru_emit_glyph("$r", 0x20BD); } // ₽ ruble (RUB)
-  if (leader_sequence_two_keys(KC_M, KC_E)) { ru_emit_glyph("$e", 0x20AC); } // € euro  (EUR)
+  if (leader_sequence_two_keys(KC_M, KC_L)) { ru_emit_glyph("$l", 0x20BA); } // ₺
+  if (leader_sequence_two_keys(KC_M, KC_R)) { ru_emit_glyph("$r", 0x20BD); } // ₽
+  if (leader_sequence_two_keys(KC_M, KC_E)) { ru_emit_glyph("$e", 0x20AC); } // €
   if (leader_sequence_one_key(KC_T)) {
     toggle_enable(L_NUM_NAV);
   }
