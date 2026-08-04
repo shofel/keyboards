@@ -44,6 +44,33 @@ def test_wrong_token_count_fatal():
     else:
         raise AssertionError("41 tokens should be fatal")
 
+def test_glyph_rules():
+    assert g.glyph("KC_A") == "a"
+    assert g.glyph("KC_7") == "7"
+    assert g.glyph("KC_F12") == "F12"
+    assert g.glyph("RU_YO") == "ё"
+    assert g.glyph("__") == "__"
+    assert g.glyph("XX") == "·"
+    assert g.glyph("KC_BSPC") == "⌫"
+    assert g.glyph("LT(L_SYMBOLS, KC_ENTER)") == "ret"
+
+def test_unknown_keycode_fatal():
+    try:
+        g.glyph("KC_TOTALLY_NEW")
+    except SystemExit:
+        pass
+    else:
+        raise AssertionError("unknown keycode should be fatal")
+
+def test_real_keymap_fully_covered():
+    src = g.KEYMAP.read_text(encoding="utf-8")
+    layers = g.extract_layers(src)
+    assert len(layers) == 7
+    for name, toks in layers:
+        for t in toks:
+            g.glyph(t)  # SystemExit here = missing glyph for a real keycode
+
 if __name__ == "__main__":
     test_layer_names(); test_extract_layers(); test_wrong_token_count_fatal()
+    test_glyph_rules(); test_unknown_keycode_fatal(); test_real_keymap_fully_covered()
     print("ok")
