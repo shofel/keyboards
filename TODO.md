@@ -17,7 +17,6 @@ estimate changes. Bugs tend to top the list because Impact carries the most weig
 
 | # | Score | Task | Where |
 |---|-------|------|-------|
-| 1 | 2.60 | Make ucis and unicodemap work together (→ then emoji via ucis) | Modules |
 | 1 | 2.60 | Generate clean schemes from layer definitions (kill manual drift) | Dactyl |
 | 3 | 2.55 | Absolute-mouse HID descriptor so bisect needs no host config | Layout |
 | 4 | 2.30 | Shared layout for cantor & dactyl (keymap transform program + tests) | Dactyl |
@@ -36,8 +35,11 @@ estimate changes. Bugs tend to top the list because Impact carries the most weig
 
 ## Modules
 
-- make ucis and unicodemap work together
-  - then: employ ucis for emoji: tulip and other flowers, tup=thumbup, ok, think, monocle
+- ~~make ucis and unicodemap work together → emoji~~ **DONE 2026-08-04.**
+  Not via UCIS: QMK hard-`#error`s UCIS + unicodemap together, and UCIS emits
+  through the ibus-hex path this firmware abandoned. Dissolved by not using UCIS —
+  emoji are standalone glyphs in the existing Compose backend (`leader,{a|i},<sel>`
+  → 🌷…🤝). See docs/superpowers/specs/2026-08-04-emoji-via-compose-design.md.
 
 ## Dactyl
 
