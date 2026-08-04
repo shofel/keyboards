@@ -113,10 +113,34 @@ def test_regen_keymap_marks_every_layer():
     once = g.regen_keymap(g.KEYMAP.read_text(encoding="utf-8"))
     assert once.count("GENERATED scheme") == 7
 
+def test_extract_combos_real():
+    combos = g.extract_combos(g.KEYMAP.read_text(encoding="utf-8"))
+    by_keys = {tuple(ks): act for ks, act in combos}
+    assert by_keys[("KC_S", "KC_W")] == "KC_LBRC"
+    assert by_keys[("KK_SHIFT", "KC_SPACE")] == "KC_ESC"
+    assert len(combos) == 23
+
+def test_extract_leader_seqs_real():
+    seqs = g.extract_leader_seqs(g.KEYMAP.read_text(encoding="utf-8"))
+    assert (["KC_R"], "Russian — compose backend (default)") in [(k, d) for k, d in seqs]
+    assert (["KC_D", "KC_W"], "delete word (Ctrl+Backspace)") in [(k, d) for k, d in seqs]
+    assert len(seqs) == 24
+
+def test_extract_emoji_real():
+    emo = g.extract_emoji(g.KEYMAP.read_text(encoding="utf-8"))
+    assert ("t", "🌷") in emo and len(emo) == 11
+
+def test_gen_doc_has_phase2_sections():
+    doc = g.gen_doc(g.KEYMAP.read_text(encoding="utf-8"))
+    for h in ["## Combos", "## Leader sequences", "## Emoji"]:
+        assert h in doc
+
 if __name__ == "__main__":
     test_layer_names(); test_extract_layers(); test_wrong_token_count_fatal()
     test_glyph_rules(); test_unknown_keycode_fatal(); test_real_keymap_fully_covered()
     test_render_grid_golden()
     test_doc_paragraph(); test_gen_doc_contains_all_layers()
     test_regen_keymap_idempotent(); test_regen_keymap_marks_every_layer()
+    test_extract_combos_real(); test_extract_leader_seqs_real()
+    test_extract_emoji_real(); test_gen_doc_has_phase2_sections()
     print("ok")

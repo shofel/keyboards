@@ -81,3 +81,78 @@ Mouse layer — BISECT mode (digitizer binary search). Opt-in via the `c` key.
 ·  ·  ·    ·  ·    ·        ·  ·  ↓    ·  ·    ·
           __  __  __        __  __  __
 ```
+
+## Combos
+
+Chord both keys at once (positions are base-layer keys).
+
+- `sft` + `spc` → Esc
+- `np` + `SYM` → bootloader
+- `ret` + `np` → bootloader
+- `np` + `sft` → reboot
+- `spc` + `np` → reboot
+- `h` + `m` → =>
+- `h` + `k` → ->
+- `s` + `w` → [
+- `n` + `h` → ]
+- `e` + `.` → (
+- `t` + `m` → )
+- `g` + `z` → < (« when shifted)
+- `b` + `p` → > (» when shifted)
+- `s` + `c` → one-shot Ctrl
+- `e` + `u` → one-shot NUM_NAV
+- `o` + `,` → one-shot Alt
+- `a` + `'` → one-shot Gui
+- `n` + `f` → one-shot Ctrl
+- `t` + `d` → one-shot NUM_NAV
+- `r` + `l` → one-shot Alt
+- `i` + `y` → one-shot Gui
+- `g` + `v` → "
+- `/` + `-` → one-shot FKEYS_SYS
+
+## Leader sequences
+
+Tap `LEAD`, then the keys in order.
+
+- `LEAD, r` — Russian — compose backend (default)
+- `LEAD, c` — Russian — compose backend (mirror of r)
+- `LEAD, v` — Russian — vim backend (vim-native unicode)
+- `LEAD, e` — back to English (drop the toggle layer)
+- `LEAD, spc` — disable any toggle layer, cancel one-shots
+- `LEAD, s` — Esc + exit toggle layer (mirror pair s·n)
+- `LEAD, n` — Esc + exit toggle layer (mirror pair s·n)
+- `LEAD, w` — Ctrl+Esc (mirror pair w·h)
+- `LEAD, h` — Ctrl+Esc (mirror pair w·h)
+- `LEAD, f` — F-keys / system layer (sticky)
+- `LEAD, m` — mouse layer, polar mode (mirror pair m·.)
+- `LEAD, .` — mouse layer, polar mode (mirror pair m·.)
+- `LEAD, t` — num/nav layer (sticky)
+- `LEAD, m, l` — ₺ lira
+- `LEAD, ., l` — ₺ lira (mirror)
+- `LEAD, m, r` — ₽ ruble
+- `LEAD, ., r` — ₽ ruble (mirror)
+- `LEAD, m, e` — € euro
+- `LEAD, ., e` — € euro (mirror)
+- `LEAD, d, a` — delete all (Ctrl+A, Del)
+- `LEAD, d, u` — delete to line start (like Ctrl-U)
+- `LEAD, d, w` — delete word (Ctrl+Backspace)
+- `LEAD, k` — kitty terminal (Gui+T)
+- `LEAD, p` — Print Screen
+
+## Emoji
+
+`LEAD, a, <sel>` or `LEAD, i, <sel>` (mirror pair), via the Compose backend.
+
+| sel | emoji |
+|-----|-------|
+| `t` | 🌷 |
+| `r` | 🌹 |
+| `c` | 🌸 |
+| `h` | 🌺 |
+| `s` | 🌻 |
+| `d` | 🌼 |
+| `u` | 👍 |
+| `o` | 👌 |
+| `k` | 🤔 |
+| `m` | 🧐 |
+| `n` | 🤝 |
