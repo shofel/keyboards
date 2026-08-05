@@ -2,7 +2,7 @@
 
 # Keymap reference
 
-Source of truth: `layouts/shofel/split_3x6_3/shofel/keymap.c`.
+Source of truth: `layouts/split_3x6_3/shofel/keymap.c`.
 `__` = transparent, `·` = no-op.
 
 ## Legend

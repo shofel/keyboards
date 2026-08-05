@@ -2,7 +2,7 @@
  * mouse mode. No QMK deps, so it runs on the host.
  *
  * Build & run from the repo root:
- *   gcc -Wall -Wextra -Ilayouts/shofel/split_3x6_3/shofel \
+ *   gcc -Wall -Wextra -Ilayouts/split_3x6_3/shofel \
  *       -o /tmp/test_bisect_geom tools/test_bisect_geom.c -lm && /tmp/test_bisect_geom
  * or:  make test-bisect
  */

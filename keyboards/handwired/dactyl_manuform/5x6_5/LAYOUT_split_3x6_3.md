@@ -15,8 +15,8 @@ This layout maps the standard `LAYOUT_split_3x6_3` (42 keys: 3 rows × 6 cols ×
 - **Right**: `[11,2]`, `[11,0]`, `[10,1]` (first 3 accessible thumb positions)
 
 ## Reference Files
-- **Standard layout**: `~/workspaces-one/forks/qmk_firmware/layouts/default/split_3x6_3/info.json`
-- **Keyboard structure**: `~/workspaces-one/forks/qmk_firmware/keyboards/handwired/dactyl_manuform/5x6_5/keyboard.json`
+- **Standard layout**: `~/workspaces-one/qmk_firmware/layouts/default/split_3x6_3/info.json`
+- **Keyboard structure**: `~/workspaces-one/qmk_firmware/keyboards/handwired/dactyl_manuform/5x6_5/keyboard.json`
 
 ## Notes
 - Row 0 of 5x6_5 is unused (top row)

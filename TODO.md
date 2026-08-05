@@ -44,18 +44,6 @@ estimate changes. Bugs tend to top the list because Impact carries the most weig
 - cleanup readme
   - nix flake run
 
-## CI
-
-- Re-add the firmware build to CI. Dropped from `.github/workflows/ci.yml`
-  because the keymap lives in a userspace `layouts/` dir, and the QMK build
-  container (`ghcr.io/qmk/qmk_cli:latest`) runs its own stock CLI that ignores
-  the fork's "Recognize layouts from a userspace" patch — so `qmk
-  userspace-compile` fails with "Could not find keymap" for both boards, even
-  pinned to `shofel/qmk_firmware`. Local `qmk compile` works (it uses the
-  patched CLI). Fix path: land the userspace-layout resolution in the qmk CLI
-  the container uses (upstream PR, or a CI step that forces the fork's
-  `lib/python`). CI already gates host tests + the scheme drift check.
-
 ## TODO cantor hardware
 
 - a sturdier case with quieter sound

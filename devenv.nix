@@ -8,8 +8,11 @@
   # hardware.keyboard.qmk.enable = true;
 
   env = {
-    S_QMK_TAG = "0.31.1";
-    S_QMK_FIRMWARE = "/home/slava/workspaces-one/forks/qmk_firmware/";
+    # Stock upstream QMK — no fork. The keymap lives at the standard userspace
+    # layout path (layouts/split_3x6_3/shofel/), which pristine qmk resolves.
+    # Keep this tag in sync with .github/workflows/ci.yml's qmk_ref.
+    S_QMK_TAG = "0.33.13";
+    S_QMK_FIRMWARE = "/home/slava/workspaces-one/qmk_firmware/";
   };
 
   scripts.setup-qmk.exec = /* sh */ ''
