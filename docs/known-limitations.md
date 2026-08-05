@@ -43,6 +43,6 @@ stacking layers has no meaningful semantics anyway (a keypress resolves against
 one layer, whereas chorded modifiers genuinely combine).
 
 The module lists the `OSL(...)` keys in `is_oneshot_ignored_key`
-(`layouts/shofel/split_3x6_3/shofel/keymap.c`) only so a *pending modifier* is
+(`layouts/split_3x6_3/shofel/keymap.c`) only so a *pending modifier* is
 not consumed when you tap into an OSL layer — i.e. the modifier penetrates the
 layer. That is about mods-through-layers, not layer stacking.

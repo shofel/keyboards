@@ -20,7 +20,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-KEYMAP = ROOT / "layouts/shofel/split_3x6_3/shofel/keymap.c"
+KEYMAP = ROOT / "layouts/split_3x6_3/shofel/keymap.c"
 DOC = ROOT / "docs/reference.md"
 
 N_TOKENS = 42  # 3 rows of 12 + 6 thumbs
@@ -301,7 +301,7 @@ def gen_doc(src):
         "",
         "# Keymap reference",
         "",
-        "Source of truth: `layouts/shofel/split_3x6_3/shofel/keymap.c`.",
+        f"Source of truth: `{KEYMAP.relative_to(ROOT)}`.",
         "`__` = transparent, `·` = no-op.",
         "",
         "## Legend",
