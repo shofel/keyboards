@@ -5,7 +5,46 @@
 Source of truth: `layouts/shofel/split_3x6_3/shofel/keymap.c`.
 `__` = transparent, `·` = no-op.
 
-## L_BOO
+## Legend
+
+- `np` — no-op filler key
+- `sft` — one-shot Shift
+- `SYM` — Symbol layer — left thumb (tap = one-shot, hold = momentary)
+- `ret` — Enter (tap) / Symbol layer (hold)
+- `spc` — Space
+- `LEAD` — leader key — starts a leader sequence
+- `⌫` — Backspace
+- `⌦` — Delete
+- `⏎` — Enter
+- `⮀` — Tab
+- `⇤` — Home
+- `⇥` — End
+- `pg↑` — Page Up
+- `pg↓` — Page Down
+- `pol` — mouse: polar mode
+- `bis` — mouse: bisect mode
+- `fwd` — mouse: move forward
+- `bwd` — mouse: move backward
+- `w↑` — mouse: wheel up
+- `w↓` — mouse: wheel down
+- `slo` — mouse: slower
+- `fst` — mouse: faster
+- `b1` — mouse: button 1
+- `b2` — mouse: button 2
+- `b3` — mouse: button 3
+- `clk` — mouse (bisect): click / hold to drag
+- `rst` — mouse (bisect): reset to full screen
+- `br↑` — brightness up
+- `br↓` — brightness down
+- `vl↑` — volume up
+- `vl↓` — volume down
+- `mute` — mute
+- `DBG` — toggle debug logging
+- `boot` — bootloader (for flashing)
+
+Arrows (`←` `→` `↑` `↓`) are directional per layer: navigation on Numbers & Navigation, steering on Mouse — Polar, screen-halving on Mouse — Bisect.
+
+## Base (BOO) <sub>`L_BOO`</sub>
 
 Base layer — the [BOO layout](https://ballerboo.github.io/boolayout/): Dvorak modified for more rollover.
 
@@ -16,7 +55,7 @@ np  ·  x  .  w  z        p  h  m  k  j  np
    LEAD  sft  SYM        ret  spc  LEAD
 ```
 
-## L_RUSSIAN
+## Russian <sub>`L_RUSSIAN`</sub>
 
 Russian layer.
 
@@ -27,7 +66,7 @@ __  я  ч  с  м  и        т  ь  б  ю  .  ъ
        __  __  __        __  __  __
 ```
 
-## L_SYMBOLS
+## Symbols <sub>`L_SYMBOLS`</sub>
 
 Symbol layer — frequency-first, punctuation on the RIGHT hand.
 
@@ -38,7 +77,7 @@ Symbol layer — frequency-first, punctuation on the RIGHT hand.
      __  __  SYM        __  __  __
 ```
 
-## L_NUM_NAV
+## Numbers & Navigation <sub>`L_NUM_NAV`</sub>
 
 Layer for numbers and navigation.
 
@@ -49,7 +88,7 @@ Layer for numbers and navigation.
       __  __  __        __  __  __
 ```
 
-## L_FKEYS_SYS
+## F-keys & System <sub>`L_FKEYS_SYS`</sub>
 
 Layer for F keys and multimedia buttons.
 
@@ -60,7 +99,7 @@ boot  F10  F1  F2  F3  ·        ·  br↓  vl↓  mute  ·    boot
               __  __  __        __  __  __
 ```
 
-## L_MOUSE
+## Mouse — Polar <sub>`L_MOUSE`</sub>
 
 Mouse layer — POLAR mode (Orbital Mouse, getreuer/orbital_mouse). DEFAULT.
 
@@ -71,7 +110,7 @@ Mouse layer — POLAR mode (Orbital Mouse, getreuer/orbital_mouse). DEFAULT.
           __  __  __        __  __  __
 ```
 
-## L_MOUSE_BISECT
+## Mouse — Bisect <sub>`L_MOUSE_BISECT`</sub>
 
 Mouse layer — BISECT mode (digitizer binary search). Opt-in via the `c` key.
 

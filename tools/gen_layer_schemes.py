@@ -125,6 +125,45 @@ GLYPHS = {
 }
 
 
+LAYER_TITLES = {
+    "L_BOO": "Base (BOO)",
+    "L_RUSSIAN": "Russian",
+    "L_SYMBOLS": "Symbols",
+    "L_NUM_NAV": "Numbers & Navigation",
+    "L_FKEYS_SYS": "F-keys & System",
+    "L_MOUSE": "Mouse — Polar",
+    "L_MOUSE_BISECT": "Mouse — Bisect",
+}
+
+
+def layer_title(name):
+    if name in LAYER_TITLES:
+        return LAYER_TITLES[name]
+    die(f"no title for layer {name!r} — add it to LAYER_TITLES")
+
+
+LEGEND = [
+    ("np", "no-op filler key"),
+    ("sft", "one-shot Shift"),
+    ("SYM", "Symbol layer — left thumb (tap = one-shot, hold = momentary)"),
+    ("ret", "Enter (tap) / Symbol layer (hold)"),
+    ("spc", "Space"),
+    ("LEAD", "leader key — starts a leader sequence"),
+    ("⌫", "Backspace"), ("⌦", "Delete"), ("⏎", "Enter"), ("⮀", "Tab"),
+    ("⇤", "Home"), ("⇥", "End"), ("pg↑", "Page Up"), ("pg↓", "Page Down"),
+    ("pol", "mouse: polar mode"), ("bis", "mouse: bisect mode"),
+    ("fwd", "mouse: move forward"), ("bwd", "mouse: move backward"),
+    ("w↑", "mouse: wheel up"), ("w↓", "mouse: wheel down"),
+    ("slo", "mouse: slower"), ("fst", "mouse: faster"),
+    ("b1", "mouse: button 1"), ("b2", "mouse: button 2"), ("b3", "mouse: button 3"),
+    ("clk", "mouse (bisect): click / hold to drag"),
+    ("rst", "mouse (bisect): reset to full screen"),
+    ("br↑", "brightness up"), ("br↓", "brightness down"),
+    ("vl↑", "volume up"), ("vl↓", "volume down"), ("mute", "mute"),
+    ("DBG", "toggle debug logging"), ("boot", "bootloader (for flashing)"),
+]
+
+
 def glyph(token):
     if token in GLYPHS:
         return GLYPHS[token]
@@ -265,9 +304,19 @@ def gen_doc(src):
         "Source of truth: `layouts/shofel/split_3x6_3/shofel/keymap.c`.",
         "`__` = transparent, `·` = no-op.",
         "",
+        "## Legend",
+        "",
     ]
+    for gl, meaning in LEGEND:
+        out.append(f"- `{gl}` — {meaning}")
+    out.append("")
+    out.append(
+        "Arrows (`←` `→` `↑` `↓`) are directional per layer: navigation on "
+        "Numbers & Navigation, steering on Mouse — Polar, screen-halving on "
+        "Mouse — Bisect.")
+    out.append("")
     for name, toks in extract_layers(src):
-        out.append(f"## {name}")
+        out.append(f"## {layer_title(name)} <sub>`{name}`</sub>")
         out.append("")
         prose = doc_paragraph(src, name)
         if prose:
