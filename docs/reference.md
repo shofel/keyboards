@@ -123,31 +123,26 @@ Mouse layer — BISECT mode (digitizer binary search). Opt-in via the `c` key.
 
 ## Combos
 
-Chord both keys at once (positions are base-layer keys).
+Combos fire on two physical key positions (they resolve from the base layer). A label on a border is the combo of the two keys it sits between: the upper border is *home + the key above* (mods, `"`, F-keys), the lower border is *home + the key below* (brackets — opening on the left hand, closing on the right).
 
-- `sft` + `spc` → Esc
-- `np` + `SYM` → bootloader
-- `ret` + `np` → bootloader
-- `np` + `sft` → reboot
-- `spc` + `np` → reboot
-- `h` + `m` → =>
-- `h` + `k` → ->
-- `s` + `w` → [
-- `n` + `h` → ]
-- `e` + `.` → (
-- `t` + `m` → )
-- `g` + `z` → < (« when shifted)
-- `b` + `p` → > (» when shifted)
-- `s` + `c` → one-shot Ctrl
-- `e` + `u` → one-shot NUM_NAV
-- `o` + `,` → one-shot Alt
-- `a` + `'` → one-shot Gui
-- `n` + `f` → one-shot Ctrl
-- `t` + `d` → one-shot NUM_NAV
-- `r` + `l` → one-shot Alt
-- `i` + `y` → one-shot Gui
-- `g` + `v` → "
-- `/` + `-` → one-shot FKEYS_SYS
+```
+┌─────┬─────┬─────┬─────┬─────┬─────┐    ┌─────┬─────┬─────┬─────┬─────┬─────┐
+│  ·  │  '  │  ,  │  u  │  c  │  v  │    │  q  │  f  │  d  │  l  │  y  │  /  │
+├─────┼─Gui─┼─Alt─┼─Nav─┼─Ctl─┼─ " ─┤    ├─────┼─Ctl─┼─Nav─┼─Alt─┼─Gui─┼─Fky─┤
+│  ·  │  a  │  o  │  e  │  s  │  g  │    │  b  │  n  │  t  │  r  │  i  │  -  │
+├─────┼─────┼─────┼─ ( ─┼─ [ ─┼─ < ─┤    ├─ > ─┼─ ] ─┼─ ) ─┼─────┼─────┼─────┤
+│  np │  ·  │  x  │  .  │  w  │  z  │    │  p  │  h  │  m  │  k  │  j  │  np │
+└─────┴─────┴─────┴─────┴─────┴─────┘    └─────┴─────┴─────┴─────┴─────┴─────┘
+
+Other combos (keys not vertically adjacent):
+  sft + spc → Esc
+  np + SYM → bootloader
+  ret + np → bootloader
+  np + sft → reboot
+  spc + np → reboot
+  h + m → =>
+  h + k → ->
+```
 
 ## Leader sequences
 

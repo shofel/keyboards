@@ -155,6 +155,27 @@ def test_gen_doc_has_phase2_sections():
     for h in ["## Combos", "## Leader sequences", "## Emoji"]:
         assert h in doc
 
+def test_combo_board_real():
+    src = g.KEYMAP.read_text(encoding="utf-8")
+    base = dict(g.extract_layers(src))["L_BOO"]
+    board = g.render_combo_board(base, g.extract_combos(src))
+    # boxed, and rendered as two hands with a gap between them
+    assert any(l.startswith("┌") and "    ┌" in l for l in board.splitlines())
+    assert "┼" in board
+    # every vertical same-column combo lands on a border label
+    for lbl in ("Ctl", "Nav", "Alt", "Gui", "Fky", "[", "]", "(", ")", "<", ">", '"'):
+        assert lbl in board, f"missing border label {lbl!r}"
+    # the non-adjacent combos fall to the caption list, not a border
+    assert "Other combos" in board
+    for cap in ("Esc", "=>", "->", "bootloader", "reboot"):
+        assert cap in board, f"missing caption {cap!r}"
+
+def test_gen_doc_combos_is_board():
+    doc = g.gen_doc(g.KEYMAP.read_text(encoding="utf-8"))
+    section = doc.split("## Combos")[1].split("## Leader")[0]
+    assert "┌" in section and "┼" in section, "combos section is not the boxed board"
+    assert "Ctl" in section and "[" in section
+
 if __name__ == "__main__":
     test_layer_names(); test_extract_layers(); test_wrong_token_count_fatal()
     test_glyph_rules(); test_unknown_keycode_fatal(); test_real_keymap_fully_covered()
@@ -165,4 +186,5 @@ if __name__ == "__main__":
     test_extract_combos_real(); test_extract_leader_seqs_real()
     test_extract_emoji_real(); test_gen_doc_has_legend()
     test_gen_doc_has_phase2_sections()
+    test_combo_board_real(); test_gen_doc_combos_is_board()
     print("ok")
