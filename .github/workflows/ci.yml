@@ -23,5 +23,10 @@ jobs:
   build:
     uses: qmk/.github/.github/workflows/qmk_userspace_build.yml@main
     with:
-      qmk_repo: qmk/qmk_firmware
-      qmk_ref: 0.31.3
+      # Build against shofel/qmk_firmware, NOT upstream: the keymap lives in a
+      # userspace `layouts/` dir, and only the fork's "Recognize layouts from a
+      # userspace" patch (73b8698b9d) makes QMK resolve it — upstream 0.31.3
+      # fails with "Could not find keymap" for both boards. Pinned to a SHA for
+      # reproducibility (public repo, cloned anonymously by the reusable build).
+      qmk_repo: shofel/qmk_firmware
+      qmk_ref: 87085c3a81d3b460636d1047c26bc0d9e6e9021d
