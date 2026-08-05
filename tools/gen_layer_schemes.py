@@ -190,6 +190,15 @@ COMBO_OUT = {  # combo outputs that aren't plain layer glyphs
     "KC_DQUO": '"',
 }
 
+# Short labels for the combo board — each must fit a border cell (<= CW-2 chars).
+COMBO_SHORT = {
+    "OS_CTL": "Ctl", "OS_ALT": "Alt", "OS_GUI": "Gui",
+    "OSL(L_NUM_NAV)": "Nav", "OSL(L_FKEYS_SYS)": "Fky",
+    "KC_LBRC": "[", "KC_RBRC": "]", "KC_LPRN": "(", "KC_RPRN": ")",
+    "KK_LANGLE": "<", "KK_RANGLE": ">", "KC_DQUO": '"',
+}
+CW = 5  # combo-board cell width
+
 
 def combo_out(token):
     if token in COMBO_OUT:
@@ -273,6 +282,65 @@ def render_grid(tokens):
     return "\n".join(lines)
 
 
+def _grid_positions(base_toks):
+    """base keycode token -> (row, col), only for tokens unique in the 36-key grid."""
+    seen = {}
+    for i, t in enumerate(base_toks[:36]):
+        seen.setdefault(t, []).append((i // 12, i % 12))
+    return {t: ps[0] for t, ps in seen.items() if len(ps) == 1}
+
+
+def _board_hand(rows, upper, lower):
+    """rows: 3 lists of 6 glyphs; upper/lower: 6 border labels ('' = plain border)."""
+    def cells(vals):
+        return "│" + "│".join(v.center(CW) for v in vals) + "│"
+
+    def seg(label):
+        if not label:
+            return "─" * CW
+        if len(label) > CW - 2:
+            die(f"combo-board label {label!r} too wide for a {CW}-char cell")
+        return "─" + label.center(CW - 2) + "─"
+
+    def border(labels):
+        return "├" + "┼".join(seg(l) for l in labels) + "┤"
+
+    def edge(a, mid, b):
+        return a + mid.join("─" * CW for _ in range(6)) + b
+
+    return [edge("┌", "┬", "┐"), cells(rows[0]), border(upper),
+            cells(rows[1]), border(lower), cells(rows[2]), edge("└", "┴", "┘")]
+
+
+def render_combo_board(base_toks, combos):
+    """Keymap-drawer-style ASCII: a boxed base grid with each vertical (same-column,
+    adjacent) combo's output on the border between its two keys — the upper border
+    is home+above, the lower home+below. Combos whose keys are not vertically
+    adjacent (thumbs, bottom-row rolls, corners) are listed as captions instead."""
+    pos = _grid_positions(base_toks)
+    upper, lower = [""] * 12, [""] * 12
+    captions = []
+    for keys, out in combos:
+        ps = [pos.get(k) for k in keys]
+        if len(keys) == 2 and all(ps) and ps[0][1] == ps[1][1] and abs(ps[0][0] - ps[1][0]) == 1:
+            col, band = ps[0][1], {ps[0][0], ps[1][0]}
+            label = COMBO_SHORT.get(out)
+            if label is None:
+                die(f"no COMBO_SHORT label for vertical combo output {out!r}")
+            (upper if band == {0, 1} else lower)[col] = label
+        else:
+            captions.append((keys, out))
+    grid = [[glyph(base_toks[r * 12 + c]) for c in range(12)] for r in range(3)]
+    left = _board_hand([grid[r][0:6] for r in range(3)], upper[0:6], lower[0:6])
+    right = _board_hand([grid[r][6:12] for r in range(3)], upper[6:12], lower[6:12])
+    lines = [l + "    " + r for l, r in zip(left, right)]
+    lines.append("")
+    lines.append("Other combos (keys not vertically adjacent):")
+    for keys, out in captions:
+        lines.append("  " + " + ".join(glyph(k) for k in keys) + " → " + combo_out(out))
+    return "\n".join(lines)
+
+
 def doc_paragraph(src, name):
     """First paragraph of the /** doc comment immediately above `[name] =`."""
     idx = src.find(f"[{name}]")
@@ -328,11 +396,15 @@ def gen_doc(src):
         out.append("")
     out.append("## Combos")
     out.append("")
-    out.append("Chord both keys at once (positions are base-layer keys).")
+    out.append("Combos fire on two physical key positions (they resolve from the base "
+               "layer). A label on a border is the combo of the two keys it sits between: "
+               "the upper border is *home + the key above* (mods, `\"`, F-keys), the lower "
+               "border is *home + the key below* (brackets — opening on the left hand, "
+               "closing on the right).")
     out.append("")
-    for keys, action in extract_combos(src):
-        trig = " + ".join(f"`{glyph(k)}`" for k in keys)
-        out.append(f"- {trig} → {combo_out(action)}")
+    out.append("```")
+    out.append(render_combo_board(dict(extract_layers(src))["L_BOO"], extract_combos(src)))
+    out.append("```")
     out.append("")
     out.append("## Leader sequences")
     out.append("")
