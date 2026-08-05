@@ -1,6 +1,28 @@
-# QMK External Userspace
+# Cantor / Dactyl keymap — the BOO layout
 
-This repository contains QMK keyboard keymaps and userspace code, structured as an external userspace repository.
+A personal QMK keymap for a **Cantor** choc split and a **Dactyl Manuform**, both
+driven by *one* shared keymap (via QMK's [layouts feature](https://docs.qmk.fm/feature_layouts)).
+The base is the [BOO layout](https://ballerboo.github.io/boolayout/) — a Dvorak
+variant tuned for rollover — on a 3×6+3 split.
+
+**→ [Full keymap reference](docs/reference.md)** — every layer, combo, leader
+sequence and emoji, generated from the firmware so it never drifts.
+
+What's interesting about it:
+
+- **Shiftless symbols.** A dedicated Symbol layer gives every punctuation mark its
+  own key, biased to the Space hand so a `symbol → Space` sequence is a one-hand roll.
+- **Vertical combos.** Mods and brackets are same-column two-key chords —
+  comfortable and misfire-free on choc switches.
+- **Leader sequences.** One leader key drives layer toggles, text edits, currency
+  (₺ ₽ €) and emoji.
+- **Russian, host-wide.** Cyrillic is typed on a firmware layer and emitted as X
+  Compose sequences, so it works in any app and survives fast rolls.
+- **Mouse layers.** Orbital-Mouse polar steering, plus an experimental digitizer
+  "bisect" mode.
+
+This is a QMK [external userspace](https://github.com/qmk/qmk_userspace) — keymaps
+and modules that build against upstream `qmk_firmware` without living inside it.
 
 ## Structure
 
