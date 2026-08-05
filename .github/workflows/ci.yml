@@ -6,6 +6,12 @@ on:
   pull_request:
   workflow_dispatch:
 
+# The reusable qmk_userspace_build workflow declares `contents: write` for
+# itself; a called workflow can't be granted more than its caller holds, so
+# without this the run fails at startup on repos with a read-only default token.
+permissions:
+  contents: write
+
 jobs:
   test:
     runs-on: ubuntu-latest
