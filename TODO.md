@@ -34,6 +34,15 @@ estimate changes. Bugs tend to top the list because Impact carries the most weig
 
 ## Dactyl
 
+- get the dactyl building on stock qmk. It's not in `qmk.json` build targets
+  (so not in CI) because the shared keymap reaches it by adding the
+  `split_3x6_3` community layout to the *mainline* `handwired/dactyl_manuform/5x6_5`
+  via a userspace `keyboards/.../info.json` overlay — and stock qmk's
+  `find_info_json` never reads the userspace keyboards dir (that was a fork-only
+  patch, now dropped). Cantor is unaffected: its mainline `keyboard.json`
+  already declares `split_3x6_3`. Paths forward: (a) upstream PR adding the
+  `split_3x6_3` community layout to mainline dactyl, or (b) define the dactyl as
+  a standalone userspace keyboard that declares the layout itself.
 - make a shared layout for cantor and dactyl
   - transform dactyl keymap to a cantor's
     - make a text transform program
