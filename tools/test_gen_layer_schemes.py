@@ -160,8 +160,10 @@ def test_leader_seqs_grouped_with_diagrams():
     assert "mirror" not in lead
     # Single (non-mirrored) sequences still appear on their own.
     assert "`LEAD, v`" in lead
-    # Each entry carries a position diagram (● hits inside a fenced block).
-    assert "●" in lead
+    # Each entry carries a numbered position diagram (LEAD=0, keys 1,2,...) —
+    # combos keep ●, leaders are ordered so they read as "press here, then here".
+    assert "0 · ·   · · 0" in lead
+    assert "●" not in lead
 
 def test_insert_toc_requires_sections():
     # Fail loud (die), not a bare StopIteration, if there are no ## sections.
@@ -296,6 +298,42 @@ def test_position_diagram_marks():
     assert thumbs[0] == "· · · · · ·   · · · · · ·"
     assert thumbs[3].count("●") == 2 and thumbs[3].strip() == "· ● ·   · ● ·"
 
+def test_position_diagram_labels():
+    # An optional labels dict overrides a position's mark with its own text —
+    # used to number leader steps instead of the anonymous ● hit.
+    d = g.render_position_diagram(set(), labels={16: "1"})   # KC_S home row
+    assert d.splitlines()[1] == "· · · · 1 ·   · · · · · ·"
+    # LEAD lives on both outer thumbs (tokens 36 & 41); number them 0.
+    thumbs = g.render_position_diagram(set(), labels={36: "0", 41: "0"}).splitlines()
+    assert thumbs[3].strip() == "0 · ·   · · 0"
+    # The plain marks path is untouched: a set still renders ●.
+    assert g.render_position_diagram({16}).splitlines()[1] == "· · · · ● ·   · · · · · ·"
+
+def test_leader_labels():
+    base = dict(g.extract_layers(g.KEYMAP.read_text(encoding="utf-8")))["L_BOO"]
+    def at(tok):
+        (i,) = [j for j, t in enumerate(base) if t == tok]
+        return i
+    # LEAD (both outer thumbs) is step 0; the key after it is 1.
+    labels = g.leader_labels(base, [["KC_V"]])
+    assert labels[36] == "0" and labels[41] == "0"
+    assert labels[at("KC_V")] == "1"
+    # A two-key leader numbers the keys in press order: d -> 1, w -> 2.
+    labels = g.leader_labels(base, [["KC_D", "KC_W"]])
+    assert labels[at("KC_D")] == "1" and labels[at("KC_W")] == "2"
+    # A mirror pair shares step numbers across both hands: s and n both -> 1.
+    labels = g.leader_labels(base, [["KC_S"], ["KC_N"]])
+    assert labels[at("KC_S")] == "1" and labels[at("KC_N")] == "1"
+
+def test_leader_diagrams_numbered():
+    doc = g.gen_doc(g.KEYMAP.read_text(encoding="utf-8"))
+    lead = doc.split("## Leader sequences", 1)[1].split("## Emoji", 1)[0]
+    # Leader diagrams number the presses (LEAD=0, then 1,2,...) — no anonymous ●.
+    assert "●" not in lead
+    assert "0 · ·   · · 0" in lead          # LEAD drawn as 0 on both outer thumbs
+    # A two-key leader (delete word: LEAD, d, w) reaches step 2.
+    assert "2" in lead
+
 def test_resolve_positions_disambiguates_noop():
     base = dict(g.extract_layers(g.KEYMAP.read_text(encoding="utf-8")))["L_BOO"]
     # KK_NOOP sits on both bottom corners; the paired thumb picks the hand.
@@ -344,7 +382,9 @@ if __name__ == "__main__":
     test_extract_design_real(); test_gen_doc_has_design()
     test_gh_anchor_slug(); test_gen_doc_has_toc()
     test_combo_board_real(); test_combo_board_only_home_anchors()
-    test_position_diagram_marks(); test_resolve_positions_disambiguates_noop()
+    test_position_diagram_marks(); test_position_diagram_labels()
+    test_leader_labels(); test_leader_diagrams_numbered()
+    test_resolve_positions_disambiguates_noop()
     test_combos_note_shifted_guillemets()
     test_nonadjacent_combos_have_diagrams()
     test_gen_doc_combos_is_board()

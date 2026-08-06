@@ -441,11 +441,16 @@ def resolve_positions(base_toks, keys):
     return out
 
 
-def render_position_diagram(marks, dot="·", hit="●"):
+def render_position_diagram(marks, dot="·", hit="●", labels=None):
     """A blanked base-layout diagram (3×12 main split 6+6, plus a 6-key thumb
-    row) with `marks` (base token indices) emphasized — positions only, no
-    labels, so a sequence reads as 'press here'."""
+    row) with `marks` (base token indices) emphasized. Combos pass a `marks` set
+    and every hit is an anonymous `●` (the two keys fire simultaneously). Leaders
+    pass a `labels` dict {index: str} that numbers the presses in order (LEAD=0,
+    then 1, 2, …); a labelled position shows its digit instead of `●`."""
+    labels = labels or {}
     def cell(i):
+        if i in labels:
+            return labels[i]
         return hit if i in marks else dot
     lines = []
     for r in range(3):
@@ -457,6 +462,18 @@ def render_position_diagram(marks, dot="·", hit="●"):
         row[col] = cell(tok)
     lines.append("".join(row).rstrip())
     return "\n".join(lines)
+
+
+def leader_labels(base_toks, key_seqs):
+    """Position -> step-number label for a leader group's diagram. `LEAD` (both
+    outer thumbs carry QK_LEAD) is step 0; the keys pressed after it are 1, 2, …
+    A mirror pair shares step numbers across hands — both members of step n get
+    the same digit, so the diagram reads 'press LEAD, then key 1 (either hand)'."""
+    labels = {i: "0" for i, t in enumerate(base_toks) if t == "QK_LEAD"}
+    for ks in key_seqs:
+        for step, idx in enumerate(resolve_positions(base_toks, ks), start=1):
+            labels[idx] = str(step)
+    return labels
 
 
 def doc_paragraph(src, name):
@@ -557,18 +574,16 @@ def gen_doc(src):
     out.append("## Leader sequences")
     out.append("")
     out.append("Tap `LEAD`, then the keys in order. Mirror pairs (either hand) share "
-               "one entry; the diagram marks the key position(s) pressed after `LEAD`.")
+               "one entry; the diagram numbers the presses — `0` is `LEAD` (either "
+               "outer thumb), then `1`, `2` for the keys after it.")
     out.append("")
     for key_seqs, doc in group_leader_seqs(extract_leader_seqs(src)):
         triggers = " / ".join(
             "`LEAD, " + ", ".join(glyph(k) for k in ks) + "`" for ks in key_seqs)
         out.append(f"{triggers} — {doc}")
         out.append("")
-        marks = set()
-        for ks in key_seqs:
-            marks.update(resolve_positions(base, ks))
         out.append("```")
-        out.append(render_position_diagram(marks))
+        out.append(render_position_diagram(set(), labels=leader_labels(base, key_seqs)))
         out.append("```")
         out.append("")
     out.append("## Emoji")
