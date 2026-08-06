@@ -493,7 +493,10 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 
     /* The two outer thumbs are custom leader keys (distinct so the reset combo
      * can tell them apart); both arm the leader sequence. process_leader still
-     * captures the following keys, since it keys off the `leading` flag. */
+     * captures the following keys, since it keys off the `leading` flag.
+     * Returning false is load-bearing: process_leader runs after us in the
+     * pipeline, so falling through would append this keycode into an active
+     * sequence and corrupt it. Arm here; let process_leader capture the rest. */
     case KK_LEAD_L:
     case KK_LEAD_R:
       if (record->event.pressed) { leader_start(); }

@@ -347,8 +347,22 @@ def test_leader_diagrams_numbered():
     # Leader diagrams number the presses (LEAD=0, then 1,2,...) — no anonymous ●.
     assert "●" not in lead
     assert "0 · ·   · · 0" in lead          # LEAD drawn as 0 on both outer thumbs
-    # A two-key leader (delete word: LEAD, d, w) reaches step 2.
-    assert "2" in lead
+    # The two-key 'delete word' (LEAD, d, w) DIAGRAM itself carries steps 1 and 2
+    # — assert inside its fenced block, not the header prose (which literally says
+    # "1, 2" and would make a bare `"2" in lead` pass even if numbering broke).
+    dw_diagram = lead.split("`LEAD, d, w`", 1)[1].split("```", 2)[1]
+    assert "1" in dw_diagram and "2" in dw_diagram
+
+def test_leader_labels_rejects_divergent_step():
+    # Assigning one base position two different step numbers within a group is
+    # drift — fail loud rather than silently mislabel (matches group_leader_seqs).
+    base = dict(g.extract_layers(g.KEYMAP.read_text(encoding="utf-8")))["L_BOO"]
+    try:
+        g.leader_labels(base, [["KC_D", "KC_A"], ["KC_A", "KC_D"]])  # d,a vs a,d
+    except SystemExit:
+        pass
+    else:
+        raise AssertionError("divergent leader step labels should be fatal")
 
 def test_base_has_split_leader_no_noop():
     base = dict(g.extract_layers(g.KEYMAP.read_text(encoding="utf-8")))["L_BOO"]
@@ -425,6 +439,7 @@ if __name__ == "__main__":
     test_combo_board_real(); test_combo_board_only_home_anchors()
     test_position_diagram_marks(); test_position_diagram_labels()
     test_leader_labels(); test_leader_diagrams_numbered()
+    test_leader_labels_rejects_divergent_step()
     test_base_has_split_leader_no_noop()
     test_resolve_positions_reset_and_boot_combos()
     test_resolve_positions_disambiguates_two_handed_key()

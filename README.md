@@ -57,7 +57,7 @@ This repository follows the [official QMK userspace template](https://github.com
    `make flash` polls for the bootloader, so start it first and enter the
    bootloader after:
 
-   - **Boot combo** — the two outer bottom keys on that half
+   - **Boot combo** — all three thumb keys of that half at once
      (`boot_combo_left` / `boot_combo_right` in `keymap.c`).
    - **Half with no firmware** — the combo needs firmware to run, so hold
      `BOOT0` while plugging in USB instead.

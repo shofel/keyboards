@@ -466,17 +466,22 @@ def render_position_diagram(marks, dot="·", hit="●", labels=None):
     return "\n".join(lines)
 
 
-LEADER_TOKENS = ("QK_LEAD", "KK_LEAD_L", "KK_LEAD_R")  # the outer-thumb leader keys
+LEADER_TOKENS = ("QK_LEAD", "KK_LEAD_L", "KK_LEAD_R")  # keycodes that arm the leader
 
 
 def leader_labels(base_toks, key_seqs):
     """Position -> step-number label for a leader group's diagram. `LEAD` (both
     outer thumbs) is step 0; the keys pressed after it are 1, 2, …. A mirror pair
     shares step numbers across hands — both members of step n get the same digit,
-    so the diagram reads 'press LEAD, then key 1 (either hand)'."""
+    so the diagram reads 'press LEAD, then key 1 (either hand)'. Fail loud if a
+    group assigns one position two different steps (source drift), rather than
+    silently mislabel — matching group_leader_seqs and the rest of the tool."""
     labels = {i: "0" for i, t in enumerate(base_toks) if t in LEADER_TOKENS}
     for ks in key_seqs:
         for step, idx in enumerate(resolve_positions(base_toks, ks), start=1):
+            if labels.get(idx, str(step)) != str(step):
+                die(f"leader diagram: position {idx} is both step "
+                    f"{labels[idx]} and {step}")
             labels[idx] = str(step)
     return labels
 
