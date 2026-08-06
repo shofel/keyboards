@@ -17,6 +17,7 @@ Source of truth: `layouts/split_3x6_3/shofel/keymap.c`.
 - [Combos](#combos)
 - [Leader sequences](#leader-sequences)
 - [Emoji](#emoji)
+- [Design](#design)
 - [Legend](#legend)
 
 ## Base (BOO) <sub>`L_BOO`</sub>
@@ -165,6 +166,60 @@ Tap `LEAD`, then the keys in order.
 | `k` | 🤔 |
 | `m` | 🧐 |
 | `n` | 🤝 |
+
+## Design
+
+### Base layer
+It's the [BOO layout](https://ballerboo.github.io/boolayout/) — Dvorak
+modified for more rollover.
+
+### Modifiers
+Vertical combo mods: a home-row key plus the key just above it. On choc
+switches these same-column chords are comfortable and misfire-free — during
+normal typing you never press two keys of one column with a single finger,
+so a vertical chord is always unambiguous intent. The top-row pairs
+(home + above) feel best; the bottom-row pairs (home + below) are more of a
+reach — which is why the highest-value combos (mods, backspace, primary
+num-layer access) take the top slots and brackets the bottom.
+
+### Thumbs
+On the Cantor the middle thumb is the most comfortable key, so the two most
+used thumb actions live there: Space (right middle) and Shift (left middle).
+Esc is both middle thumbs at once — the strongest pair. The right inner thumb
+is a SYMBOLS layer-tap (tap = Enter, hold = SYM); Enter lives there since it
+is far less frequent than Space.
+
+Punctuation on the SYM layer lives mostly on the right hand — the same hand
+as the right-thumb Space — so a symbol→Space sequence is a same-hand roll:
+tap the left-thumb one-shot SYM, type the symbol with the right hand, then
+roll into Space. (`,` `.` stay on the left of the base layer.)
+
+### Unicode input
+With a non-qwerty layout, switching language in the OS is not enough: an OS
+language map assumes qwerty (q→й, w→ц), so on a non-qwerty base the map is
+wrong. And with two keyboards attached — a qwerty laptop and the BOO board —
+the OS can't tell which map to apply. So the laptop switches language with
+`win+space`, and the QMK board carries its own Russian layer instead.
+
+Two backends, selected by leader (see the unicode_ru module): compose mode
+(default, rolling-safe, host-wide) and vim mode (`leader,v`), which emits
+vim's native `i_CTRL-V U <hex>` so Cyrillic types inside vim/neovim with no
+host compose setup. Both are emitted in userspace, so the firmware no longer
+needs the out-of-tree UNICODE_MODE_VIM patch (QMK PR #25188).
+
+### Key comfort scores
+Layout-wide ergonomic weights, higher = easier (scale 0-9). Combos resolve
+from layer 0, so one map serves every layer. This drives frequency-first
+symbol placement: rank symbols by how often you type them, rank free keys by
+score, then match highest-to-highest.
+
+```
+   pinky2 pinky  ring   mid  index  inner | inner  index   mid   ring  pinky pinky2
+      1     4     6      8     6      2   |   2      6      8      6     4     3
+      0     5     7      9     9      3   |   3      9      9      7     5     3
+      0     1     4      5     6      3   |   3      6      5      4     1     1
+                   · reserved for layer/mod keys, not symbol slots ·
+```
 
 ## Legend
 

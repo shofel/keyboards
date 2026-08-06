@@ -264,6 +264,18 @@ def extract_emoji(src):
     return emo
 
 
+def extract_design(src):
+    """The layout-rationale markdown between the @design-begin / @design-end
+    markers in keymap.c, with the C comment gutter (' * ') stripped from each
+    line. The source comment is authored as markdown, so this is a copy, not a
+    translation."""
+    m = re.search(r"@design-begin(.*?)@design-end", src, re.S)
+    if not m:
+        die("@design-begin/@design-end markers not found in keymap.c")
+    lines = [re.sub(r"^\s?\*\s?", "", ln) for ln in m.group(1).splitlines()]
+    return "\n".join(lines).strip("\n")
+
+
 GAP = " " * 8
 
 
@@ -434,6 +446,10 @@ def gen_doc(src):
     out.append("|-----|-------|")
     for sel, gl in extract_emoji(src):
         out.append(f"| `{sel}` | {gl} |")
+    out.append("")
+    out.append("## Design")
+    out.append("")
+    out.append(extract_design(src))
     out.append("")
     out.append("## Legend")
     out.append("")
