@@ -194,6 +194,19 @@ def test_combo_board_real():
     for cap in ("Esc", "=>", "->", "bootloader", "reboot"):
         assert cap in board, f"missing caption {cap!r}"
 
+def test_combo_board_only_home_anchors():
+    src = g.KEYMAP.read_text(encoding="utf-8")
+    base = dict(g.extract_layers(src))["L_BOO"]
+    board = g.render_combo_board(base, g.extract_combos(src))
+    # The keycap cells (│-separated rows) are blanked to leave only the 8 home
+    # anchors as position markers; combo border labels & captions are untouched.
+    cells = []
+    for line in board.splitlines():
+        if "│" in line:
+            cells += [c.strip() for c in line.split("│")]
+    values = sorted(c for c in cells if c)
+    assert values == sorted(["a", "o", "e", "s", "n", "t", "r", "i"]), values
+
 def test_gen_doc_combos_is_board():
     doc = g.gen_doc(g.KEYMAP.read_text(encoding="utf-8"))
     section = doc.split("## Combos")[1].split("## Leader")[0]
@@ -211,5 +224,6 @@ if __name__ == "__main__":
     test_extract_emoji_real(); test_gen_doc_has_legend()
     test_gen_doc_has_phase2_sections()
     test_gh_anchor_slug(); test_gen_doc_has_toc()
-    test_combo_board_real(); test_gen_doc_combos_is_board()
+    test_combo_board_real(); test_combo_board_only_home_anchors()
+    test_gen_doc_combos_is_board()
     print("ok")

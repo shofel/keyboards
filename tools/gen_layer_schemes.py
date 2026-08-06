@@ -330,7 +330,11 @@ def render_combo_board(base_toks, combos):
             (upper if band == {0, 1} else lower)[col] = label
         else:
             captions.append((keys, out))
-    grid = [[glyph(base_toks[r * 12 + c]) for c in range(12)] for r in range(3)]
+    # Keep only the 8 home-row anchors (a o e s / n t r i) as position markers;
+    # blank the rest so the board reads as a combo map, not a full keycap grid.
+    anchor_cols = {1, 2, 3, 4, 7, 8, 9, 10}
+    grid = [[glyph(base_toks[r * 12 + c]) if r == 1 and c in anchor_cols else ""
+             for c in range(12)] for r in range(3)]
     left = _board_hand([grid[r][0:6] for r in range(3)], upper[0:6], lower[0:6])
     right = _board_hand([grid[r][6:12] for r in range(3)], upper[6:12], lower[6:12])
     lines = [l + "    " + r for l, r in zip(left, right)]

@@ -102,11 +102,11 @@ Combos fire on two physical key positions (they resolve from the base layer). A 
 
 ```
 ┌─────┬─────┬─────┬─────┬─────┬─────┐    ┌─────┬─────┬─────┬─────┬─────┬─────┐
-│  ·  │  '  │  ,  │  u  │  c  │  v  │    │  q  │  f  │  d  │  l  │  y  │  /  │
+│     │     │     │     │     │     │    │     │     │     │     │     │     │
 ├─────┼─Gui─┼─Alt─┼─Nav─┼─Ctl─┼─ " ─┤    ├─────┼─Ctl─┼─Nav─┼─Alt─┼─Gui─┼─Fky─┤
-│  ·  │  a  │  o  │  e  │  s  │  g  │    │  b  │  n  │  t  │  r  │  i  │  -  │
+│     │  a  │  o  │  e  │  s  │     │    │     │  n  │  t  │  r  │  i  │     │
 ├─────┼─────┼─────┼─ ( ─┼─ [ ─┼─ < ─┤    ├─ > ─┼─ ] ─┼─ ) ─┼─────┼─────┼─────┤
-│  np │  ·  │  x  │  .  │  w  │  z  │    │  p  │  h  │  m  │  k  │  j  │  np │
+│     │     │     │     │     │     │    │     │     │     │     │     │     │
 └─────┴─────┴─────┴─────┴─────┴─────┘    └─────┴─────┴─────┴─────┴─────┴─────┘
 
 Other combos (keys not vertically adjacent):
