@@ -102,9 +102,10 @@ CYR = {
 }
 
 GLYPHS = {
-    "__": "__", "XX": "·", "KK_NOOP": "np",
+    "__": "__", "XX": "·",
     "KC_QUOT": "'", "KC_COMM": ",", "KC_DOT": ".", "KC_SLASH": "/", "KC_MINUS": "-",
-    "QK_LEAD": "LEAD", "KK_SHIFT": "sft", "KK_SYMBO": "SYM",
+    "QK_LEAD": "LEAD", "KK_LEAD_L": "LEAD", "KK_LEAD_R": "LEAD",
+    "KK_SHIFT": "sft", "KK_SYMBO": "SYM",
     "KK_RET": "ret", "LT(L_SYMBOLS, KC_ENTER)": "ret", "KC_SPACE": "spc",
     "RU_DOT": ".", "RU_MDASH": "—", "RU_NUM": "№", "RU_SECT": "§",
     "KC_GRV": "`", "KC_DLR": "$", "KC_CIRC": "^", "KC_EXLM": "!", "KC_ASTR": "*",
@@ -143,7 +144,6 @@ def layer_title(name):
 
 
 LEGEND = [
-    ("np", "no-op filler key"),
     ("sft", "one-shot Shift"),
     ("SYM", "Symbol layer — left thumb (tap = one-shot, hold = momentary)"),
     ("ret", "Enter (tap) / Symbol layer (hold)"),
@@ -420,10 +420,12 @@ def _hand(i):
 
 def resolve_positions(base_toks, keys):
     """Base-layer token indices for a combo/leader key list. A key that occurs
-    once resolves directly; a key on both hands (e.g. KK_NOOP) is disambiguated
-    to the hand of the unambiguous keys it is chorded with. (Assumes every chord
-    has at least one unambiguous key on the intended hand — true for all current
-    combos/leaders; a chord of only two-handed keys, e.g. QK_LEAD, would die.)"""
+    once resolves directly; a key present on both hands is disambiguated to the
+    hand of the unambiguous keys it is chorded with. (No current combo/leader
+    has a two-handed key — the two outer thumbs carry distinct leader keycodes,
+    KK_LEAD_L/KK_LEAD_R, precisely so the reset chord stays unambiguous — but the
+    logic is kept so the generator survives one being added. A chord of only
+    two-handed keys, with no unambiguous mate to pick the hand, would die.)"""
     occ = {k: [i for i, t in enumerate(base_toks) if t == k] for k in set(keys)}
     hands = {_hand(occ[k][0]) for k in keys if len(occ[k]) == 1}
     out = []
@@ -464,12 +466,15 @@ def render_position_diagram(marks, dot="·", hit="●", labels=None):
     return "\n".join(lines)
 
 
+LEADER_TOKENS = ("QK_LEAD", "KK_LEAD_L", "KK_LEAD_R")  # the outer-thumb leader keys
+
+
 def leader_labels(base_toks, key_seqs):
     """Position -> step-number label for a leader group's diagram. `LEAD` (both
-    outer thumbs carry QK_LEAD) is step 0; the keys pressed after it are 1, 2, …
-    A mirror pair shares step numbers across hands — both members of step n get
-    the same digit, so the diagram reads 'press LEAD, then key 1 (either hand)'."""
-    labels = {i: "0" for i, t in enumerate(base_toks) if t == "QK_LEAD"}
+    outer thumbs) is step 0; the keys pressed after it are 1, 2, …. A mirror pair
+    shares step numbers across hands — both members of step n get the same digit,
+    so the diagram reads 'press LEAD, then key 1 (either hand)'."""
+    labels = {i: "0" for i, t in enumerate(base_toks) if t in LEADER_TOKENS}
     for ks in key_seqs:
         for step, idx in enumerate(resolve_positions(base_toks, ks), start=1):
             labels[idx] = str(step)

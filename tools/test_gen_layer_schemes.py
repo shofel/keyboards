@@ -53,6 +53,7 @@ def test_glyph_rules():
     assert g.glyph("XX") == "·"
     assert g.glyph("KC_BSPC") == "⌫"
     assert g.glyph("LT(L_SYMBOLS, KC_ENTER)") == "ret"
+    assert g.glyph("KK_LEAD_L") == "LEAD" and g.glyph("KK_LEAD_R") == "LEAD"
 
 def test_unknown_keycode_fatal():
     try:
@@ -130,7 +131,11 @@ def test_extract_combos_real():
     by_keys = {tuple(ks): act for ks, act in combos}
     assert by_keys[("KC_S", "KC_W")] == "KC_LBRC"
     assert by_keys[("KK_SHIFT", "KC_SPACE")] == "KC_ESC"
-    assert len(combos) == 23
+    # boot = all 3 thumbs of a half; reset = the two outer (leader) thumbs.
+    assert by_keys[("KK_LEAD_L", "KK_SHIFT", "KK_SYMBO")] == "QK_BOOT"
+    assert by_keys[("KK_RET", "KC_SPACE", "KK_LEAD_R")] == "QK_BOOT"
+    assert by_keys[("KK_LEAD_L", "KK_LEAD_R")] == "QK_REBOOT"
+    assert len(combos) == 22
 
 def test_extract_leader_seqs_real():
     seqs = g.extract_leader_seqs(g.KEYMAP.read_text(encoding="utf-8"))
@@ -269,7 +274,7 @@ def test_combo_board_real():
     # non-adjacent combos are no longer captioned on the board — they move out
     assert "Other combos" not in board
     nonadj = g.nonadjacent_combos(base, g.extract_combos(src))
-    assert len(nonadj) == 7
+    assert len(nonadj) == 6
     assert {"KC_ESC", "QK_BOOT", "QK_REBOOT", "KK_FAT_RIGHT_ARROW",
             "KK_RIGHT_ARROW"} == {o for _k, o in nonadj}
 
@@ -334,11 +339,31 @@ def test_leader_diagrams_numbered():
     # A two-key leader (delete word: LEAD, d, w) reaches step 2.
     assert "2" in lead
 
-def test_resolve_positions_disambiguates_noop():
+def test_base_has_split_leader_no_noop():
     base = dict(g.extract_layers(g.KEYMAP.read_text(encoding="utf-8")))["L_BOO"]
-    # KK_NOOP sits on both bottom corners; the paired thumb picks the hand.
-    assert set(g.resolve_positions(base, ["KK_NOOP", "KK_SYMBO"])) == {24, 38}
-    assert set(g.resolve_positions(base, ["KK_RET", "KK_NOOP"])) == {39, 35}
+    # KK_NOOP is retired; the two outer thumbs carry distinct leader keycodes so
+    # the reset chord (both of them) is an unambiguous combo.
+    assert "KK_NOOP" not in base
+    assert base[36] == "KK_LEAD_L" and base[41] == "KK_LEAD_R"
+    # the retired np corners are now plain no-ops
+    assert base[24] == "XX" and base[35] == "XX"
+
+def test_resolve_positions_reset_and_boot_combos():
+    base = dict(g.extract_layers(g.KEYMAP.read_text(encoding="utf-8")))["L_BOO"]
+    # reset = both outer thumbs; boot = all three thumbs of a half.
+    assert set(g.resolve_positions(base, ["KK_LEAD_L", "KK_LEAD_R"])) == {36, 41}
+    assert set(g.resolve_positions(base, ["KK_LEAD_L", "KK_SHIFT", "KK_SYMBO"])) == {36, 37, 38}
+    assert set(g.resolve_positions(base, ["KK_RET", "KC_SPACE", "KK_LEAD_R"])) == {39, 40, 41}
+
+def test_resolve_positions_disambiguates_two_handed_key():
+    # A key present on both hands resolves to the hand of its unambiguous chord
+    # mate. No current combo needs this, but the generator stays robust to one.
+    base = (["XX"] * 23 + ["DUP"]          # right end of row 1 (index 23)...
+            + ["DUP"] + ["XX"] * 11        # ...and left start of row 2 (index 24)
+            + ["QK_LEAD", "KK_SHIFT", "KK_SYMBO", "KK_RET", "KC_SPACE", "QK_LEAD"])
+    assert len(base) == 42
+    # chorded with the left-thumb shift -> the left DUP (24), not the right (23).
+    assert set(g.resolve_positions(base, ["DUP", "KK_SHIFT"])) == {24, 37}
 
 def test_combos_note_shifted_guillemets():
     doc = g.gen_doc(g.KEYMAP.read_text(encoding="utf-8"))
@@ -356,7 +381,11 @@ def test_nonadjacent_combos_have_diagrams():
     # the non-adjacent combos are described AND diagrammed (thumbs included)
     assert "sft + spc → Esc" in combos
     assert "h + m → =>" in combos
-    assert "ret + np → bootloader" in combos
+    # boot = all three thumbs of a half; reset = both outer (leader) thumbs
+    assert "LEAD + sft + SYM → bootloader" in combos
+    assert "ret + spc + LEAD → bootloader" in combos
+    assert "LEAD + LEAD → reboot" in combos
+    assert "np" not in combos            # the retired no-op filler is gone
     # Esc fires on both middle thumbs -> its diagram thumb-row shows two hits
     assert "· ● ·   · ● ·" in combos
 
@@ -384,7 +413,9 @@ if __name__ == "__main__":
     test_combo_board_real(); test_combo_board_only_home_anchors()
     test_position_diagram_marks(); test_position_diagram_labels()
     test_leader_labels(); test_leader_diagrams_numbered()
-    test_resolve_positions_disambiguates_noop()
+    test_base_has_split_leader_no_noop()
+    test_resolve_positions_reset_and_boot_combos()
+    test_resolve_positions_disambiguates_two_handed_key()
     test_combos_note_shifted_guillemets()
     test_nonadjacent_combos_have_diagrams()
     test_gen_doc_combos_is_board()

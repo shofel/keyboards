@@ -25,10 +25,10 @@ Source of truth: `layouts/split_3x6_3/shofel/keymap.c`.
 Base layer — the [BOO layout](https://ballerboo.github.io/boolayout/): Dvorak modified for more rollover.
 
 ```
-·   '  ,  u  c  v        q  f  d  l  y  /
-·   a  o  e  s  g        b  n  t  r  i  -
-np  ·  x  .  w  z        p  h  m  k  j  np
-   LEAD  sft  SYM        ret  spc  LEAD
+·  '  ,  u  c  v        q  f  d  l  y  /
+·  a  o  e  s  g        b  n  t  r  i  -
+·  ·  x  .  w  z        p  h  m  k  j  ·
+  LEAD  sft  SYM        ret  spc  LEAD
 ```
 
 ## Russian <sub>`L_RUSSIAN`</sub>
@@ -124,40 +124,31 @@ sft + spc → Esc
       · ● ·   · ● ·
 ```
 
-np + SYM → bootloader
+LEAD + sft + SYM → bootloader
 
 ```
 · · · · · ·   · · · · · ·
 · · · · · ·   · · · · · ·
-● · · · · ·   · · · · · ·
-      · · ●   · · ·
-```
-
-ret + np → bootloader
-
-```
 · · · · · ·   · · · · · ·
-· · · · · ·   · · · · · ·
-· · · · · ·   · · · · · ●
-      · · ·   ● · ·
+      ● ● ●   · · ·
 ```
 
-np + sft → reboot
+ret + spc + LEAD → bootloader
 
 ```
 · · · · · ·   · · · · · ·
 · · · · · ·   · · · · · ·
-● · · · · ·   · · · · · ·
-      · ● ·   · · ·
+· · · · · ·   · · · · · ·
+      · · ·   ● ● ●
 ```
 
-spc + np → reboot
+LEAD + LEAD → reboot
 
 ```
 · · · · · ·   · · · · · ·
 · · · · · ·   · · · · · ·
-· · · · · ·   · · · · · ●
-      · · ·   · ● ·
+· · · · · ·   · · · · · ·
+      ● · ·   · · ●
 ```
 
 h + m → =>
@@ -414,7 +405,6 @@ score, then match highest-to-highest.
 
 ## Legend
 
-- `np` — no-op filler key
 - `sft` — one-shot Shift
 - `SYM` — Symbol layer — left thumb (tap = one-shot, hold = momentary)
 - `ret` — Enter (tap) / Symbol layer (hold)
