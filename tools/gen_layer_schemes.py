@@ -249,16 +249,24 @@ def extract_leader_seqs(src):
 def group_leader_seqs(seqs):
     """Collapse mirror pairs (rows sharing an action) into one entry, preserving
     first-appearance order. Returns [(key_sequences, doc)] with the (mirror ...)
-    annotation stripped from the doc."""
+    annotation stripped from the doc. Fail loud if rows in a group describe
+    different things (drift): they must share a base once the trailing
+    parenthetical qualifier — (default), (mirror of r), (mirror) — is removed."""
     groups, order = {}, []
     for keys, act, doc in seqs:
         if act not in groups:
-            groups[act] = {"seqs": [], "doc": doc}
+            groups[act] = {"seqs": [], "docs": []}
             order.append(act)
         groups[act]["seqs"].append(keys)
+        groups[act]["docs"].append(doc)
+    def base(d):
+        return re.sub(r"\s*\([^)]*\)\s*$", "", d).strip()
     out = []
     for act in order:
-        doc = re.sub(r"\s*\(mirror[^)]*\)", "", groups[act]["doc"]).strip()
+        docs = groups[act]["docs"]
+        if len({base(d) for d in docs}) > 1:
+            die(f"leader group {act} has divergent docs: {docs}")
+        doc = re.sub(r"\s*\(mirror[^)]*\)", "", docs[0]).strip()
         out.append((groups[act]["seqs"], doc))
     return out
 
@@ -413,7 +421,9 @@ def _hand(i):
 def resolve_positions(base_toks, keys):
     """Base-layer token indices for a combo/leader key list. A key that occurs
     once resolves directly; a key on both hands (e.g. KK_NOOP) is disambiguated
-    to the hand of the unambiguous keys it is chorded with."""
+    to the hand of the unambiguous keys it is chorded with. (Assumes every chord
+    has at least one unambiguous key on the intended hand — true for all current
+    combos/leaders; a chord of only two-handed keys, e.g. QK_LEAD, would die.)"""
     occ = {k: [i for i, t in enumerate(base_toks) if t == k] for k in set(keys)}
     hands = {_hand(occ[k][0]) for k in keys if len(occ[k]) == 1}
     out = []
@@ -591,7 +601,9 @@ def insert_toc(out):
     """Insert a Contents list of every `## ` section before the first one.
     Link text drops the <sub>`enum`</sub> tail; the anchor keeps it (GitHub
     slugs the whole rendered heading)."""
-    first = next(i for i, l in enumerate(out) if l.startswith("## "))
+    first = next((i for i, l in enumerate(out) if l.startswith("## ")), None)
+    if first is None:
+        die("no ## sections found for the ToC")
     toc = ["## Contents", ""]
     for l in out[first:]:
         if l.startswith("## "):
