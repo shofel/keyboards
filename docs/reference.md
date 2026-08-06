@@ -124,32 +124,160 @@ The `<` `>` combos are shift-aware — g + z → < (« when shifted); b + p → 
 
 ## Leader sequences
 
-Tap `LEAD`, then the keys in order.
+Tap `LEAD`, then the keys in order. Mirror pairs (either hand) share one entry; the diagram marks the key position(s) pressed after `LEAD`.
 
-- `LEAD, r` — Russian — compose backend (default)
-- `LEAD, c` — Russian — compose backend (mirror of r)
-- `LEAD, v` — Russian — vim backend (vim-native unicode)
-- `LEAD, e` — back to English (drop the toggle layer)
-- `LEAD, spc` — disable any toggle layer, cancel one-shots
-- `LEAD, s` — Esc + exit toggle layer (mirror pair s·n)
-- `LEAD, n` — Esc + exit toggle layer (mirror pair s·n)
-- `LEAD, w` — Ctrl+Esc (mirror pair w·h)
-- `LEAD, h` — Ctrl+Esc (mirror pair w·h)
-- `LEAD, f` — F-keys / system layer (sticky)
-- `LEAD, m` — mouse layer, polar mode (mirror pair m·.)
-- `LEAD, .` — mouse layer, polar mode (mirror pair m·.)
-- `LEAD, t` — num/nav layer (sticky)
-- `LEAD, m, l` — ₺ lira
-- `LEAD, ., l` — ₺ lira (mirror)
-- `LEAD, m, r` — ₽ ruble
-- `LEAD, ., r` — ₽ ruble (mirror)
-- `LEAD, m, e` — € euro
-- `LEAD, ., e` — € euro (mirror)
-- `LEAD, d, a` — delete all (Ctrl+A, Del)
-- `LEAD, d, u` — delete to line start (like Ctrl-U)
-- `LEAD, d, w` — delete word (Ctrl+Backspace)
-- `LEAD, k` — kitty terminal (Gui+T)
-- `LEAD, p` — Print Screen
+`LEAD, r` / `LEAD, c` — Russian — compose backend (default)
+
+```
+· · · · ● ·   · · · · · ·
+· · · · · ·   · · · ● · ·
+· · · · · ·   · · · · · ·
+      · · ·   · · ·
+```
+
+`LEAD, v` — Russian — vim backend (vim-native unicode)
+
+```
+· · · · · ●   · · · · · ·
+· · · · · ·   · · · · · ·
+· · · · · ·   · · · · · ·
+      · · ·   · · ·
+```
+
+`LEAD, e` — back to English (drop the toggle layer)
+
+```
+· · · · · ·   · · · · · ·
+· · · ● · ·   · · · · · ·
+· · · · · ·   · · · · · ·
+      · · ·   · · ·
+```
+
+`LEAD, spc` — disable any toggle layer, cancel one-shots
+
+```
+· · · · · ·   · · · · · ·
+· · · · · ·   · · · · · ·
+· · · · · ·   · · · · · ·
+      · · ·   · ● ·
+```
+
+`LEAD, s` / `LEAD, n` — Esc + exit toggle layer
+
+```
+· · · · · ·   · · · · · ·
+· · · · ● ·   · ● · · · ·
+· · · · · ·   · · · · · ·
+      · · ·   · · ·
+```
+
+`LEAD, w` / `LEAD, h` — Ctrl+Esc
+
+```
+· · · · · ·   · · · · · ·
+· · · · · ·   · · · · · ·
+· · · · ● ·   · ● · · · ·
+      · · ·   · · ·
+```
+
+`LEAD, f` — F-keys / system layer (sticky)
+
+```
+· · · · · ·   · ● · · · ·
+· · · · · ·   · · · · · ·
+· · · · · ·   · · · · · ·
+      · · ·   · · ·
+```
+
+`LEAD, m` / `LEAD, .` — mouse layer, polar mode
+
+```
+· · · · · ·   · · · · · ·
+· · · · · ·   · · · · · ·
+· · · ● · ·   · · ● · · ·
+      · · ·   · · ·
+```
+
+`LEAD, t` — num/nav layer (sticky)
+
+```
+· · · · · ·   · · · · · ·
+· · · · · ·   · · ● · · ·
+· · · · · ·   · · · · · ·
+      · · ·   · · ·
+```
+
+`LEAD, m, l` / `LEAD, ., l` — ₺ lira
+
+```
+· · · · · ·   · · · ● · ·
+· · · · · ·   · · · · · ·
+· · · ● · ·   · · ● · · ·
+      · · ·   · · ·
+```
+
+`LEAD, m, r` / `LEAD, ., r` — ₽ ruble
+
+```
+· · · · · ·   · · · · · ·
+· · · · · ·   · · · ● · ·
+· · · ● · ·   · · ● · · ·
+      · · ·   · · ·
+```
+
+`LEAD, m, e` / `LEAD, ., e` — € euro
+
+```
+· · · · · ·   · · · · · ·
+· · · ● · ·   · · · · · ·
+· · · ● · ·   · · ● · · ·
+      · · ·   · · ·
+```
+
+`LEAD, d, a` — delete all (Ctrl+A, Del)
+
+```
+· · · · · ·   · · ● · · ·
+· ● · · · ·   · · · · · ·
+· · · · · ·   · · · · · ·
+      · · ·   · · ·
+```
+
+`LEAD, d, u` — delete to line start (like Ctrl-U)
+
+```
+· · · ● · ·   · · ● · · ·
+· · · · · ·   · · · · · ·
+· · · · · ·   · · · · · ·
+      · · ·   · · ·
+```
+
+`LEAD, d, w` — delete word (Ctrl+Backspace)
+
+```
+· · · · · ·   · · ● · · ·
+· · · · · ·   · · · · · ·
+· · · · ● ·   · · · · · ·
+      · · ·   · · ·
+```
+
+`LEAD, k` — kitty terminal (Gui+T)
+
+```
+· · · · · ·   · · · · · ·
+· · · · · ·   · · · · · ·
+· · · · · ·   · · · ● · ·
+      · · ·   · · ·
+```
+
+`LEAD, p` — Print Screen
+
+```
+· · · · · ·   · · · · · ·
+· · · · · ·   · · · · · ·
+· · · · · ·   ● · · · · ·
+      · · ·   · · ·
+```
 
 ## Emoji
 

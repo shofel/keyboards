@@ -230,18 +230,37 @@ def extract_combos(src):
 
 
 def extract_leader_seqs(src):
-    """[( [1-2 keycodes], doc )] from the leader_seqs[] table."""
+    """[( [1-2 keycodes], act, doc )] from the leader_seqs[] table. `act` (the
+    handler function name) identifies mirror pairs — the two rows sharing an
+    action."""
     body_m = re.search(r"leader_seq_t leader_seqs\[\]\s*=\s*\{(.*?)\n\};", src, re.S)
     if not body_m:
         die("leader_seqs[] not found")
     seqs = []
-    for m in re.finditer(r'\{\s*(\w+),\s*(\w+),\s*\w+,\s*"([^"]*)"\s*\}',
+    for m in re.finditer(r'\{\s*(\w+),\s*(\w+),\s*(\w+),\s*"([^"]*)"\s*\}',
                          strip_comments(body_m.group(1))):
-        k1, k2, doc = m.groups()
-        seqs.append(([k1] if k2 == "KC_NO" else [k1, k2], doc))
+        k1, k2, act, doc = m.groups()
+        seqs.append(([k1] if k2 == "KC_NO" else [k1, k2], act, doc))
     if not seqs:
         die("leader_seqs[] parsed empty")
     return seqs
+
+
+def group_leader_seqs(seqs):
+    """Collapse mirror pairs (rows sharing an action) into one entry, preserving
+    first-appearance order. Returns [(key_sequences, doc)] with the (mirror ...)
+    annotation stripped from the doc."""
+    groups, order = {}, []
+    for keys, act, doc in seqs:
+        if act not in groups:
+            groups[act] = {"seqs": [], "doc": doc}
+            order.append(act)
+        groups[act]["seqs"].append(keys)
+    out = []
+    for act in order:
+        doc = re.sub(r"\s*\(mirror[^)]*\)", "", groups[act]["doc"]).strip()
+        out.append((groups[act]["seqs"], doc))
+    return out
 
 
 def bold_selector(word, sel):
@@ -369,6 +388,60 @@ def render_combo_board(base_toks, combos):
     return "\n".join(lines)
 
 
+# --- position-only diagrams (shared by leader sequences and non-adjacent combos)
+
+# Thumb token (36-41) -> column index in the rendered thumb row. The three left
+# thumbs sit under the inner half of the left hand, the three right thumbs under
+# the inner half of the right hand — mirroring a split keyboard's clusters.
+_THUMB_COL = {36: 6, 37: 8, 38: 10, 39: 14, 40: 16, 41: 18}
+
+
+def _hand(i):
+    """'L' or 'R' for a base token index (0-41)."""
+    if i >= 36:
+        return "L" if i < 39 else "R"
+    return "L" if i % 12 < 6 else "R"
+
+
+def resolve_positions(base_toks, keys):
+    """Base-layer token indices for a combo/leader key list. A key that occurs
+    once resolves directly; a key on both hands (e.g. KK_NOOP) is disambiguated
+    to the hand of the unambiguous keys it is chorded with."""
+    occ = {k: [i for i, t in enumerate(base_toks) if t == k] for k in set(keys)}
+    hands = {_hand(occ[k][0]) for k in keys if len(occ[k]) == 1}
+    out = []
+    for k in keys:
+        idxs = occ[k]
+        if not idxs:
+            die(f"key {k!r} not found in the base layer")
+        if len(idxs) == 1:
+            out.append(idxs[0])
+            continue
+        cands = [i for i in idxs if _hand(i) in hands]
+        if len(cands) != 1:
+            die(f"cannot resolve ambiguous key {k!r} to one position")
+        out.append(cands[0])
+    return out
+
+
+def render_position_diagram(marks, dot="·", hit="●"):
+    """A blanked base-layout diagram (3×12 main split 6+6, plus a 6-key thumb
+    row) with `marks` (base token indices) emphasized — positions only, no
+    labels, so a sequence reads as 'press here'."""
+    def cell(i):
+        return hit if i in marks else dot
+    lines = []
+    for r in range(3):
+        left = " ".join(cell(r * 12 + c) for c in range(6))
+        right = " ".join(cell(r * 12 + c) for c in range(6, 12))
+        lines.append(left + "   " + right)
+    row = [" "] * 25
+    for tok, col in _THUMB_COL.items():
+        row[col] = cell(tok)
+    lines.append("".join(row).rstrip())
+    return "\n".join(lines)
+
+
 def doc_paragraph(src, name):
     """First paragraph of the /** doc comment immediately above `[name] =`."""
     idx = src.find(f"[{name}]")
@@ -451,12 +524,22 @@ def gen_doc(src):
         out.append("")
     out.append("## Leader sequences")
     out.append("")
-    out.append("Tap `LEAD`, then the keys in order.")
+    out.append("Tap `LEAD`, then the keys in order. Mirror pairs (either hand) share "
+               "one entry; the diagram marks the key position(s) pressed after `LEAD`.")
     out.append("")
-    for keys, doc in extract_leader_seqs(src):
-        seq = ", ".join(glyph(k) for k in keys)
-        out.append(f"- `LEAD, {seq}` — {doc}")
-    out.append("")
+    base = dict(extract_layers(src))["L_BOO"]
+    for key_seqs, doc in group_leader_seqs(extract_leader_seqs(src)):
+        triggers = " / ".join(
+            "`LEAD, " + ", ".join(glyph(k) for k in ks) + "`" for ks in key_seqs)
+        out.append(f"{triggers} — {doc}")
+        out.append("")
+        marks = set()
+        for ks in key_seqs:
+            marks.update(resolve_positions(base, ks))
+        out.append("```")
+        out.append(render_position_diagram(marks))
+        out.append("```")
+        out.append("")
     out.append("## Emoji")
     out.append("")
     out.append("`LEAD, a, <sel>` or `LEAD, i, <sel>` (mirror pair), via the Compose backend.")
