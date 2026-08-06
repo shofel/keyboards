@@ -238,10 +238,12 @@ def test_combo_board_real():
     # every vertical same-column combo lands on a border label
     for lbl in ("Ctl", "Nav", "Alt", "Gui", "Fky", "[", "]", "(", ")", "<", ">", '"'):
         assert lbl in board, f"missing border label {lbl!r}"
-    # the non-adjacent combos fall to the caption list, not a border
-    assert "Other combos" in board
-    for cap in ("Esc", "=>", "->", "bootloader", "reboot"):
-        assert cap in board, f"missing caption {cap!r}"
+    # non-adjacent combos are no longer captioned on the board — they move out
+    assert "Other combos" not in board
+    nonadj = g.nonadjacent_combos(base, g.extract_combos(src))
+    assert len(nonadj) == 7
+    assert {"KC_ESC", "QK_BOOT", "QK_REBOOT", "KK_FAT_RIGHT_ARROW",
+            "KK_RIGHT_ARROW"} == {o for _k, o in nonadj}
 
 def test_combo_board_only_home_anchors():
     src = g.KEYMAP.read_text(encoding="utf-8")
@@ -283,6 +285,17 @@ def test_combos_note_shifted_guillemets():
     assert "shift" in combos.lower()
     assert "g + z" in combos and "b + p" in combos
 
+def test_nonadjacent_combos_have_diagrams():
+    doc = g.gen_doc(g.KEYMAP.read_text(encoding="utf-8"))
+    combos = doc.split("## Combos", 1)[1].split("## Leader", 1)[0]
+    assert "┌" in combos                          # the boxed board is still there
+    # the non-adjacent combos are described AND diagrammed (thumbs included)
+    assert "sft + spc → Esc" in combos
+    assert "h + m → =>" in combos
+    assert "ret + np → bootloader" in combos
+    # Esc fires on both middle thumbs -> its diagram thumb-row shows two hits
+    assert "· ● ·   · ● ·" in combos
+
 def test_gen_doc_combos_is_board():
     doc = g.gen_doc(g.KEYMAP.read_text(encoding="utf-8"))
     section = doc.split("## Combos")[1].split("## Leader")[0]
@@ -306,5 +319,6 @@ if __name__ == "__main__":
     test_combo_board_real(); test_combo_board_only_home_anchors()
     test_position_diagram_marks(); test_resolve_positions_disambiguates_noop()
     test_combos_note_shifted_guillemets()
+    test_nonadjacent_combos_have_diagrams()
     test_gen_doc_combos_is_board()
     print("ok")

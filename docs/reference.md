@@ -109,18 +109,74 @@ Combos fire on two physical key positions (they resolve from the base layer). A 
 ├─────┼─────┼─────┼─ ( ─┼─ [ ─┼─ < ─┤    ├─ > ─┼─ ] ─┼─ ) ─┼─────┼─────┼─────┤
 │     │     │     │     │     │     │    │     │     │     │     │     │     │
 └─────┴─────┴─────┴─────┴─────┴─────┘    └─────┴─────┴─────┴─────┴─────┴─────┘
-
-Other combos (keys not vertically adjacent):
-  sft + spc → Esc
-  np + SYM → bootloader
-  ret + np → bootloader
-  np + sft → reboot
-  spc + np → reboot
-  h + m → =>
-  h + k → ->
 ```
 
 The `<` `>` combos are shift-aware — g + z → < (« when shifted); b + p → > (» when shifted). A held Shift (or a one-shot Shift) turns them into the guillemets.
+
+The rest fire on keys that aren't vertically adjacent — thumbs, bottom-row rolls, and the outer corners. Each diagram marks the two trigger positions:
+
+sft + spc → Esc
+
+```
+· · · · · ·   · · · · · ·
+· · · · · ·   · · · · · ·
+· · · · · ·   · · · · · ·
+      · ● ·   · ● ·
+```
+
+np + SYM → bootloader
+
+```
+· · · · · ·   · · · · · ·
+· · · · · ·   · · · · · ·
+● · · · · ·   · · · · · ·
+      · · ●   · · ·
+```
+
+ret + np → bootloader
+
+```
+· · · · · ·   · · · · · ·
+· · · · · ·   · · · · · ·
+· · · · · ·   · · · · · ●
+      · · ·   ● · ·
+```
+
+np + sft → reboot
+
+```
+· · · · · ·   · · · · · ·
+· · · · · ·   · · · · · ·
+● · · · · ·   · · · · · ·
+      · ● ·   · · ·
+```
+
+spc + np → reboot
+
+```
+· · · · · ·   · · · · · ·
+· · · · · ·   · · · · · ·
+· · · · · ·   · · · · · ●
+      · · ·   · ● ·
+```
+
+h + m → =>
+
+```
+· · · · · ·   · · · · · ·
+· · · · · ·   · · · · · ·
+· · · · · ·   · ● ● · · ·
+      · · ·   · · ·
+```
+
+h + k → ->
+
+```
+· · · · · ·   · · · · · ·
+· · · · · ·   · · · · · ·
+· · · · · ·   · ● · ● · ·
+      · · ·   · · ·
+```
 
 ## Leader sequences
 
