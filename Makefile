@@ -18,8 +18,8 @@ build:
 # Flash one half. The Cantor is a split: whichever half is on USB is the one
 # flashed, so run this once per half, connected directly rather than over TRRS.
 #
-# Enter the bootloader with the boot combo — the two outer bottom keys on that
-# half (boot_combo_left / boot_combo_right in keymap.c). A half with no firmware
+# Enter the bootloader with the boot combo — all three thumb keys of that half
+# (boot_combo_left / boot_combo_right in keymap.c). A half with no firmware
 # can't run the combo; hold BOOT0 while plugging in USB instead.
 #
 # Start this first and enter the bootloader after: it polls (FLASH_TIMEOUT)

@@ -32,7 +32,13 @@ enum my_keycodes {
   KK_FAT_RIGHT_ARROW,
   KK_LANGLE,  // « when shifted, < otherwise
   KK_RANGLE,  // » when shifted, > otherwise
-  KK_NOOP,
+
+  /* The two outer-thumb leader keys. Distinct keycodes (not a single shared
+   * QK_LEAD) so the reset chord — both of them at once — is an unambiguous
+   * combo: stock QMK matches combos by keycode, so a {QK_LEAD, QK_LEAD} combo
+   * could never fire. Both arm the leader in process_record_user. */
+  KK_LEAD_L,
+  KK_LEAD_R,
 
   /* One-shot trigger keys */
   OS_CTL,
@@ -196,12 +202,11 @@ const key_override_t *key_overrides[] = {
 
 /* Hit both middle thumb keys for esc. */
 const uint16_t PROGMEM esc_combo[]      = {KK_SHIFT, KC_SPACE, COMBO_END};
-/* Two outer bottom keys on a single half to get into bootloader. */
-const uint16_t PROGMEM boot_combo_left[]  = {KK_NOOP, KK_SYMBO, COMBO_END};
-const uint16_t PROGMEM boot_combo_right[] = {KK_RET, KK_NOOP, COMBO_END};
-/* On each half: the outermost bottom pinky key + the middle thumb key to reboot the keyboard. */
-const uint16_t PROGMEM reset_combo_left[]  = {KK_NOOP, KK_SHIFT, COMBO_END};
-const uint16_t PROGMEM reset_combo_right[] = {KC_SPACE, KK_NOOP, COMBO_END};
+/* All three thumb keys of one half at once -> bootloader (for flashing). */
+const uint16_t PROGMEM boot_combo_left[]  = {KK_LEAD_L, KK_SHIFT, KK_SYMBO, COMBO_END};
+const uint16_t PROGMEM boot_combo_right[] = {KK_RET, KC_SPACE, KK_LEAD_R, COMBO_END};
+/* Both outer thumb (leader) keys at once -> reboot the keyboard. */
+const uint16_t PROGMEM reset_combo[]       = {KK_LEAD_L, KK_LEAD_R, COMBO_END};
 /* Digraphs */
 const uint16_t PROGMEM fat_right_arrow_combo[] = {KC_H, KC_M, COMBO_END}; // =>
 const uint16_t PROGMEM right_arrow_combo[]     = {KC_H, KC_K, COMBO_END}; // ->
@@ -237,8 +242,7 @@ enum combos {
   CMB_BOOT_L,
   CMB_BOOT_R,
 
-  CMB_RESET_L,
-  CMB_RESET_R,
+  CMB_RESET,
 
   CMB_FAT_ARROW,
   CMB_RIGHT_ARROW,
@@ -269,8 +273,7 @@ combo_t key_combos[] = {
   [CMB_BOOT_L]     = COMBO(boot_combo_left,  QK_BOOT),
   [CMB_BOOT_R]     = COMBO(boot_combo_right, QK_BOOT),
 
-  [CMB_RESET_L]    = COMBO(reset_combo_left,  QK_REBOOT),
-  [CMB_RESET_R]    = COMBO(reset_combo_right, QK_REBOOT),
+  [CMB_RESET]      = COMBO(reset_combo, QK_REBOOT),
 
   [CMB_FAT_ARROW]  = COMBO(fat_right_arrow_combo, KK_FAT_RIGHT_ARROW),
   [CMB_RIGHT_ARROW]= COMBO(right_arrow_combo, KK_RIGHT_ARROW),
@@ -488,6 +491,14 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
       }
       return false;
 
+    /* The two outer thumbs are custom leader keys (distinct so the reset combo
+     * can tell them apart); both arm the leader sequence. process_leader still
+     * captures the following keys, since it keys off the `leading` flag. */
+    case KK_LEAD_L:
+    case KK_LEAD_R:
+      if (record->event.pressed) { leader_start(); }
+      return false;
+
     /* Mouse mode switch */
     case KK_MM_POLAR:
       if (record->event.pressed) { toggle_enable(L_MOUSE); }
@@ -612,16 +623,16 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    * Dvorak modified for more rollover.
    */
   [L_BOO] = LAYOUT_split_3x6_3(/* GENERATED scheme — edit the array, then `make gen-docs`.
-       ·   '  ,  u  c  v        q  f  d  l  y  /
-       ·   a  o  e  s  g        b  n  t  r  i  -
-       np  ·  x  .  w  z        p  h  m  k  j  np
-          LEAD  sft  SYM        ret  spc  LEAD
+       ·  '  ,  u  c  v        q  f  d  l  y  /
+       ·  a  o  e  s  g        b  n  t  r  i  -
+       ·  ·  x  .  w  z        p  h  m  k  j  ·
+         LEAD  sft  SYM        ret  spc  LEAD
   */
            XX , KC_QUOT, KC_COMM,    KC_U,   KC_C,  KC_V,     KC_Q,  KC_F,  KC_D,  KC_L,  KC_Y,   KC_SLASH,
            XX ,    KC_A,    KC_O,    KC_E,   KC_S,  KC_G,     KC_B,  KC_N,  KC_T,  KC_R,  KC_I,   KC_MINUS,
-       KK_NOOP,     XX,    KC_X,  KC_DOT,   KC_W,  KC_Z,     KC_P,  KC_H,  KC_M,  KC_K,  KC_J,   KK_NOOP,
+           XX ,     XX,    KC_X,  KC_DOT,   KC_W,  KC_Z,     KC_P,  KC_H,  KC_M,  KC_K,  KC_J,   XX,
 
-                           QK_LEAD , KK_SHIFT , KK_SYMBO,       KK_RET , KC_SPACE, QK_LEAD
+                         KK_LEAD_L , KK_SHIFT , KK_SYMBO,       KK_RET , KC_SPACE, KK_LEAD_R
   ),
 
   /**
