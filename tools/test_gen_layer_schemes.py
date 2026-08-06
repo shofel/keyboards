@@ -147,8 +147,8 @@ def test_gen_doc_has_legend():
     assert "## Legend" in doc
     assert "- `sft` — one-shot Shift" in doc
     assert "- `pol` — mouse: polar mode" in doc
-    # Legend comes before the first layer heading.
-    assert doc.index("## Legend") < doc.index("## Base (BOO)")
+    # Legend now lives at the end, after the Emoji table.
+    assert doc.index("## Legend") > doc.index("## Emoji")
 
 def test_gen_doc_has_phase2_sections():
     doc = g.gen_doc(g.KEYMAP.read_text(encoding="utf-8"))

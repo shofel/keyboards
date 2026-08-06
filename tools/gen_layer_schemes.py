@@ -390,17 +390,7 @@ def gen_doc(src):
         f"Source of truth: `{KEYMAP.relative_to(ROOT)}`.",
         "`__` = transparent, `·` = no-op.",
         "",
-        "## Legend",
-        "",
     ]
-    for gl, meaning in LEGEND:
-        out.append(f"- `{gl}` — {meaning}")
-    out.append("")
-    out.append(
-        "Arrows (`←` `→` `↑` `↓`) are directional per layer: navigation on "
-        "Numbers & Navigation, steering on Mouse — Polar, screen-halving on "
-        "Mouse — Bisect.")
-    out.append("")
     for name, toks in extract_layers(src):
         out.append(f"## {layer_title(name)} <sub>`{name}`</sub>")
         out.append("")
@@ -440,6 +430,16 @@ def gen_doc(src):
     out.append("|-----|-------|")
     for sel, gl in extract_emoji(src):
         out.append(f"| `{sel}` | {gl} |")
+    out.append("")
+    out.append("## Legend")
+    out.append("")
+    for gl, meaning in LEGEND:
+        out.append(f"- `{gl}` — {meaning}")
+    out.append("")
+    out.append(
+        "Arrows (`←` `→` `↑` `↓`) are directional per layer: navigation on "
+        "Numbers & Navigation, steering on Mouse — Polar, screen-halving on "
+        "Mouse — Bisect.")
     out.append("")
     return "\n".join(insert_toc(out))
 
