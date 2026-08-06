@@ -244,10 +244,21 @@ def extract_leader_seqs(src):
     return seqs
 
 
+def bold_selector(word, sel):
+    """`word` with the first occurrence of the selector char bolded for markdown
+    (e.g. bold_selector("think", "k") -> "thin**k**"). The char is not always
+    word-initial; fail loud if the selector isn't in the mnemonic at all."""
+    i = word.find(sel)
+    if i < 0:
+        die(f"emoji selector {sel!r} not found in mnemonic {word!r}")
+    return f"{word[:i]}**{word[i]}**{word[i + 1:]}"
+
+
 def extract_emoji(src):
-    """[(selector char, glyph)] joining keymap.c emoji_seqs with the compose table."""
+    """[(selector char, glyph, mnemonic)] joining keymap.c emoji_seqs with the
+    compose table (the single source for the glyph + mnemonic word)."""
     import gen_unicode_compose as compose
-    glyph_by_sel = {sel: gl for _cp, sel, gl in compose.EMOJI}
+    info_by_sel = {sel: (gl, word) for _cp, sel, gl, word in compose.EMOJI}
     body_m = re.search(r"\}\s*emoji_seqs\[\]\s*=\s*\{(.*?)\n\s*\};", src, re.S)
     if not body_m:
         die("emoji_seqs[] not found")
@@ -256,9 +267,10 @@ def extract_emoji(src):
         key, sel = m.group(1).lower(), m.group(2)
         if key != sel:
             die(f"emoji selector mismatch: KC_{m.group(1)} vs @{sel}")
-        if sel not in glyph_by_sel:
+        if sel not in info_by_sel:
             die(f"emoji @{sel} missing from gen_unicode_compose.EMOJI")
-        emo.append((sel, glyph_by_sel[sel]))
+        gl, word = info_by_sel[sel]
+        emo.append((sel, gl, word))
     if not emo:
         die("emoji_seqs[] parsed empty")
     return emo
@@ -449,10 +461,10 @@ def gen_doc(src):
     out.append("")
     out.append("`LEAD, a, <sel>` or `LEAD, i, <sel>` (mirror pair), via the Compose backend.")
     out.append("")
-    out.append("| sel | emoji |")
-    out.append("|-----|-------|")
-    for sel, gl in extract_emoji(src):
-        out.append(f"| `{sel}` | {gl} |")
+    out.append("| sel | mnemonic | emoji |")
+    out.append("|-----|----------|-------|")
+    for sel, gl, word in extract_emoji(src):
+        out.append(f"| `{sel}` | {bold_selector(word, sel)} | {gl} |")
     out.append("")
     out.append("## Design")
     out.append("")

@@ -155,19 +155,19 @@ Tap `LEAD`, then the keys in order.
 
 `LEAD, a, <sel>` or `LEAD, i, <sel>` (mirror pair), via the Compose backend.
 
-| sel | emoji |
-|-----|-------|
-| `t` | 🌷 |
-| `r` | 🌹 |
-| `c` | 🌸 |
-| `h` | 🌺 |
-| `s` | 🌻 |
-| `d` | 🌼 |
-| `u` | 👍 |
-| `o` | 👌 |
-| `k` | 🤔 |
-| `m` | 🧐 |
-| `n` | 🤝 |
+| sel | mnemonic | emoji |
+|-----|----------|-------|
+| `t` | **t**ulip | 🌷 |
+| `r` | **r**ose | 🌹 |
+| `c` | **c**herry | 🌸 |
+| `h` | **h**ibiscus | 🌺 |
+| `s` | **s**unflower | 🌻 |
+| `d` | **d**aisy | 🌼 |
+| `u` | th**u**mbup | 👍 |
+| `o` | **o**k | 👌 |
+| `k` | thin**k** | 🤔 |
+| `m` | **m**onocle | 🧐 |
+| `n` | ha**n**dshake | 🤝 |
 
 ## Design
 
