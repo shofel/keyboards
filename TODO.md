@@ -13,16 +13,14 @@ Procedure: score the four factors per task, take the weighted sum, round to 2 de
 descending; on ties the earlier-listed task stays first. Re-rank whenever a task is added or an
 estimate changes. Bugs tend to top the list because Impact carries the most weight on a daily driver.
 
-## Ranked — 2026-08-04
+## Ranked — 2026-08-06
 
 | # | Score | Task | Where |
 |---|-------|------|-------|
 | 1 | 2.55 | Absolute-mouse HID descriptor so bisect needs no host config | Layout |
 | 2 | 2.30 | Shared layout for cantor & dactyl (keymap transform program + tests) | Dactyl |
 | 3 | 2.25 | Cleanup readme (nix flake run) | Dactyl |
-| 4 | 2.25 | Draw the layers diagram by hand | Ideas |
-| 5 | 2.00 | Sturdier cantor case with quieter sound | Hardware |
-| 6 | 1.55 | Make animations to explain tricks | Ideas |
+| 4 | 2.00 | Sturdier cantor case with quieter sound | Hardware |
 
 ## Layout
 
@@ -56,11 +54,6 @@ estimate changes. Bugs tend to top the list because Impact carries the most weig
 ## TODO cantor hardware
 
 - a sturdier case with quieter sound
-
-## Ideas
-
-- Draw the layers diagram by hand
-- Make animations to explain tricks
 
 ## References
 
