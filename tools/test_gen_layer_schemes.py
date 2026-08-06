@@ -134,15 +134,34 @@ def test_extract_combos_real():
 
 def test_extract_leader_seqs_real():
     seqs = g.extract_leader_seqs(g.KEYMAP.read_text(encoding="utf-8"))
-    assert (["KC_R"], "Russian — compose backend (default)") in [(k, d) for k, d in seqs]
-    assert (["KC_D", "KC_W"], "delete word (Ctrl+Backspace)") in [(k, d) for k, d in seqs]
+    assert (["KC_R"], "lead_ru", "Russian — compose backend (default)") in seqs
+    assert (["KC_D", "KC_W"], "lead_del_word", "delete word (Ctrl+Backspace)") in seqs
     assert len(seqs) == 24
+    # Mirror pairs share an action; grouping collapses the 24 rows to 17 entries.
+    groups = g.group_leader_seqs(seqs)
+    assert len(groups) == 17
+    by_seqs = {tuple(map(tuple, ks)): doc for ks, doc in groups}
+    assert by_seqs[(("KC_S",), ("KC_N",))] == "Esc + exit toggle layer"
+    assert by_seqs[(("KC_M", "KC_L"), ("KC_DOT", "KC_L"))] == "₺ lira"
 
 def test_bold_selector():
     assert g.bold_selector("tulip", "t") == "**t**ulip"
     assert g.bold_selector("think", "k") == "thin**k**"       # not word-initial
     assert g.bold_selector("handshake", "n") == "ha**n**dshake"
     assert g.bold_selector("thumbup", "u") == "th**u**mbup"   # first occurrence
+
+def test_leader_seqs_grouped_with_diagrams():
+    doc = g.gen_doc(g.KEYMAP.read_text(encoding="utf-8"))
+    lead = doc.split("## Leader sequences", 1)[1].split("## Emoji", 1)[0]
+    # Mirror pairs collapse into one entry naming both hands.
+    assert "`LEAD, s` / `LEAD, n`" in lead
+    assert "`LEAD, m, l` / `LEAD, ., l`" in lead
+    # (mirror ...) annotations are stripped from the rendered descriptions.
+    assert "mirror" not in lead
+    # Single (non-mirrored) sequences still appear on their own.
+    assert "`LEAD, v`" in lead
+    # Each entry carries a position diagram (● hits inside a fenced block).
+    assert "●" in lead
 
 def test_extract_emoji_real():
     emo = g.extract_emoji(g.KEYMAP.read_text(encoding="utf-8"))
@@ -237,6 +256,24 @@ def test_combo_board_only_home_anchors():
     values = sorted(c for c in cells if c)
     assert values == sorted(["a", "o", "e", "s", "n", "t", "r", "i"]), values
 
+def test_position_diagram_marks():
+    # 3 main rows (12 cols, split 6+6) + a thumb row; every cell a dot, hits ●.
+    d = g.render_position_diagram({16})            # KC_S = home row, left col 4
+    lines = d.splitlines()
+    assert len(lines) == 4
+    assert lines[0] == "· · · · · ·   · · · · · ·"
+    assert lines[1] == "· · · · ● ·   · · · · · ·"
+    # Esc = both middle thumbs (tokens 37, 40) -> two hits on the thumb row only.
+    thumbs = g.render_position_diagram({37, 40}).splitlines()
+    assert thumbs[0] == "· · · · · ·   · · · · · ·"
+    assert thumbs[3].count("●") == 2 and thumbs[3].strip() == "· ● ·   · ● ·"
+
+def test_resolve_positions_disambiguates_noop():
+    base = dict(g.extract_layers(g.KEYMAP.read_text(encoding="utf-8")))["L_BOO"]
+    # KK_NOOP sits on both bottom corners; the paired thumb picks the hand.
+    assert set(g.resolve_positions(base, ["KK_NOOP", "KK_SYMBO"])) == {24, 38}
+    assert set(g.resolve_positions(base, ["KK_RET", "KK_NOOP"])) == {39, 35}
+
 def test_combos_note_shifted_guillemets():
     doc = g.gen_doc(g.KEYMAP.read_text(encoding="utf-8"))
     combos = doc.split("## Combos", 1)[1].split("## Leader", 1)[0]
@@ -260,12 +297,14 @@ if __name__ == "__main__":
     test_layer_title_unknown_fatal()
     test_regen_keymap_idempotent(); test_regen_keymap_marks_every_layer()
     test_extract_combos_real(); test_extract_leader_seqs_real()
+    test_leader_seqs_grouped_with_diagrams()
     test_bold_selector(); test_extract_emoji_real(); test_emoji_table_bolds_word()
     test_gen_doc_has_legend()
     test_gen_doc_has_phase2_sections()
     test_extract_design_real(); test_gen_doc_has_design()
     test_gh_anchor_slug(); test_gen_doc_has_toc()
     test_combo_board_real(); test_combo_board_only_home_anchors()
+    test_position_diagram_marks(); test_resolve_positions_disambiguates_noop()
     test_combos_note_shifted_guillemets()
     test_gen_doc_combos_is_board()
     print("ok")
