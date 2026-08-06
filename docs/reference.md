@@ -120,6 +120,8 @@ Other combos (keys not vertically adjacent):
   h + k → ->
 ```
 
+The `<` `>` combos are shift-aware — g + z → < (« when shifted); b + p → > (» when shifted). A held Shift (or a one-shot Shift) turns them into the guillemets.
+
 ## Leader sequences
 
 Tap `LEAD`, then the keys in order.

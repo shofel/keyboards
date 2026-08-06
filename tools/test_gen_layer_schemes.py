@@ -226,6 +226,15 @@ def test_combo_board_only_home_anchors():
     values = sorted(c for c in cells if c)
     assert values == sorted(["a", "o", "e", "s", "n", "t", "r", "i"]), values
 
+def test_combos_note_shifted_guillemets():
+    doc = g.gen_doc(g.KEYMAP.read_text(encoding="utf-8"))
+    combos = doc.split("## Combos", 1)[1].split("## Leader", 1)[0]
+    # The <,> combos double as «,» under Shift — surfaced as a footnote, keyed
+    # to the actual trigger keys so it stays in sync with the combo table.
+    assert "«" in combos and "»" in combos
+    assert "shift" in combos.lower()
+    assert "g + z" in combos and "b + p" in combos
+
 def test_gen_doc_combos_is_board():
     doc = g.gen_doc(g.KEYMAP.read_text(encoding="utf-8"))
     section = doc.split("## Combos")[1].split("## Leader")[0]
@@ -245,5 +254,6 @@ if __name__ == "__main__":
     test_extract_design_real(); test_gen_doc_has_design()
     test_gh_anchor_slug(); test_gen_doc_has_toc()
     test_combo_board_real(); test_combo_board_only_home_anchors()
+    test_combos_note_shifted_guillemets()
     test_gen_doc_combos_is_board()
     print("ok")

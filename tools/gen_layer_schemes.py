@@ -430,6 +430,13 @@ def gen_doc(src):
     out.append(render_combo_board(dict(extract_layers(src))["L_BOO"], extract_combos(src)))
     out.append("```")
     out.append("")
+    angle = [(ks, o) for ks, o in extract_combos(src) if o in ("KK_LANGLE", "KK_RANGLE")]
+    if angle:
+        notes = "; ".join(
+            f"{' + '.join(glyph(k) for k in ks)} → {combo_out(o)}" for ks, o in angle)
+        out.append(f"The `<` `>` combos are shift-aware — {notes}. A held Shift "
+                   "(or a one-shot Shift) turns them into the guillemets.")
+        out.append("")
     out.append("## Leader sequences")
     out.append("")
     out.append("Tap `LEAD`, then the keys in order.")
