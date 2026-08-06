@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Off-target tests for gen_layer_schemes.py (layer-scheme generator)."""
-import sys, os
+import sys, os, re
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import gen_layer_schemes as g
 
@@ -155,6 +155,30 @@ def test_gen_doc_has_phase2_sections():
     for h in ["## Combos", "## Leader sequences", "## Emoji"]:
         assert h in doc
 
+def test_gen_doc_has_toc():
+    doc = g.gen_doc(g.KEYMAP.read_text(encoding="utf-8"))
+    assert "## Contents" in doc
+    # ToC sits near the top, before the first content section.
+    assert doc.index("## Contents") < doc.index("## Base (BOO)")
+    toc = doc.split("## Contents", 1)[1].split("\n## ", 1)[0]
+    # Every other ## heading is linked, with the clean title and a resolving anchor.
+    for h in re.findall(r"^## (.+)$", doc, re.M):
+        if h == "Contents":
+            continue
+        title = re.sub(r"\s*<sub>.*?</sub>", "", h)
+        assert f"- [{title}](#{g.gh_anchor(h)})" in toc, f"ToC missing {title!r}"
+    # The tricky <sub> heading resolves to the tag-stripped slug, not #base-boo.
+    assert "(#base-boo-l_boo)" in toc
+
+def test_gh_anchor_slug():
+    # GitHub's github-slugger: strip HTML tags, lowercase, drop a punctuation
+    # blocklist (incl. backticks, parens, &, em dash), spaces -> hyphens. The
+    # <sub>`enum`</sub> tail contributes its inner text (the enum) to the slug.
+    assert g.gh_anchor("Combos") == "combos"
+    assert g.gh_anchor("Base (BOO) <sub>`L_BOO`</sub>") == "base-boo-l_boo"
+    assert g.gh_anchor("Numbers & Navigation <sub>`L_NUM_NAV`</sub>") == "numbers--navigation-l_num_nav"
+    assert g.gh_anchor("Mouse — Polar <sub>`L_MOUSE`</sub>") == "mouse--polar-l_mouse"
+
 def test_combo_board_real():
     src = g.KEYMAP.read_text(encoding="utf-8")
     base = dict(g.extract_layers(src))["L_BOO"]
@@ -186,5 +210,6 @@ if __name__ == "__main__":
     test_extract_combos_real(); test_extract_leader_seqs_real()
     test_extract_emoji_real(); test_gen_doc_has_legend()
     test_gen_doc_has_phase2_sections()
+    test_gh_anchor_slug(); test_gen_doc_has_toc()
     test_combo_board_real(); test_gen_doc_combos_is_board()
     print("ok")

@@ -5,6 +5,20 @@
 Source of truth: `layouts/split_3x6_3/shofel/keymap.c`.
 `__` = transparent, `·` = no-op.
 
+## Contents
+
+- [Legend](#legend)
+- [Base (BOO)](#base-boo-l_boo)
+- [Russian](#russian-l_russian)
+- [Symbols](#symbols-l_symbols)
+- [Numbers & Navigation](#numbers--navigation-l_num_nav)
+- [F-keys & System](#f-keys--system-l_fkeys_sys)
+- [Mouse — Polar](#mouse--polar-l_mouse)
+- [Mouse — Bisect](#mouse--bisect-l_mouse_bisect)
+- [Combos](#combos)
+- [Leader sequences](#leader-sequences)
+- [Emoji](#emoji)
+
 ## Legend
 
 - `np` — no-op filler key
