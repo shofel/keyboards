@@ -7,7 +7,6 @@ Source of truth: `layouts/split_3x6_3/shofel/keymap.c`.
 
 ## Contents
 
-- [Legend](#legend)
 - [Base (BOO)](#base-boo-l_boo)
 - [Russian](#russian-l_russian)
 - [Symbols](#symbols-l_symbols)
@@ -18,45 +17,7 @@ Source of truth: `layouts/split_3x6_3/shofel/keymap.c`.
 - [Combos](#combos)
 - [Leader sequences](#leader-sequences)
 - [Emoji](#emoji)
-
-## Legend
-
-- `np` — no-op filler key
-- `sft` — one-shot Shift
-- `SYM` — Symbol layer — left thumb (tap = one-shot, hold = momentary)
-- `ret` — Enter (tap) / Symbol layer (hold)
-- `spc` — Space
-- `LEAD` — leader key — starts a leader sequence
-- `⌫` — Backspace
-- `⌦` — Delete
-- `⏎` — Enter
-- `⮀` — Tab
-- `⇤` — Home
-- `⇥` — End
-- `pg↑` — Page Up
-- `pg↓` — Page Down
-- `pol` — mouse: polar mode
-- `bis` — mouse: bisect mode
-- `fwd` — mouse: move forward
-- `bwd` — mouse: move backward
-- `w↑` — mouse: wheel up
-- `w↓` — mouse: wheel down
-- `slo` — mouse: slower
-- `fst` — mouse: faster
-- `b1` — mouse: button 1
-- `b2` — mouse: button 2
-- `b3` — mouse: button 3
-- `clk` — mouse (bisect): click / hold to drag
-- `rst` — mouse (bisect): reset to full screen
-- `br↑` — brightness up
-- `br↓` — brightness down
-- `vl↑` — volume up
-- `vl↓` — volume down
-- `mute` — mute
-- `DBG` — toggle debug logging
-- `boot` — bootloader (for flashing)
-
-Arrows (`←` `→` `↑` `↓`) are directional per layer: navigation on Numbers & Navigation, steering on Mouse — Polar, screen-halving on Mouse — Bisect.
+- [Legend](#legend)
 
 ## Base (BOO) <sub>`L_BOO`</sub>
 
@@ -204,3 +165,42 @@ Tap `LEAD`, then the keys in order.
 | `k` | 🤔 |
 | `m` | 🧐 |
 | `n` | 🤝 |
+
+## Legend
+
+- `np` — no-op filler key
+- `sft` — one-shot Shift
+- `SYM` — Symbol layer — left thumb (tap = one-shot, hold = momentary)
+- `ret` — Enter (tap) / Symbol layer (hold)
+- `spc` — Space
+- `LEAD` — leader key — starts a leader sequence
+- `⌫` — Backspace
+- `⌦` — Delete
+- `⏎` — Enter
+- `⮀` — Tab
+- `⇤` — Home
+- `⇥` — End
+- `pg↑` — Page Up
+- `pg↓` — Page Down
+- `pol` — mouse: polar mode
+- `bis` — mouse: bisect mode
+- `fwd` — mouse: move forward
+- `bwd` — mouse: move backward
+- `w↑` — mouse: wheel up
+- `w↓` — mouse: wheel down
+- `slo` — mouse: slower
+- `fst` — mouse: faster
+- `b1` — mouse: button 1
+- `b2` — mouse: button 2
+- `b3` — mouse: button 3
+- `clk` — mouse (bisect): click / hold to drag
+- `rst` — mouse (bisect): reset to full screen
+- `br↑` — brightness up
+- `br↓` — brightness down
+- `vl↑` — volume up
+- `vl↓` — volume down
+- `mute` — mute
+- `DBG` — toggle debug logging
+- `boot` — bootloader (for flashing)
+
+Arrows (`←` `→` `↑` `↓`) are directional per layer: navigation on Numbers & Navigation, steering on Mouse — Polar, screen-halving on Mouse — Bisect.
