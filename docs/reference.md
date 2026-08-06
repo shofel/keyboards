@@ -180,33 +180,33 @@ h + k → ->
 
 ## Leader sequences
 
-Tap `LEAD`, then the keys in order. Mirror pairs (either hand) share one entry; the diagram marks the key position(s) pressed after `LEAD`.
+Tap `LEAD`, then the keys in order. Mirror pairs (either hand) share one entry; the diagram numbers the presses — `0` is `LEAD` (either outer thumb), then `1`, `2` for the keys after it.
 
 `LEAD, r` / `LEAD, c` — Russian — compose backend (default)
 
 ```
-· · · · ● ·   · · · · · ·
-· · · · · ·   · · · ● · ·
+· · · · 1 ·   · · · · · ·
+· · · · · ·   · · · 1 · ·
 · · · · · ·   · · · · · ·
-      · · ·   · · ·
+      0 · ·   · · 0
 ```
 
 `LEAD, v` — Russian — vim backend (vim-native unicode)
 
 ```
-· · · · · ●   · · · · · ·
+· · · · · 1   · · · · · ·
 · · · · · ·   · · · · · ·
 · · · · · ·   · · · · · ·
-      · · ·   · · ·
+      0 · ·   · · 0
 ```
 
 `LEAD, e` — back to English (drop the toggle layer)
 
 ```
 · · · · · ·   · · · · · ·
-· · · ● · ·   · · · · · ·
+· · · 1 · ·   · · · · · ·
 · · · · · ·   · · · · · ·
-      · · ·   · · ·
+      0 · ·   · · 0
 ```
 
 `LEAD, spc` — disable any toggle layer, cancel one-shots
@@ -215,16 +215,16 @@ Tap `LEAD`, then the keys in order. Mirror pairs (either hand) share one entry; 
 · · · · · ·   · · · · · ·
 · · · · · ·   · · · · · ·
 · · · · · ·   · · · · · ·
-      · · ·   · ● ·
+      0 · ·   · 1 0
 ```
 
 `LEAD, s` / `LEAD, n` — Esc + exit toggle layer
 
 ```
 · · · · · ·   · · · · · ·
-· · · · ● ·   · ● · · · ·
+· · · · 1 ·   · 1 · · · ·
 · · · · · ·   · · · · · ·
-      · · ·   · · ·
+      0 · ·   · · 0
 ```
 
 `LEAD, w` / `LEAD, h` — Ctrl+Esc
@@ -232,17 +232,17 @@ Tap `LEAD`, then the keys in order. Mirror pairs (either hand) share one entry; 
 ```
 · · · · · ·   · · · · · ·
 · · · · · ·   · · · · · ·
-· · · · ● ·   · ● · · · ·
-      · · ·   · · ·
+· · · · 1 ·   · 1 · · · ·
+      0 · ·   · · 0
 ```
 
 `LEAD, f` — F-keys / system layer (sticky)
 
 ```
-· · · · · ·   · ● · · · ·
+· · · · · ·   · 1 · · · ·
 · · · · · ·   · · · · · ·
 · · · · · ·   · · · · · ·
-      · · ·   · · ·
+      0 · ·   · · 0
 ```
 
 `LEAD, m` / `LEAD, .` — mouse layer, polar mode
@@ -250,71 +250,71 @@ Tap `LEAD`, then the keys in order. Mirror pairs (either hand) share one entry; 
 ```
 · · · · · ·   · · · · · ·
 · · · · · ·   · · · · · ·
-· · · ● · ·   · · ● · · ·
-      · · ·   · · ·
+· · · 1 · ·   · · 1 · · ·
+      0 · ·   · · 0
 ```
 
 `LEAD, t` — num/nav layer (sticky)
 
 ```
 · · · · · ·   · · · · · ·
-· · · · · ·   · · ● · · ·
+· · · · · ·   · · 1 · · ·
 · · · · · ·   · · · · · ·
-      · · ·   · · ·
+      0 · ·   · · 0
 ```
 
 `LEAD, m, l` / `LEAD, ., l` — ₺ lira
 
 ```
-· · · · · ·   · · · ● · ·
+· · · · · ·   · · · 2 · ·
 · · · · · ·   · · · · · ·
-· · · ● · ·   · · ● · · ·
-      · · ·   · · ·
+· · · 1 · ·   · · 1 · · ·
+      0 · ·   · · 0
 ```
 
 `LEAD, m, r` / `LEAD, ., r` — ₽ ruble
 
 ```
 · · · · · ·   · · · · · ·
-· · · · · ·   · · · ● · ·
-· · · ● · ·   · · ● · · ·
-      · · ·   · · ·
+· · · · · ·   · · · 2 · ·
+· · · 1 · ·   · · 1 · · ·
+      0 · ·   · · 0
 ```
 
 `LEAD, m, e` / `LEAD, ., e` — € euro
 
 ```
 · · · · · ·   · · · · · ·
-· · · ● · ·   · · · · · ·
-· · · ● · ·   · · ● · · ·
-      · · ·   · · ·
+· · · 2 · ·   · · · · · ·
+· · · 1 · ·   · · 1 · · ·
+      0 · ·   · · 0
 ```
 
 `LEAD, d, a` — delete all (Ctrl+A, Del)
 
 ```
-· · · · · ·   · · ● · · ·
-· ● · · · ·   · · · · · ·
+· · · · · ·   · · 1 · · ·
+· 2 · · · ·   · · · · · ·
 · · · · · ·   · · · · · ·
-      · · ·   · · ·
+      0 · ·   · · 0
 ```
 
 `LEAD, d, u` — delete to line start (like Ctrl-U)
 
 ```
-· · · ● · ·   · · ● · · ·
+· · · 2 · ·   · · 1 · · ·
 · · · · · ·   · · · · · ·
 · · · · · ·   · · · · · ·
-      · · ·   · · ·
+      0 · ·   · · 0
 ```
 
 `LEAD, d, w` — delete word (Ctrl+Backspace)
 
 ```
-· · · · · ·   · · ● · · ·
+· · · · · ·   · · 1 · · ·
 · · · · · ·   · · · · · ·
-· · · · ● ·   · · · · · ·
-      · · ·   · · ·
+· · · · 2 ·   · · · · · ·
+      0 · ·   · · 0
 ```
 
 `LEAD, k` — kitty terminal (Gui+T)
@@ -322,8 +322,8 @@ Tap `LEAD`, then the keys in order. Mirror pairs (either hand) share one entry; 
 ```
 · · · · · ·   · · · · · ·
 · · · · · ·   · · · · · ·
-· · · · · ·   · · · ● · ·
-      · · ·   · · ·
+· · · · · ·   · · · 1 · ·
+      0 · ·   · · 0
 ```
 
 `LEAD, p` — Print Screen
@@ -331,8 +331,8 @@ Tap `LEAD`, then the keys in order. Mirror pairs (either hand) share one entry; 
 ```
 · · · · · ·   · · · · · ·
 · · · · · ·   · · · · · ·
-· · · · · ·   ● · · · · ·
-      · · ·   · · ·
+· · · · · ·   1 · · · · ·
+      0 · ·   · · 0
 ```
 
 ## Emoji
