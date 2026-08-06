@@ -252,6 +252,17 @@ def test_gen_doc_has_design():
     design = doc.split("## Design", 1)[1]
     assert "pinky2 pinky" in design
 
+def test_design_modifiers_justification_is_honest():
+    design = g.extract_design(g.KEYMAP.read_text(encoding="utf-8"))
+    mods = design.split("### Modifiers", 1)[1].split("###", 1)[0]
+    # The old hand-wave (misfires avoided because "you never press two keys of a
+    # column with one finger") is discredited — it is gone.
+    assert "never press two keys of one column with a single finger" not in mods
+    # The honest reason: choc spacing makes the pair an easy "extra key" reached
+    # by finger placement; ordinary typing aims at key centers, so no accident.
+    assert "placement" in mods
+    assert "extra key" in mods
+
 def test_gh_anchor_slug():
     # GitHub's github-slugger: strip HTML tags, lowercase, drop a punctuation
     # blocklist (incl. backticks, parens, &, em dash), spaces -> hyphens. The
@@ -409,6 +420,7 @@ if __name__ == "__main__":
     test_gen_doc_has_legend()
     test_gen_doc_has_phase2_sections()
     test_extract_design_real(); test_gen_doc_has_design()
+    test_design_modifiers_justification_is_honest()
     test_gh_anchor_slug(); test_gen_doc_has_toc()
     test_combo_board_real(); test_combo_board_only_home_anchors()
     test_position_diagram_marks(); test_position_diagram_labels()

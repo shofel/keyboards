@@ -190,10 +190,10 @@ const key_override_t *key_overrides[] = {
  * NB: to add a combo, add it in 3 places
  *
  * Vertical (same-column) combos: a home-row key chorded with the key directly
- * above it (mods, backspace, layer toggles) or below it (brackets).
- * On a Cantor with choc switches these are comfortable and misfire-free —
- * during normal typing you never press two keys of one column with a single
- * finger, so a vertical chord is always unambiguous intent.
+ * above it (mods, backspace, layer toggles) or below it (brackets). On choc the
+ * two keys sit close enough that pressing both at once is almost like pressing a
+ * single key between them — an easy, unambiguous placement (see the Modifiers
+ * note in the DESIGN block).
  * The top-row pairs (home + above) feel best; the bottom-row pairs (home +
  * below) are more of a reach — which is why the highest-value combos (mods,
  * backspace, primary num-layer access) take the top slots and brackets the
@@ -566,13 +566,15 @@ layer_state_t layer_state_set_user(layer_state_t state) {
  *
  * ### Modifiers
  *
- * Vertical combo mods: a home-row key plus the key just above it. On choc
- * switches these same-column chords are comfortable and misfire-free — during
- * normal typing you never press two keys of one column with a single finger,
- * so a vertical chord is always unambiguous intent. The top-row pairs
- * (home + above) feel best; the bottom-row pairs (home + below) are more of a
- * reach — which is why the highest-value combos (mods, backspace, primary
- * num-layer access) take the top slots and brackets the bottom.
+ * Vertical combo mods: a home-row key plus the key just above it (or below it,
+ * for brackets). With choc's tight spacing, pressing both keys of a column at
+ * once is almost as easy as pressing one — no finger-flattening, just a
+ * different finger placement, so a vertical combo feels like an extra key
+ * between the two. Ordinary typing aims at the key centers, so it never fires
+ * one by accident. The top-row pairs (home + above) feel best; the bottom-row
+ * pairs (home + below) are more of a reach — which is why the highest-value
+ * combos (mods, backspace, primary num-layer access) take the top slots and
+ * brackets the bottom.
  *
  * ### Thumbs
  *
