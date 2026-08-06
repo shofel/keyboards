@@ -163,6 +163,32 @@ def test_leader_seqs_grouped_with_diagrams():
     # Each entry carries a position diagram (● hits inside a fenced block).
     assert "●" in lead
 
+def test_insert_toc_requires_sections():
+    # Fail loud (die), not a bare StopIteration, if there are no ## sections.
+    try:
+        g.insert_toc(["# Title", "", "prose but no sections"])
+    except SystemExit:
+        pass
+    else:
+        raise AssertionError("insert_toc with no ## sections should be fatal")
+
+def test_group_leader_seqs_rejects_divergent_docs():
+    # Two mirror rows whose descriptions diverge (beyond the trailing qualifier)
+    # is source drift — the generator should die, not silently keep the first.
+    bad = [(["KC_S"], "lead_esc", "Esc + exit toggle layer (mirror pair s·n)"),
+           (["KC_N"], "lead_esc", "Escape and leave (mirror pair s·n)")]
+    try:
+        g.group_leader_seqs(bad)
+    except SystemExit:
+        pass
+    else:
+        raise AssertionError("divergent mirror-pair docs should be fatal")
+    # ...but a trailing-qualifier difference (default vs mirror-of) is allowed.
+    ok = [(["KC_R"], "lead_ru", "Russian — compose backend (default)"),
+          (["KC_C"], "lead_ru", "Russian — compose backend (mirror of r)")]
+    (seqs, doc), = g.group_leader_seqs(ok)
+    assert doc == "Russian — compose backend (default)"
+
 def test_extract_emoji_real():
     emo = g.extract_emoji(g.KEYMAP.read_text(encoding="utf-8"))
     assert ("t", "🌷", "tulip") in emo and len(emo) == 11
@@ -310,6 +336,7 @@ if __name__ == "__main__":
     test_layer_title_unknown_fatal()
     test_regen_keymap_idempotent(); test_regen_keymap_marks_every_layer()
     test_extract_combos_real(); test_extract_leader_seqs_real()
+    test_insert_toc_requires_sections(); test_group_leader_seqs_rejects_divergent_docs()
     test_leader_seqs_grouped_with_diagrams()
     test_bold_selector(); test_extract_emoji_real(); test_emoji_table_bolds_word()
     test_gen_doc_has_legend()
