@@ -65,19 +65,21 @@ CURRENCY = [
 
 # Emoji — emitted by leader seqs (leader,{a|i},<sel>) via ru_compose_emit_code.
 # Standalone glyphs under a private '@' prefix (zero-collision, chosen like '$').
-# Like EXTRA/CURRENCY: XCompose + cheatsheet, no C-table row. (cp, selector, glyph)
+# Like EXTRA/CURRENCY: XCompose + cheatsheet, no C-table row.
+# (cp, selector, glyph, mnemonic) — the selector char appears in the mnemonic,
+# and the generated reference bolds it (its first occurrence).
 EMOJI = [
-    (0x1F337, "t", "🌷"),  # tulip
-    (0x1F339, "r", "🌹"),  # rose
-    (0x1F338, "c", "🌸"),  # cherry blossom
-    (0x1F33A, "h", "🌺"),  # hibiscus
-    (0x1F33B, "s", "🌻"),  # sunflower
-    (0x1F33C, "d", "🌼"),  # daisy
-    (0x1F44D, "u", "👍"),  # thumbup
-    (0x1F44C, "o", "👌"),  # ok
-    (0x1F914, "k", "🤔"),  # think
-    (0x1F9D0, "m", "🧐"),  # monocle
-    (0x1F91D, "n", "🤝"),  # handshake
+    (0x1F337, "t", "🌷", "tulip"),
+    (0x1F339, "r", "🌹", "rose"),
+    (0x1F338, "c", "🌸", "cherry"),
+    (0x1F33A, "h", "🌺", "hibiscus"),
+    (0x1F33B, "s", "🌻", "sunflower"),
+    (0x1F33C, "d", "🌼", "daisy"),
+    (0x1F44D, "u", "👍", "thumbup"),
+    (0x1F44C, "o", "👌", "ok"),
+    (0x1F914, "k", "🤔", "think"),
+    (0x1F9D0, "m", "🧐", "monocle"),
+    (0x1F91D, "n", "🤝", "handshake"),
 ]
 
 # Keysym names for selector chars whose keysym name isn't the char itself.
@@ -124,7 +126,7 @@ def gen_xcompose():
         out.append(f'<Multi_key> <q> <{keysym(s)}> : "{glyph}" U{cp:04X}')
     for cp, s, glyph in CURRENCY:
         out.append(f'<Multi_key> <dollar> <{keysym(s)}> : "{glyph}" U{cp:04X}')
-    for cp, s, glyph in EMOJI:
+    for cp, s, glyph, _word in EMOJI:
         out.append(f'<Multi_key> <at> <{keysym(s)}> : "{glyph}" U{cp:04X}')
     return "\n".join(out) + "\n"
 
@@ -137,7 +139,7 @@ def gen_cheatsheet():
         out.append(f"  {glyph}  U+{cp:04X}   Compose q {s}")
     for cp, s, glyph in CURRENCY:
         out.append(f"  {glyph}  U+{cp:04X}   Compose $ {s}")
-    for cp, s, glyph in EMOJI:
+    for cp, s, glyph, _word in EMOJI:
         out.append(f"  {glyph}  U+{cp:04X}   Compose @ {s}")
     return "\n".join(out) + "\n"
 

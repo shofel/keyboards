@@ -138,9 +138,20 @@ def test_extract_leader_seqs_real():
     assert (["KC_D", "KC_W"], "delete word (Ctrl+Backspace)") in [(k, d) for k, d in seqs]
     assert len(seqs) == 24
 
+def test_bold_selector():
+    assert g.bold_selector("tulip", "t") == "**t**ulip"
+    assert g.bold_selector("think", "k") == "thin**k**"       # not word-initial
+    assert g.bold_selector("handshake", "n") == "ha**n**dshake"
+    assert g.bold_selector("thumbup", "u") == "th**u**mbup"   # first occurrence
+
 def test_extract_emoji_real():
     emo = g.extract_emoji(g.KEYMAP.read_text(encoding="utf-8"))
-    assert ("t", "🌷") in emo and len(emo) == 11
+    assert ("t", "🌷", "tulip") in emo and len(emo) == 11
+
+def test_emoji_table_bolds_word():
+    doc = g.gen_doc(g.KEYMAP.read_text(encoding="utf-8"))
+    emoji = doc.split("## Emoji", 1)[1].split("## Design", 1)[0]
+    assert "**t**ulip" in emoji and "thin**k**" in emoji and "ha**n**dshake" in emoji
 
 def test_gen_doc_has_legend():
     doc = g.gen_doc(g.KEYMAP.read_text(encoding="utf-8"))
@@ -249,7 +260,8 @@ if __name__ == "__main__":
     test_layer_title_unknown_fatal()
     test_regen_keymap_idempotent(); test_regen_keymap_marks_every_layer()
     test_extract_combos_real(); test_extract_leader_seqs_real()
-    test_extract_emoji_real(); test_gen_doc_has_legend()
+    test_bold_selector(); test_extract_emoji_real(); test_emoji_table_bolds_word()
+    test_gen_doc_has_legend()
     test_gen_doc_has_phase2_sections()
     test_extract_design_real(); test_gen_doc_has_design()
     test_gh_anchor_slug(); test_gen_doc_has_toc()
