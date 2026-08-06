@@ -549,10 +549,12 @@ layer_state_t layer_state_set_user(layer_state_t state) {
  *
  * @design-begin
  * ### Base layer
+ *
  * It's the [BOO layout](https://ballerboo.github.io/boolayout/) — Dvorak
  * modified for more rollover.
  *
  * ### Modifiers
+ *
  * Vertical combo mods: a home-row key plus the key just above it. On choc
  * switches these same-column chords are comfortable and misfire-free — during
  * normal typing you never press two keys of one column with a single finger,
@@ -562,6 +564,7 @@ layer_state_t layer_state_set_user(layer_state_t state) {
  * num-layer access) take the top slots and brackets the bottom.
  *
  * ### Thumbs
+ *
  * On the Cantor the middle thumb is the most comfortable key, so the two most
  * used thumb actions live there: Space (right middle) and Shift (left middle).
  * Esc is both middle thumbs at once — the strongest pair. The right inner thumb
@@ -574,6 +577,7 @@ layer_state_t layer_state_set_user(layer_state_t state) {
  * roll into Space. (`,` `.` stay on the left of the base layer.)
  *
  * ### Unicode input
+ *
  * With a non-qwerty layout, switching language in the OS is not enough: an OS
  * language map assumes qwerty (q→й, w→ц), so on a non-qwerty base the map is
  * wrong. And with two keyboards attached — a qwerty laptop and the BOO board —
@@ -587,6 +591,7 @@ layer_state_t layer_state_set_user(layer_state_t state) {
  * needs the out-of-tree UNICODE_MODE_VIM patch (QMK PR #25188).
  *
  * ### Key comfort scores
+ *
  * Layout-wide ergonomic weights, higher = easier (scale 0-9). Combos resolve
  * from layer 0, so one map serves every layer. This drives frequency-first
  * symbol placement: rank symbols by how often you type them, rank free keys by
