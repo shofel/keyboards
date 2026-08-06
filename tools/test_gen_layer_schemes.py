@@ -170,6 +170,25 @@ def test_gen_doc_has_toc():
     # The tricky <sub> heading resolves to the tag-stripped slug, not #base-boo.
     assert "(#base-boo-l_boo)" in toc
 
+def test_extract_design_real():
+    design = g.extract_design(g.KEYMAP.read_text(encoding="utf-8"))
+    assert "### Base layer" in design
+    assert "[BOO layout](https://ballerboo.github.io/boolayout/)" in design
+    for h in ["### Modifiers", "### Thumbs", "### Unicode input", "### Key comfort scores"]:
+        assert h in design, h
+    assert "pinky2 pinky" in design   # the comfort-score table survived
+    assert "```" in design            # ...inside a fenced code block
+
+def test_gen_doc_has_design():
+    doc = g.gen_doc(g.KEYMAP.read_text(encoding="utf-8"))
+    assert "## Design" in doc
+    assert "### Modifiers" in doc
+    # Design is an appendix: after Emoji, before Legend.
+    assert doc.index("## Emoji") < doc.index("## Design") < doc.index("## Legend")
+    # The comfort-score table stays preformatted (fenced), not a markdown table.
+    design = doc.split("## Design", 1)[1]
+    assert "pinky2 pinky" in design
+
 def test_gh_anchor_slug():
     # GitHub's github-slugger: strip HTML tags, lowercase, drop a punctuation
     # blocklist (incl. backticks, parens, &, em dash), spaces -> hyphens. The
@@ -223,6 +242,7 @@ if __name__ == "__main__":
     test_extract_combos_real(); test_extract_leader_seqs_real()
     test_extract_emoji_real(); test_gen_doc_has_legend()
     test_gen_doc_has_phase2_sections()
+    test_extract_design_real(); test_gen_doc_has_design()
     test_gh_anchor_slug(); test_gen_doc_has_toc()
     test_combo_board_real(); test_combo_board_only_home_anchors()
     test_gen_doc_combos_is_board()
