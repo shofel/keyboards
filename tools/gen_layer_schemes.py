@@ -355,24 +355,36 @@ def _board_hand(rows, upper, lower):
             cells(rows[1]), border(lower), cells(rows[2]), edge("└", "┴", "┘")]
 
 
+def _is_vertical(pos, keys):
+    """True if the two keys are the same column, adjacent rows (a border combo)."""
+    ps = [pos.get(k) for k in keys]
+    return (len(keys) == 2 and all(ps)
+            and ps[0][1] == ps[1][1] and abs(ps[0][0] - ps[1][0]) == 1)
+
+
+def nonadjacent_combos(base_toks, combos):
+    """Combos whose two keys are not vertically adjacent (thumbs, bottom-row
+    rolls, corners) — rendered as position diagrams rather than board labels."""
+    pos = _grid_positions(base_toks)
+    return [(keys, out) for keys, out in combos if not _is_vertical(pos, keys)]
+
+
 def render_combo_board(base_toks, combos):
     """Keymap-drawer-style ASCII: a boxed base grid with each vertical (same-column,
     adjacent) combo's output on the border between its two keys — the upper border
-    is home+above, the lower home+below. Combos whose keys are not vertically
-    adjacent (thumbs, bottom-row rolls, corners) are listed as captions instead."""
+    is home+above, the lower home+below. Non-adjacent combos are diagrammed
+    separately (see nonadjacent_combos)."""
     pos = _grid_positions(base_toks)
     upper, lower = [""] * 12, [""] * 12
-    captions = []
     for keys, out in combos:
-        ps = [pos.get(k) for k in keys]
-        if len(keys) == 2 and all(ps) and ps[0][1] == ps[1][1] and abs(ps[0][0] - ps[1][0]) == 1:
-            col, band = ps[0][1], {ps[0][0], ps[1][0]}
-            label = COMBO_SHORT.get(out)
-            if label is None:
-                die(f"no COMBO_SHORT label for vertical combo output {out!r}")
-            (upper if band == {0, 1} else lower)[col] = label
-        else:
-            captions.append((keys, out))
+        if not _is_vertical(pos, keys):
+            continue
+        ps = [pos[k] for k in keys]
+        col, band = ps[0][1], {ps[0][0], ps[1][0]}
+        label = COMBO_SHORT.get(out)
+        if label is None:
+            die(f"no COMBO_SHORT label for vertical combo output {out!r}")
+        (upper if band == {0, 1} else lower)[col] = label
     # Keep only the 8 home-row anchors (a o e s / n t r i) as position markers;
     # blank the rest so the board reads as a combo map, not a full keycap grid.
     anchor_cols = {1, 2, 3, 4, 7, 8, 9, 10}
@@ -380,12 +392,7 @@ def render_combo_board(base_toks, combos):
              for c in range(12)] for r in range(3)]
     left = _board_hand([grid[r][0:6] for r in range(3)], upper[0:6], lower[0:6])
     right = _board_hand([grid[r][6:12] for r in range(3)], upper[6:12], lower[6:12])
-    lines = [l + "    " + r for l, r in zip(left, right)]
-    lines.append("")
-    lines.append("Other combos (keys not vertically adjacent):")
-    for keys, out in captions:
-        lines.append("  " + " + ".join(glyph(k) for k in keys) + " → " + combo_out(out))
-    return "\n".join(lines)
+    return "\n".join(l + "    " + r for l, r in zip(left, right))
 
 
 # --- position-only diagrams (shared by leader sequences and non-adjacent combos)
@@ -511,23 +518,37 @@ def gen_doc(src):
                "border is *home + the key below* (brackets — opening on the left hand, "
                "closing on the right).")
     out.append("")
+    base = dict(extract_layers(src))["L_BOO"]
+    combos = extract_combos(src)
     out.append("```")
-    out.append(render_combo_board(dict(extract_layers(src))["L_BOO"], extract_combos(src)))
+    out.append(render_combo_board(base, combos))
     out.append("```")
     out.append("")
-    angle = [(ks, o) for ks, o in extract_combos(src) if o in ("KK_LANGLE", "KK_RANGLE")]
+    angle = [(ks, o) for ks, o in combos if o in ("KK_LANGLE", "KK_RANGLE")]
     if angle:
         notes = "; ".join(
             f"{' + '.join(glyph(k) for k in ks)} → {combo_out(o)}" for ks, o in angle)
         out.append(f"The `<` `>` combos are shift-aware — {notes}. A held Shift "
                    "(or a one-shot Shift) turns them into the guillemets.")
         out.append("")
+    nonadj = nonadjacent_combos(base, combos)
+    if nonadj:
+        out.append("The rest fire on keys that aren't vertically adjacent — thumbs, "
+                   "bottom-row rolls, and the outer corners. Each diagram marks the two "
+                   "trigger positions:")
+        out.append("")
+        for keys, o in nonadj:
+            out.append(" + ".join(glyph(k) for k in keys) + " → " + combo_out(o))
+            out.append("")
+            out.append("```")
+            out.append(render_position_diagram(set(resolve_positions(base, keys))))
+            out.append("```")
+            out.append("")
     out.append("## Leader sequences")
     out.append("")
     out.append("Tap `LEAD`, then the keys in order. Mirror pairs (either hand) share "
                "one entry; the diagram marks the key position(s) pressed after `LEAD`.")
     out.append("")
-    base = dict(extract_layers(src))["L_BOO"]
     for key_seqs, doc in group_leader_seqs(extract_leader_seqs(src)):
         triggers = " / ".join(
             "`LEAD, " + ", ".join(glyph(k) for k in ks) + "`" for ks in key_seqs)
