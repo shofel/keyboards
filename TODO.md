@@ -13,21 +13,23 @@ Procedure: score the four factors per task, take the weighted sum, round to 2 de
 descending; on ties the earlier-listed task stays first. Re-rank whenever a task is added or an
 estimate changes. Bugs tend to top the list because Impact carries the most weight on a daily driver.
 
-## Ranked — 2026-08-06
+## Ranked — 2026-08-07
 
 | # | Score | Task | Where |
 |---|-------|------|-------|
 | 1 | 2.55 | Absolute-mouse HID descriptor so bisect needs no host config | Layout |
 | 2 | 2.30 | Shared layout for cantor & dactyl (keymap transform program + tests) | Dactyl |
-| 3 | 2.25 | Cleanup readme (nix flake run) | Dactyl |
-| 4 | 2.00 | Sturdier cantor case with quieter sound | Hardware |
+| 3 | 2.00 | Sturdier cantor case with quieter sound | Hardware |
 
 ## Layout
 
-- Bisect needs the host to bind the digitizer. libwacom is exhausted — a
-  matching `.tablet` entry did not get the cursor moving, and that lane is
-  closed. The remaining option is to stop presenting as a digitizer and emit an
-  absolute-mouse HID descriptor instead, which needs no host config on any OS.
+- Bisect needs the host to bind the digitizer. The proposed fix — stop
+  presenting as a digitizer and emit an absolute-mouse HID descriptor (no host
+  config on any OS) — turns out to be **core-only**: that descriptor lives in
+  QMK's `usb_descriptor.c` (non-weak `const`, no userspace override, no
+  absolute-mouse build knob), so it's an upstream-QMK-PR / local-fork task, not a
+  keymap change. Cheaper first step: re-test a *correct* libwacom `.tablet` entry
+  (the earlier attempt may have been an ID/descriptor mismatch, not a dead lane).
   See [docs/known-limitations.md](docs/known-limitations.md).
 
 ## Dactyl
@@ -48,8 +50,6 @@ estimate changes. Bugs tend to top the list because Impact carries the most weig
       - from the comment
       - from the code
     - which is covered by tests
-- cleanup readme
-  - nix flake run
 
 ## TODO cantor hardware
 

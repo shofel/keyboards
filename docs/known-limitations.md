@@ -28,7 +28,16 @@ keypress away on `c`.
 The libwacom route is exhausted: a matching `.tablet` entry did not get the
 cursor moving. What is left is to stop presenting as a digitizer at all and emit
 an absolute-mouse HID descriptor instead — the pointer type a VM's "USB Tablet"
-uses, which every OS drives without configuration. See TODO.md.
+uses, which every OS drives without configuration.
+
+That descriptor, however, lives in QMK **core** (`tmk_core/protocol/usb_descriptor.c`)
+as a non-weak `const` with no override hook, and QMK 0.33.13 has no absolute-mouse
+build knob (its only absolute pointer *is* the digitizer). So it cannot be done
+from this external userspace without patching core — which would reintroduce the
+fork this repo deliberately dropped. It is an upstream-QMK-PR (or local-fork)
+task, not a keymap one. Before any firmware work, it is cheaper to re-test a
+*correct* libwacom `.tablet` entry — the earlier attempt may have been an
+ID/descriptor mismatch rather than the lane being truly dead. See TODO.md #1.
 
 ## Oneshot layers do not stack (only oneshot modifiers do)
 

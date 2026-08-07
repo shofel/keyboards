@@ -36,18 +36,24 @@ This repository follows the [official QMK userspace template](https://github.com
 
 ## Setup
 
-1. Configure QMK to use this userspace:
+Tooling (`qmk`, `make`, python) comes from a [devenv](https://devenv.sh) shell,
+loaded automatically by [direnv](https://direnv.net). Entering the repo
+configures qmk for this userspace — `overlay_dir` → the repo, `qmk_home` → an
+upstream `qmk_firmware` checkout — and clones that firmware on first use, so
+there is nothing to wire up by hand.
+
+1. Enter the environment (from the repo root):
    ```bash
-   qmk config user.overlay_dir="$(realpath /home/slava/workspaces-one/keyboards)"
+   direnv allow          # auto-loads on cd; without direnv, run `devenv shell`
    ```
+   The upstream `qmk_firmware` checkout defaults to `~/qmk_firmware`; to reuse an
+   existing one elsewhere, export `S_QMK_FIRMWARE` before entering the shell.
 
 2. Build a keymap:
    ```bash
-   qmk compile -kb cantor -km shofel
-   # Or for Dactyl with the shared keymap:
+   make build            # Cantor — shorthand for `qmk compile -kb cantor -km shofel`
+   # Or Dactyl, with the shared keymap:
    qmk compile -kb handwired/dactyl_manuform/5x6_5 -km shofel
-   # Shorthand (Cantor only):
-   make build
    ```
 
 3. Flash a keymap. The Cantor is a split — whichever half is plugged into USB is
