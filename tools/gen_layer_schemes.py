@@ -405,10 +405,14 @@ def render_combo_board(base_toks, combos):
 
 # --- position-only diagrams (shared by leader sequences and non-adjacent combos)
 
-# Thumb token (36-41) -> column index in the rendered thumb row. The three left
-# thumbs sit under the inner half of the left hand, the three right thumbs under
-# the inner half of the right hand — mirroring a split keyboard's clusters.
-_THUMB_COL = {36: 6, 37: 8, 38: 10, 39: 14, 40: 16, 41: 18}
+# Thumb token (36-41) -> column index in the rendered thumb row. The cluster is
+# shifted one column inboard, toward the MCU, to match where the thumbs sit on
+# the board: the middle thumb (37 sft / 40 spc) under the inner-index column
+# (z left / p right), the outer thumb (36 / 41 LEAD) one further out (w / h),
+# and the inner thumb (38 SYM / 39 ret) in the centre gap under the MCU. The
+# inter-half gap is widened to 7 (see render_position_diagram) so both inner
+# thumbs get a full slot with air around them instead of colliding at centre.
+_THUMB_COL = {36: 8, 37: 10, 38: 12, 39: 16, 40: 18, 41: 20}
 
 
 def _hand(i):
@@ -458,8 +462,8 @@ def render_position_diagram(marks, dot="·", hit="●", labels=None):
     for r in range(3):
         left = " ".join(cell(r * 12 + c) for c in range(6))
         right = " ".join(cell(r * 12 + c) for c in range(6, 12))
-        lines.append(left + "   " + right)
-    row = [" "] * 25
+        lines.append(left + "       " + right)
+    row = [" "] * 29
     for tok, col in _THUMB_COL.items():
         row[col] = cell(tok)
     lines.append("".join(row).rstrip())
