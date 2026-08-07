@@ -10,7 +10,7 @@
 #
 #   # flake.nix inputs:
 #   cantor-kb = { url = "github:shofel/keyboards"; flake = false; };
-#   # (local iteration: url = "git+file:///home/slava/workspaces-one/keyboards";)
+#   # (local iteration: url = "git+file:///path/to/your/keyboards/checkout";)
 #
 #   # home-manager module:
 #   imports = [ "${inputs.cantor-kb}/nix/cantor-compose-ru.nix" ];
