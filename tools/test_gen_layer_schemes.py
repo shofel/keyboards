@@ -308,23 +308,23 @@ def test_position_diagram_marks():
     d = g.render_position_diagram({16})            # KC_S = home row, left col 4
     lines = d.splitlines()
     assert len(lines) == 4
-    assert lines[0] == "· · · · · ·   · · · · · ·"
-    assert lines[1] == "· · · · ● ·   · · · · · ·"
+    assert lines[0] == "· · · · · ·       · · · · · ·"
+    assert lines[1] == "· · · · ● ·       · · · · · ·"
     # Esc = both middle thumbs (tokens 37, 40) -> two hits on the thumb row only.
     thumbs = g.render_position_diagram({37, 40}).splitlines()
-    assert thumbs[0] == "· · · · · ·   · · · · · ·"
+    assert thumbs[0] == "· · · · · ·       · · · · · ·"
     assert thumbs[3].count("●") == 2 and thumbs[3].strip() == "· ● ·   · ● ·"
 
 def test_position_diagram_labels():
     # An optional labels dict overrides a position's mark with its own text —
     # used to number leader steps instead of the anonymous ● hit.
     d = g.render_position_diagram(set(), labels={16: "1"})   # KC_S home row
-    assert d.splitlines()[1] == "· · · · 1 ·   · · · · · ·"
+    assert d.splitlines()[1] == "· · · · 1 ·       · · · · · ·"
     # LEAD lives on both outer thumbs (tokens 36 & 41); number them 0.
     thumbs = g.render_position_diagram(set(), labels={36: "0", 41: "0"}).splitlines()
     assert thumbs[3].strip() == "0 · ·   · · 0"
     # The plain marks path is untouched: a set still renders ●.
-    assert g.render_position_diagram({16}).splitlines()[1] == "· · · · ● ·   · · · · · ·"
+    assert g.render_position_diagram({16}).splitlines()[1] == "· · · · ● ·       · · · · · ·"
 
 def test_leader_labels():
     base = dict(g.extract_layers(g.KEYMAP.read_text(encoding="utf-8")))["L_BOO"]
