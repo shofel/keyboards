@@ -131,11 +131,12 @@ def test_extract_combos_real():
     by_keys = {tuple(ks): act for ks, act in combos}
     assert by_keys[("KC_S", "KC_W")] == "KC_LBRC"
     assert by_keys[("KK_SHIFT", "KC_SPACE")] == "KC_ESC"
-    # boot = all 3 thumbs of a half; reset = the two outer (leader) thumbs.
+    # boot = all 3 thumbs of a half; reset = outer + inner thumb of that half.
     assert by_keys[("KK_LEAD_L", "KK_SHIFT", "KK_SYMBO")] == "QK_BOOT"
     assert by_keys[("KK_RET", "KC_SPACE", "KK_LEAD_R")] == "QK_BOOT"
-    assert by_keys[("KK_LEAD_L", "KK_LEAD_R")] == "QK_REBOOT"
-    assert len(combos) == 22
+    assert by_keys[("KK_LEAD_L", "KK_SYMBO")] == "QK_REBOOT"
+    assert by_keys[("KK_RET", "KK_LEAD_R")] == "QK_REBOOT"
+    assert len(combos) == 23
 
 def test_extract_leader_seqs_real():
     seqs = g.extract_leader_seqs(g.KEYMAP.read_text(encoding="utf-8"))
@@ -285,7 +286,7 @@ def test_combo_board_real():
     # non-adjacent combos are no longer captioned on the board — they move out
     assert "Other combos" not in board
     nonadj = g.nonadjacent_combos(base, g.extract_combos(src))
-    assert len(nonadj) == 6
+    assert len(nonadj) == 7
     assert {"KC_ESC", "QK_BOOT", "QK_REBOOT", "KK_FAT_RIGHT_ARROW",
             "KK_RIGHT_ARROW"} == {o for _k, o in nonadj}
 
@@ -375,10 +376,11 @@ def test_base_has_split_leader_no_noop():
 
 def test_resolve_positions_reset_and_boot_combos():
     base = dict(g.extract_layers(g.KEYMAP.read_text(encoding="utf-8")))["L_BOO"]
-    # reset = both outer thumbs; boot = all three thumbs of a half.
-    assert set(g.resolve_positions(base, ["KK_LEAD_L", "KK_LEAD_R"])) == {36, 41}
+    # boot = all three thumbs of a half; reset = outer + inner thumb of that half.
     assert set(g.resolve_positions(base, ["KK_LEAD_L", "KK_SHIFT", "KK_SYMBO"])) == {36, 37, 38}
     assert set(g.resolve_positions(base, ["KK_RET", "KC_SPACE", "KK_LEAD_R"])) == {39, 40, 41}
+    assert set(g.resolve_positions(base, ["KK_LEAD_L", "KK_SYMBO"])) == {36, 38}
+    assert set(g.resolve_positions(base, ["KK_RET", "KK_LEAD_R"])) == {39, 41}
 
 def test_resolve_positions_disambiguates_two_handed_key():
     # A key present on both hands resolves to the hand of its unambiguous chord
@@ -406,10 +408,11 @@ def test_nonadjacent_combos_have_diagrams():
     # the non-adjacent combos are described AND diagrammed (thumbs included)
     assert "sft + spc → Esc" in combos
     assert "h + m → =>" in combos
-    # boot = all three thumbs of a half; reset = both outer (leader) thumbs
+    # boot = all three thumbs of a half; reset = outer + inner thumb of that half
     assert "LEAD + sft + SYM → bootloader" in combos
     assert "ret + spc + LEAD → bootloader" in combos
-    assert "LEAD + LEAD → reboot" in combos
+    assert "LEAD + SYM → reboot" in combos
+    assert "ret + LEAD → reboot" in combos
     assert "np" not in combos            # the retired no-op filler is gone
     # Esc fires on both middle thumbs -> its diagram thumb-row shows two hits
     assert "· ● ·   · ● ·" in combos
