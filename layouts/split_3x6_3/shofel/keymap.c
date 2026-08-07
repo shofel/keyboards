@@ -205,8 +205,13 @@ const uint16_t PROGMEM esc_combo[]      = {KK_SHIFT, KC_SPACE, COMBO_END};
 /* All three thumb keys of one half at once -> bootloader (for flashing). */
 const uint16_t PROGMEM boot_combo_left[]  = {KK_LEAD_L, KK_SHIFT, KK_SYMBO, COMBO_END};
 const uint16_t PROGMEM boot_combo_right[] = {KK_RET, KC_SPACE, KK_LEAD_R, COMBO_END};
-/* Both outer thumb (leader) keys at once -> reboot the keyboard. */
-const uint16_t PROGMEM reset_combo[]       = {KK_LEAD_L, KK_LEAD_R, COMBO_END};
+/* On each half, its outer + inner thumb at once -> reboot the keyboard (so
+ * either half can reboot on its own). Each is a 2-key subset of that half's
+ * 3-key boot combo; stock QMK's overlaps() drops the shorter combo when the
+ * longer one also completes within COMBO_TERM, so a firm 3-thumb press still
+ * bootloads and a 2-thumb press reboots. */
+const uint16_t PROGMEM reset_combo_left[]  = {KK_LEAD_L, KK_SYMBO, COMBO_END};
+const uint16_t PROGMEM reset_combo_right[] = {KK_RET, KK_LEAD_R, COMBO_END};
 /* Digraphs */
 const uint16_t PROGMEM fat_right_arrow_combo[] = {KC_H, KC_M, COMBO_END}; // =>
 const uint16_t PROGMEM right_arrow_combo[]     = {KC_H, KC_K, COMBO_END}; // ->
@@ -242,7 +247,8 @@ enum combos {
   CMB_BOOT_L,
   CMB_BOOT_R,
 
-  CMB_RESET,
+  CMB_RESET_L,
+  CMB_RESET_R,
 
   CMB_FAT_ARROW,
   CMB_RIGHT_ARROW,
@@ -273,7 +279,8 @@ combo_t key_combos[] = {
   [CMB_BOOT_L]     = COMBO(boot_combo_left,  QK_BOOT),
   [CMB_BOOT_R]     = COMBO(boot_combo_right, QK_BOOT),
 
-  [CMB_RESET]      = COMBO(reset_combo, QK_REBOOT),
+  [CMB_RESET_L]    = COMBO(reset_combo_left,  QK_REBOOT),
+  [CMB_RESET_R]    = COMBO(reset_combo_right, QK_REBOOT),
 
   [CMB_FAT_ARROW]  = COMBO(fat_right_arrow_combo, KK_FAT_RIGHT_ARROW),
   [CMB_RIGHT_ARROW]= COMBO(right_arrow_combo, KK_RIGHT_ARROW),
