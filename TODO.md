@@ -17,14 +17,37 @@ estimate changes. Bugs tend to top the list because Impact carries the most weig
 
 | # | Score | Task | Where |
 |---|-------|------|-------|
-| 1 | 2.55 | Combos are positional: strip key-label names from combo comments + enforce in the generator | Docs |
-| 2 | 2.50 | Remove bisect mouse mode; document its history (existed, never worked) in known-limitations | Layout |
-| 3 | 2.45 | Russian backend selection under a single leader prefix (`l,r` / `l,r,c` / `l,r,w` / `l,r,v`) | Layout |
-| 4 | 2.40 | README: dedicated keymap-reference section (header links to the file, body a clickable TOC) | Docs |
-| 5 | 2.00 | Sturdier cantor case with quieter sound | Hardware |
+| 1 | 2.70 | Timeoutless leader: fire-on-unique-match, prefix-free sequence set + collision lint | Leader |
+| 2 | 2.55 | Combos are positional: strip key-label names from combo comments + enforce in the generator | Docs |
+| 3 | 2.50 | Remove bisect mouse mode; document its history (existed, never worked) in known-limitations | Layout |
+| 4 | 2.45 | Russian backend selection under a single leader prefix (`l,r` / `l,r,c` / `l,r,w` / `l,r,v`) | Layout |
+| 5 | 2.40 | README: dedicated keymap-reference section (header links to the file, body a clickable TOC) | Docs |
+| 6 | 2.00 | Sturdier cantor case with quieter sound | Hardware |
 
 Scores are estimates applying the rubric above — re-weight freely; the cluster (2.40–2.55) means
 these are close in priority.
+
+## Leader
+
+- **Timeoutless leader.** Today the leader still terminates each sequence on a
+  100 ms per-key timeout (`LEADER_TIMEOUT 100` + `LEADER_PER_KEY_TIMING`;
+  `LEADER_NO_TIMEOUT` only removes the *initial* wait). Make it fire the instant a
+  sequence is uniquely matched — consistent with the no-timeout one-shot design,
+  snappier, and with no "too slow" misfire. Requires, in order:
+  1. **Prefix-free sequence set.** A timeoutless leader only works if no sequence
+     is a prefix of another. Current blockers: `M` (mouse layer) is a prefix of
+     `M,L`/`M,R`/`M,E` (₺/₽/€), and `.` mirrors it. Relocate the mouse layer off
+     bare `M`/`.` (or move the currencies) so the set is a prefix code.
+  2. **Fire-on-unique-match.** Replace timeout-termination with a small custom
+     matcher (same shape as the one-shot module) that tests the growing buffer
+     against the sequence table and fires the moment a unique complete match is
+     found; abort immediately on a non-matching key. Off-target testable.
+  3. **Prefix-collision lint.** A generator/CI check that fails if any two
+     sequences ever form a prefix pair — guards the invariant forever.
+
+  Couples with the "Russian backend under one leader prefix" item: `l,r` plus
+  `l,r,c`/`l,r,w`/`l,r,v` is *not* prefix-free, so the two are incompatible unless
+  the bare `l,r` standalone is dropped (always require the 3rd key).
 
 ## Docs
 
@@ -52,7 +75,10 @@ these are close in priority.
   - `l,r,w` → windows  (open question: use QMK's facility, or vendor its piece into our module?)
   - `l,r,v` → vim
 
-  Needs a small design pass on nested-prefix leader handling.
+  Needs a small design pass on nested-prefix leader handling. **Conflicts with
+  the timeoutless-leader item** (see the Leader section): a bare `l,r` is a prefix
+  of `l,r,c/w/v`, so a prefix-free timeoutless leader requires dropping the
+  standalone `l,r` (always require the 3rd key).
 
 ## Hardware
 
