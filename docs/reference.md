@@ -227,15 +227,6 @@ Tap `LEAD`, then the keys in order. Mirror pairs (either hand) share one entry; 
         0 · ·   · 1 0
 ```
 
-`LEAD, w` / `LEAD, h` — Ctrl+Esc
-
-```
-· · · · · ·       · · · · · ·
-· · · · · ·       · · · · · ·
-· · · · 1 ·       · 1 · · · ·
-        0 · ·   · · 0
-```
-
 `LEAD, f` — F-keys / system layer (sticky)
 
 ```
