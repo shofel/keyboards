@@ -380,7 +380,6 @@ static void lead_ru(void)       { ru_backend = RU_BACKEND_COMPOSE; toggle_enable
 static void lead_vim(void)      { ru_backend = RU_BACKEND_VIM; toggle_enable(L_RUSSIAN); }
 static void lead_en(void)       { ru_backend = RU_BACKEND_COMPOSE; toggle_disable(); }
 static void lead_reset(void)    { toggle_reset(); }
-static void lead_ctl_esc(void)  { tap_code16(LCTL(KC_ESC)); }
 static void lead_fkeys(void)    { toggle_enable(L_FKEYS_SYS); }
 static void lead_mouse(void)    { toggle_enable(L_MOUSE); }
 static void lead_num(void)      { toggle_enable(L_NUM_NAV); }
@@ -399,8 +398,6 @@ static const leader_seq_t leader_seqs[] = {
   {KC_V,     KC_NO, lead_vim,      "Russian — vim backend (vim-native unicode)"},
   {KC_E,     KC_NO, lead_en,       "back to English (drop the toggle layer)"},
   {KC_SPACE, KC_NO, lead_reset,    "disable any toggle layer, cancel one-shots"},
-  {KC_W,     KC_NO, lead_ctl_esc,  "Ctrl+Esc (mirror pair w·h)"},
-  {KC_H,     KC_NO, lead_ctl_esc,  "Ctrl+Esc (mirror pair w·h)"},
   {KC_F,     KC_NO, lead_fkeys,    "F-keys / system layer (sticky)"},
   {KC_M,     KC_NO, lead_mouse,    "mouse layer, polar mode (mirror pair m·.)"},
   {KC_DOT,   KC_NO, lead_mouse,    "mouse layer, polar mode (mirror pair m·.)"},

@@ -142,10 +142,10 @@ def test_extract_leader_seqs_real():
     seqs = g.extract_leader_seqs(g.KEYMAP.read_text(encoding="utf-8"))
     assert (["KC_R"], "lead_ru", "Russian — compose backend (default)") in seqs
     assert (["KC_D", "KC_W"], "lead_del_word", "delete word (Ctrl+Backspace)") in seqs
-    assert len(seqs) == 22
-    # Mirror pairs share an action; grouping collapses the 22 rows to 16 entries.
+    assert len(seqs) == 20
+    # Mirror pairs share an action; grouping collapses the 20 rows to 15 entries.
     groups = g.group_leader_seqs(seqs)
-    assert len(groups) == 16
+    assert len(groups) == 15
     by_seqs = {tuple(map(tuple, ks)): doc for ks, doc in groups}
     assert by_seqs[(("KC_M", "KC_L"), ("KC_DOT", "KC_L"))] == "₺ lira"
 
