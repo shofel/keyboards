@@ -55,3 +55,17 @@ The module lists the `OSL(...)` keys in `is_oneshot_ignored_key`
 (`layouts/split_3x6_3/shofel/keymap.c`) only so a *pending modifier* is
 not consumed when you tap into an OSL layer — i.e. the modifier penetrates the
 layer. That is about mods-through-layers, not layer stacking.
+
+## A tapped oneshot modifier is held until the next key (no timeout)
+
+Tapping a oneshot mod (`OS_CTL/ALT/GUI/SFT`) presses the modifier eagerly and
+holds it until you press another key. There is no timeout: a stray tap with
+nothing after it leaves the modifier physically held (harmless for Gui, but a
+held Ctrl/Alt can catch the next mouse click). The next keypress always releases
+it, so in normal typing this is invisible.
+
+Why: the custom module (`modules/shofel/oneshot`) is a pure, event-driven FSM
+(`oneshot_fsm.h`) with no timer or matrix-scan hook — that is what keeps it
+unit-testable off-target. QMK's `ONESHOT_TIMEOUT` does not apply here (this is a
+custom `register_code16` module, not QMK's built-in OSM). To force a release
+without a keypress, call `oneshot_cancel()`.
