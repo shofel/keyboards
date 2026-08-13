@@ -67,5 +67,19 @@ it, so in normal typing this is invisible.
 Why: the custom module (`modules/shofel/oneshot`) is a pure, event-driven FSM
 (`oneshot_fsm.h`) with no timer or matrix-scan hook — that is what keeps it
 unit-testable off-target. QMK's `ONESHOT_TIMEOUT` does not apply here (this is a
-custom `register_code16` module, not QMK's built-in OSM). To force a release
-without a keypress, call `oneshot_cancel()`.
+custom `register_code16` module, not QMK's built-in OSM). To release without
+typing a key, press the same one-shot again — a second press drops the mod (see
+below) — or call `oneshot_cancel()`.
+
+## Double-tapping a one-shot sends the bare modifier (second press releases)
+
+Pressing an already-armed one-shot a second time releases it instead of
+re-arming. Because the mod is held eagerly from the first tap, releasing it with
+no key in between is a bare modifier tap to the host: **double-tapping the Gui
+combo (`A`+`'` or `I`+`Y`) sends a lone Gui press — e.g. it opens the launcher /
+Start menu.** This is uniform across all four one-shots, so double-tapping `OS_ALT`
+sends a bare Alt (focuses the menu bar on some apps), etc. — expected, not a bug.
+A single tap still arms for the next key as before; only a *second* press of the
+same trigger, while still armed, releases. Implemented purely in the FSM
+(`oneshot_fsm.h`, `os_trigger_down`); no timer, so there is no double-tap window
+to tune.
