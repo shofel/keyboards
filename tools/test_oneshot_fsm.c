@@ -6,13 +6,14 @@
  *       -o /tmp/test_oneshot_fsm tools/test_oneshot_fsm.c && /tmp/test_oneshot_fsm
  * or:  make test-oneshot
  *
- * Covers two shipped bugs:
+ * Covers:
  *   - "88 bug": a fast roll `os_sft c a` must yield `Ca`, not `CA` — the one-shot
  *     shift must drop off the SECOND key even when it goes down before the first
  *     comes up.
- *   - RU-activation leak: Russian-layer suspension is derived from state, so
- *     re-tapping a mod one-shot while it is queued must not leave suspension
- *     stuck on (the old +1/-1 depth counter leaked here).
+ *   - Second press releases: re-pressing an armed one-shot drops the modifier
+ *     (a bare tap to the host — e.g. double-tapping Gui opens the launcher)
+ *     instead of re-arming it, and state-derived Russian-layer suspension
+ *     clears with no leak (the old +1/-1 depth counter leaked here).
  */
 #include <stdio.h>
 #include "oneshot_fsm.h"
@@ -102,34 +103,23 @@ int main(void) {
     CHECK(held_k1 == 1 && held_k2 == 1, "held trigger: both keys shifted");
     CHECK(m.state == os_up_unqueued && m.mod_held == 0, "held trigger: settles released");
 
-    /* --- Bug RU-activation: re-tap a mod one-shot while it is queued, then use
-     * it once. The legacy +1/-1 depth counter leaks (>0, Russian stuck
-     * suspended); the state-derived predicate stays correct. --- */
-    {
-        int             depth = 0; /* mirrors old keymap mod_ru_suspend_depth */
-        oneshot_state_t prev;
-        sim_reset(&m);
-
-#define STEP(ev)                                                        \
-        do {                                                            \
-            prev = m.state;                                             \
-            sim_ev(&m, ev);                                             \
-            if (m.state == os_down_unused && prev != os_down_unused) depth++; \
-            if (m.state == os_up_unqueued && prev != os_up_unqueued) depth--; \
-        } while (0)
-
-        STEP(os_trigger_down); /* arm            */
-        STEP(os_trigger_up);   /* queued         */
-        STEP(os_trigger_down); /* RE-TAP whilst queued: legacy double-counts */
-        STEP(os_trigger_up);   /* queued again   */
-        STEP(os_other_down);   /* used by 1 key  */
-        STEP(os_other_up);     /* key up         */
-#undef STEP
-
-        CHECK(depth == 1, "double-tap: legacy depth counter LEAKS to 1 (bug 1 root cause)");
-        CHECK(oneshot_mod_held(m.state) == 0,
-              "double-tap: state-derived suspension is CLEAR (bug 1 fixed)");
-    }
+    /* --- Second press releases: re-pressing an armed (queued) one-shot drops
+     * the modifier instead of re-arming it. The mod was held eagerly since the
+     * first tap, so releasing it now — with no key in between — is a bare
+     * modifier tap to the host (double-tapping the Gui combo opens the
+     * launcher). State-derived Russian suspension must clear, no leak. --- */
+    sim_reset(&m);
+    sim_ev(&m, os_trigger_down);
+    sim_ev(&m, os_trigger_up);   int sp_armed = m.mod_held;    /* tap 1: armed, held  */
+    sim_ev(&m, os_trigger_down); int sp_after = m.mod_held;    /* tap 2 down: released */
+    sim_ev(&m, os_trigger_up);                                 /* tap 2 up: no change  */
+    CHECK(sp_armed == 1, "second-press: first tap arms (mod held)");
+    CHECK(sp_after == 0, "second-press: second press releases the mod (bare tap)");
+    CHECK(m.state == os_up_unqueued && m.mod_held == 0, "second-press: settles released");
+    CHECK(oneshot_mod_held(m.state) == 0, "second-press: RU suspension clears (no leak)");
+    sim_ev(&m, os_other_down);   int sp_later = m.mod_held;    /* later key unmodified */
+    sim_ev(&m, os_other_up);
+    CHECK(sp_later == 0, "second-press: a later key is unmodified");
 
     if (failures) {
         printf("\n%d FAILURE(S)\n", failures);

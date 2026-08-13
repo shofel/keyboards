@@ -11,8 +11,9 @@
  *
  * Design constraint — NO TIMEOUTS. The machine advances only on key events
  * (see oneshot_event_t); there is no timer, matrix-scan, or deferred-exec
- * transition. So a tapped one-shot holds its modifier until the next key event
- * (or an explicit oneshot_cancel()) — it never auto-expires. This is
+ * transition. So a tapped one-shot holds its modifier until released by the
+ * next key event, by a second press of the same trigger (see os_trigger_down),
+ * or by an explicit oneshot_cancel() — it never auto-expires. This is
  * deliberate: it keeps the FSM pure and unit-testable off-target. QMK's
  * ONESHOT_TIMEOUT does NOT apply here — this is a custom register_code16
  * module, not QMK's built-in OSM. The next keypress always releases the mod, so
@@ -48,6 +49,13 @@ typedef enum {
 static inline oneshot_state_t oneshot_next_state(oneshot_state_t s, oneshot_event_t e) {
     switch (e) {
         case os_trigger_down:
+            /* Second press of an already-queued one-shot releases it: the mod
+             * has been held (eager) since the first tap, so dropping it now —
+             * with no key in between — emits a bare modifier tap to the host
+             * (e.g. double-tapping the Gui combo opens the launcher) and
+             * disarms. A first press (from os_up_unqueued) still arms. Purely
+             * state-driven, no timer — consistent with the no-timeout design. */
+            if (s == os_up_queued) return os_up_unqueued;
             return os_down_unused;
 
         case os_trigger_up:
