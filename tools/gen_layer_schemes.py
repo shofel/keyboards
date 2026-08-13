@@ -117,12 +117,10 @@ GLYPHS = {
     "KC_ENTER": "⏎", "KC_TAB": "⮀",
     "KC_BRIU": "br↑", "KC_BRID": "br↓", "KC_VOLU": "vl↑", "KC_VOLD": "vl↓",
     "KC_MUTE": "mute", "DB_TOGG": "DBG", "QK_BOOT": "boot",
-    "KK_MM_POLAR": "pol", "KK_MM_BISECT": "bis",
+    "KK_MM_POLAR": "pol",
     "OM_U": "fwd", "OM_D": "bwd", "OM_L": "←", "OM_R": "→",
     "OM_W_U": "w↑", "OM_W_D": "w↓", "OM_SLOW": "slo", "OM_FAST": "fst",
     "OM_BTN1": "b1", "OM_BTN2": "b2", "OM_BTN3": "b3",
-    "KK_BI_L": "←", "KK_BI_R": "→", "KK_BI_U": "↑", "KK_BI_D": "↓",
-    "KK_BI_CLICK": "clk", "KK_BI_RESET": "rst",
 }
 
 
@@ -133,7 +131,6 @@ LAYER_TITLES = {
     "L_NUM_NAV": "Numbers & Navigation",
     "L_FKEYS_SYS": "F-keys & System",
     "L_MOUSE": "Mouse — Polar",
-    "L_MOUSE_BISECT": "Mouse — Bisect",
 }
 
 
@@ -151,13 +148,11 @@ LEGEND = [
     ("LEAD", "leader key — starts a leader sequence"),
     ("⌫", "Backspace"), ("⌦", "Delete"), ("⏎", "Enter"), ("⮀", "Tab"),
     ("⇤", "Home"), ("⇥", "End"), ("pg↑", "Page Up"), ("pg↓", "Page Down"),
-    ("pol", "mouse: polar mode"), ("bis", "mouse: bisect mode"),
+    ("pol", "mouse: polar mode"),
     ("fwd", "mouse: move forward"), ("bwd", "mouse: move backward"),
     ("w↑", "mouse: wheel up"), ("w↓", "mouse: wheel down"),
     ("slo", "mouse: slower"), ("fst", "mouse: faster"),
     ("b1", "mouse: button 1"), ("b2", "mouse: button 2"), ("b3", "mouse: button 3"),
-    ("clk", "mouse (bisect): click / hold to drag"),
-    ("rst", "mouse (bisect): reset to full screen"),
     ("br↑", "brightness up"), ("br↓", "brightness down"),
     ("vl↑", "volume up"), ("vl↓", "volume down"), ("mute", "mute"),
     ("DBG", "toggle debug logging"), ("boot", "bootloader (for flashing)"),
@@ -622,8 +617,7 @@ def gen_doc(src):
     out.append("")
     out.append(
         "Arrows (`←` `→` `↑` `↓`) are directional per layer: navigation on "
-        "Numbers & Navigation, steering on Mouse — Polar, screen-halving on "
-        "Mouse — Bisect.")
+        "Numbers & Navigation, steering on Mouse — Polar.")
     out.append("")
     return "\n".join(insert_toc(out))
 

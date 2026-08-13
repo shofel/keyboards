@@ -18,8 +18,7 @@ What's interesting about it:
   (₺ ₽ €) and emoji.
 - **Russian, host-wide.** Cyrillic is typed on a firmware layer and emitted as X
   Compose sequences, so it works in any app and survives fast rolls.
-- **Mouse layers.** Orbital-Mouse polar steering, plus an experimental digitizer
-  "bisect" mode.
+- **Mouse layer.** Orbital-Mouse polar steering.
 
 This is a QMK [external userspace](https://github.com/qmk/qmk_userspace) — keymaps
 and modules that build against upstream `qmk_firmware` without living inside it.

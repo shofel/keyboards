@@ -5,7 +5,7 @@
 
 /* oneshot_state_t / oneshot_event_t and the pure transition table (oneshot_fsm.h)
  * are header-only and QMK-free so the state machine can be unit-tested off-target
- * (see tools/test_oneshot_fsm.c), mirroring bisect_geom.h. */
+ * (see tools/test_oneshot_fsm.c). */
 #include "oneshot_fsm.h"
 
 #define ONESHOT_STATE_SIZE 10

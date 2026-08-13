@@ -66,7 +66,7 @@ def test_unknown_keycode_fatal():
 def test_real_keymap_fully_covered():
     src = g.KEYMAP.read_text(encoding="utf-8")
     layers = g.extract_layers(src)
-    assert len(layers) == 7
+    assert len(layers) == 6
     for name, toks in layers:
         for t in toks:
             g.glyph(t)  # SystemExit here = missing glyph for a real keycode
@@ -100,7 +100,7 @@ def test_doc_paragraph():
 def test_gen_doc_contains_all_layers():
     doc = g.gen_doc(g.KEYMAP.read_text(encoding="utf-8"))
     for title in ["Base (BOO)", "Russian", "Symbols", "Numbers & Navigation",
-                  "F-keys & System", "Mouse — Polar", "Mouse — Bisect"]:
+                  "F-keys & System", "Mouse — Polar"]:
         assert f"## {title}" in doc
     # friendly titles replace raw enum headings, but the enum survives in <sub>
     assert "## L_NUM_NAV" not in doc
@@ -124,7 +124,7 @@ def test_regen_keymap_idempotent():
 
 def test_regen_keymap_marks_every_layer():
     once = g.regen_keymap(g.KEYMAP.read_text(encoding="utf-8"))
-    assert once.count("GENERATED scheme") == 7
+    assert once.count("GENERATED scheme") == 6
 
 def test_extract_combos_real():
     combos = g.extract_combos(g.KEYMAP.read_text(encoding="utf-8"))
