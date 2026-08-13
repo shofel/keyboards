@@ -44,6 +44,13 @@ these are close in priority.
      found; abort immediately on a non-matching key. Off-target testable.
   3. **Prefix-collision lint.** A generator/CI check that fails if any two
      sequences ever form a prefix pair — guards the invariant forever.
+  4. **Cancel / abort a half-typed sequence.** A timeoutless leader has no clock
+     to bail you out, so it needs an explicit escape hatch: a way to drop out of
+     leader capture without firing anything. Candidate — a *soft-reset* combo,
+     both hands, mirroring the one-handed Esc combos (`h+m` / `.+w`): `x+w` on the
+     left and `h+k` on the right abort the in-flight sequence. `h+k` currently
+     holds the last remaining arrow combo (`->`), which this retires; `x+w` is
+     free today.
 
   Couples with the "Russian backend under one leader prefix" item: `l,r` plus
   `l,r,c`/`l,r,w`/`l,r,v` is *not* prefix-free, so the two are incompatible unless
