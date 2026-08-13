@@ -29,7 +29,6 @@ void keyboard_post_init_user(void) {
 
 enum my_keycodes {
   KK_RIGHT_ARROW = SAFE_RANGE,
-  KK_FAT_RIGHT_ARROW,
   KK_LANGLE,  // « when shifted, < otherwise
   KK_RANGLE,  // » when shifted, > otherwise
 
@@ -202,6 +201,9 @@ const key_override_t *key_overrides[] = {
 
 /* Hit both middle thumb keys for esc. */
 const uint16_t PROGMEM esc_combo[]      = {KK_SHIFT, KC_SPACE, COMBO_END};
+/* One-handed esc, one per hand: bottom-row h+m (right) and .+w (left). */
+const uint16_t PROGMEM esc_hm_combo[]   = {KC_H, KC_M, COMBO_END};
+const uint16_t PROGMEM esc_dotw_combo[] = {KC_DOT, KC_W, COMBO_END};
 /* All three thumb keys of one half at once -> bootloader (for flashing). */
 const uint16_t PROGMEM boot_combo_left[]  = {KK_LEAD_L, KK_SHIFT, KK_SYMBO, COMBO_END};
 const uint16_t PROGMEM boot_combo_right[] = {KK_RET, KC_SPACE, KK_LEAD_R, COMBO_END};
@@ -212,8 +214,7 @@ const uint16_t PROGMEM boot_combo_right[] = {KK_RET, KC_SPACE, KK_LEAD_R, COMBO_
  * bootloads and a 2-thumb press reboots. */
 const uint16_t PROGMEM reset_combo_left[]  = {KK_LEAD_L, KK_SYMBO, COMBO_END};
 const uint16_t PROGMEM reset_combo_right[] = {KK_RET, KK_LEAD_R, COMBO_END};
-/* Digraphs */
-const uint16_t PROGMEM fat_right_arrow_combo[] = {KC_H, KC_M, COMBO_END}; // =>
+/* Digraphs. (=> retired: h+m is now the one-handed Esc combo above.) */
 const uint16_t PROGMEM right_arrow_combo[]     = {KC_H, KC_K, COMBO_END}; // ->
 /* := and != are gone: the SYM `:`->`=` roll and `!` make them unnecessary. */
 /* [(<>)] */
@@ -223,6 +224,9 @@ const uint16_t PROGMEM brace_left_combo[]   = {KC_E, KC_DOT, COMBO_END};
 const uint16_t PROGMEM brace_right_combo[]  = {KC_T, KC_M, COMBO_END};
 const uint16_t PROGMEM angle_left_combo[]   = {KC_G, KC_Z, COMBO_END};
 const uint16_t PROGMEM angle_right_combo[]  = {KC_B, KC_P, COMBO_END};
+/* Curly braces: vertical home+below — left o+x -> { , right r+k -> } . */
+const uint16_t PROGMEM curly_left_combo[]   = {KC_O, KC_X, COMBO_END};
+const uint16_t PROGMEM curly_right_combo[]  = {KC_R, KC_K, COMBO_END};
 /* Vertical combos for mods */
 const uint16_t PROGMEM lctl_combo[] = {KC_S, KC_C, COMBO_END};
 const uint16_t PROGMEM llt2_combo[] = {KC_E, KC_U, COMBO_END};
@@ -243,6 +247,8 @@ const uint16_t PROGMEM fkeys_combo[] = {KC_SLASH, KC_MINUS, COMBO_END};
 /* Indices for all combos (designated initializers) */
 enum combos {
   CMB_ESC,
+  CMB_ESC_HM,
+  CMB_ESC_DOTW,
 
   CMB_BOOT_L,
   CMB_BOOT_R,
@@ -250,7 +256,6 @@ enum combos {
   CMB_RESET_L,
   CMB_RESET_R,
 
-  CMB_FAT_ARROW,
   CMB_RIGHT_ARROW,
 
   CMB_SQ_L,
@@ -259,6 +264,8 @@ enum combos {
   CMB_BR_R,
   CMB_ANG_L,
   CMB_ANG_R,
+  CMB_CURLY_L,
+  CMB_CURLY_R,
 
   CMB_LCTL,
   CMB_LLT2,
@@ -275,6 +282,8 @@ enum combos {
 
 combo_t key_combos[] = {
   [CMB_ESC]        = COMBO(esc_combo, KC_ESC),
+  [CMB_ESC_HM]     = COMBO(esc_hm_combo, KC_ESC),
+  [CMB_ESC_DOTW]   = COMBO(esc_dotw_combo, KC_ESC),
 
   [CMB_BOOT_L]     = COMBO(boot_combo_left,  QK_BOOT),
   [CMB_BOOT_R]     = COMBO(boot_combo_right, QK_BOOT),
@@ -282,16 +291,17 @@ combo_t key_combos[] = {
   [CMB_RESET_L]    = COMBO(reset_combo_left,  QK_REBOOT),
   [CMB_RESET_R]    = COMBO(reset_combo_right, QK_REBOOT),
 
-  [CMB_FAT_ARROW]  = COMBO(fat_right_arrow_combo, KK_FAT_RIGHT_ARROW),
   [CMB_RIGHT_ARROW]= COMBO(right_arrow_combo, KK_RIGHT_ARROW),
 
-  /* ([<>])  NB: {} = shift+[] ; <>/« » resolved by KK_LANGLE/KK_RANGLE */
+  /* ([{<>}])  {} now have their own combos; <>/« » resolved by KK_LANGLE/KK_RANGLE */
   [CMB_SQ_L]       = COMBO(square_left_combo , KC_LBRC),
   [CMB_SQ_R]       = COMBO(square_right_combo, KC_RBRC),
   [CMB_BR_L]       = COMBO(brace_left_combo, KC_LPRN),
   [CMB_BR_R]       = COMBO(brace_right_combo, KC_RPRN),
   [CMB_ANG_L]      = COMBO(angle_left_combo, KK_LANGLE),
   [CMB_ANG_R]      = COMBO(angle_right_combo, KK_RANGLE),
+  [CMB_CURLY_L]    = COMBO(curly_left_combo, KC_LCBR),
+  [CMB_CURLY_R]    = COMBO(curly_right_combo, KC_RCBR),
 
   [CMB_LCTL]       = COMBO(lctl_combo, OS_CTL),
   [CMB_LLT2]       = COMBO(llt2_combo, OSL(L_NUM_NAV)),
@@ -370,10 +380,6 @@ static void lead_ru(void)       { ru_backend = RU_BACKEND_COMPOSE; toggle_enable
 static void lead_vim(void)      { ru_backend = RU_BACKEND_VIM; toggle_enable(L_RUSSIAN); }
 static void lead_en(void)       { ru_backend = RU_BACKEND_COMPOSE; toggle_disable(); }
 static void lead_reset(void)    { toggle_reset(); }
-/* Esc mirrors the thumb esc combo: exits the toggle layer AND sends Esc.
- * tap_code alone would not re-enter process_record, so the KC_ESC ->
- * toggle_disable path would never fire. */
-static void lead_esc(void)      { toggle_disable(); tap_code(KC_ESC); }
 static void lead_ctl_esc(void)  { tap_code16(LCTL(KC_ESC)); }
 static void lead_fkeys(void)    { toggle_enable(L_FKEYS_SYS); }
 static void lead_mouse(void)    { toggle_enable(L_MOUSE); }
@@ -393,8 +399,6 @@ static const leader_seq_t leader_seqs[] = {
   {KC_V,     KC_NO, lead_vim,      "Russian — vim backend (vim-native unicode)"},
   {KC_E,     KC_NO, lead_en,       "back to English (drop the toggle layer)"},
   {KC_SPACE, KC_NO, lead_reset,    "disable any toggle layer, cancel one-shots"},
-  {KC_S,     KC_NO, lead_esc,      "Esc + exit toggle layer (mirror pair s·n)"},
-  {KC_N,     KC_NO, lead_esc,      "Esc + exit toggle layer (mirror pair s·n)"},
   {KC_W,     KC_NO, lead_ctl_esc,  "Ctrl+Esc (mirror pair w·h)"},
   {KC_H,     KC_NO, lead_ctl_esc,  "Ctrl+Esc (mirror pair w·h)"},
   {KC_F,     KC_NO, lead_fkeys,    "F-keys / system layer (sticky)"},
@@ -474,11 +478,6 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     case KK_RIGHT_ARROW:
       if (record->event.pressed) {
         SEND_STRING("->");
-      }
-      return false;
-    case KK_FAT_RIGHT_ARROW:
-      if (record->event.pressed) {
-        SEND_STRING("=>");
       }
       return false;
     case KK_LANGLE:
