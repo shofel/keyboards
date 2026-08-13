@@ -136,18 +136,17 @@ def test_extract_combos_real():
     assert by_keys[("KK_RET", "KC_SPACE", "KK_LEAD_R")] == "QK_BOOT"
     assert by_keys[("KK_LEAD_L", "KK_SYMBO")] == "QK_REBOOT"
     assert by_keys[("KK_RET", "KK_LEAD_R")] == "QK_REBOOT"
-    assert len(combos) == 23
+    assert len(combos) == 26
 
 def test_extract_leader_seqs_real():
     seqs = g.extract_leader_seqs(g.KEYMAP.read_text(encoding="utf-8"))
     assert (["KC_R"], "lead_ru", "Russian — compose backend (default)") in seqs
     assert (["KC_D", "KC_W"], "lead_del_word", "delete word (Ctrl+Backspace)") in seqs
-    assert len(seqs) == 24
-    # Mirror pairs share an action; grouping collapses the 24 rows to 17 entries.
+    assert len(seqs) == 22
+    # Mirror pairs share an action; grouping collapses the 22 rows to 16 entries.
     groups = g.group_leader_seqs(seqs)
-    assert len(groups) == 17
+    assert len(groups) == 16
     by_seqs = {tuple(map(tuple, ks)): doc for ks, doc in groups}
-    assert by_seqs[(("KC_S",), ("KC_N",))] == "Esc + exit toggle layer"
     assert by_seqs[(("KC_M", "KC_L"), ("KC_DOT", "KC_L"))] == "₺ lira"
 
 def test_bold_selector():
@@ -160,7 +159,6 @@ def test_leader_seqs_grouped_with_diagrams():
     doc = g.gen_doc(g.KEYMAP.read_text(encoding="utf-8"))
     lead = doc.split("## Leader sequences", 1)[1].split("## Emoji", 1)[0]
     # Mirror pairs collapse into one entry naming both hands.
-    assert "`LEAD, s` / `LEAD, n`" in lead
     assert "`LEAD, m, l` / `LEAD, ., l`" in lead
     # (mirror ...) annotations are stripped from the rendered descriptions.
     assert "mirror" not in lead
@@ -286,8 +284,8 @@ def test_combo_board_real():
     # non-adjacent combos are no longer captioned on the board — they move out
     assert "Other combos" not in board
     nonadj = g.nonadjacent_combos(base, g.extract_combos(src))
-    assert len(nonadj) == 7
-    assert {"KC_ESC", "QK_BOOT", "QK_REBOOT", "KK_FAT_RIGHT_ARROW",
+    assert len(nonadj) == 8
+    assert {"KC_ESC", "QK_BOOT", "QK_REBOOT",
             "KK_RIGHT_ARROW"} == {o for _k, o in nonadj}
 
 def test_combo_board_only_home_anchors():
@@ -407,7 +405,8 @@ def test_nonadjacent_combos_have_diagrams():
     assert "┌" in combos                          # the boxed board is still there
     # the non-adjacent combos are described AND diagrammed (thumbs included)
     assert "sft + spc → Esc" in combos
-    assert "h + m → =>" in combos
+    assert "h + m → Esc" in combos
+    assert ". + w → Esc" in combos
     # boot = all three thumbs of a half; reset = outer + inner thumb of that half
     assert "LEAD + sft + SYM → bootloader" in combos
     assert "ret + spc + LEAD → bootloader" in combos
