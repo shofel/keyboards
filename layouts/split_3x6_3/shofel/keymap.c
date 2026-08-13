@@ -8,8 +8,6 @@
 #include "introspection.h"
 #include "modules/shofel/unicode_ru/introspection.h"
 #include "modules/getreuer/orbital_mouse/introspection.h"
-#include "digitizer.h"
-#include "bisect_geom.h"
 
 /*
  * Runtime debug logging — all off by default.
@@ -47,15 +45,6 @@ enum my_keycodes {
 
   /* Mouse mode switch (live on the mouse layers) */
   KK_MM_POLAR,
-  KK_MM_BISECT,
-
-  /* Bisect mode actions */
-  KK_BI_L,
-  KK_BI_R,
-  KK_BI_U,
-  KK_BI_D,
-  KK_BI_CLICK,
-  KK_BI_RESET,
 };
 
 /* Layer names */
@@ -66,7 +55,6 @@ enum my_layer_names {
   L_NUM_NAV,
   L_FKEYS_SYS,
   L_MOUSE,
-  L_MOUSE_BISECT,
 };
 
 /* Simple thumb keys. */
@@ -451,15 +439,6 @@ void leader_end_user(void) {
   }
 }
 
-/* Mouse: bisect mode — binary-search absolute positioning via the digitizer.
- * The box lives here; layer_state_set_user arms/releases the digitizer when
- * entering/leaving L_MOUSE_BISECT. */
-static bisect_box_t bi_box;
-
-static void bisect_move(void) {
-  digitizer_set_position(bisect_cx(&bi_box), bisect_cy(&bi_box));
-}
-
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   /* Russian: the RU_ and U_ unicode_map keys are emitted in userspace by the
    * active backend (compose or vim) here, and consumed before QMK's hex path. */
@@ -509,30 +488,6 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     case KK_MM_POLAR:
       if (record->event.pressed) { toggle_enable(L_MOUSE); }
       return false;
-    case KK_MM_BISECT:
-      if (record->event.pressed) { toggle_enable(L_MOUSE_BISECT); }
-      return false;
-
-    /* Bisect: halve the box and re-center the pointer; click holds the tip. */
-    case KK_BI_L:
-      if (record->event.pressed) { bisect_left(&bi_box);  bisect_move(); }
-      return false;
-    case KK_BI_R:
-      if (record->event.pressed) { bisect_right(&bi_box); bisect_move(); }
-      return false;
-    case KK_BI_U:
-      if (record->event.pressed) { bisect_up(&bi_box);    bisect_move(); }
-      return false;
-    case KK_BI_D:
-      if (record->event.pressed) { bisect_down(&bi_box);  bisect_move(); }
-      return false;
-    case KK_BI_RESET:
-      if (record->event.pressed) { bisect_reset(&bi_box); bisect_move(); }
-      return false;
-    case KK_BI_CLICK:
-      if (record->event.pressed) { digitizer_tip_switch_on(); }
-      else                       { digitizer_tip_switch_off(); }
-      return false;
 
     default:
       break;
@@ -541,22 +496,6 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   return true;
 }
 
-/* Arm the digitizer while in bisect mode; release it on the way out (however
- * the layer is left — mode switch, Esc, or leader,space). */
-layer_state_t layer_state_set_user(layer_state_t state) {
-  static bool bisect_was_on = false;
-  bool bisect_on = layer_state_cmp(state, L_MOUSE_BISECT);
-  if (bisect_on && !bisect_was_on) {
-    digitizer_in_range_on();
-    bisect_reset(&bi_box);
-    bisect_move();
-  } else if (!bisect_on && bisect_was_on) {
-    digitizer_tip_switch_off();  // release a held click before leaving
-    digitizer_in_range_off();
-  }
-  bisect_was_on = bisect_on;
-  return state;
-}
 
 /*
  * DESIGN — the layout rationale. Everything between the begin/end markers
@@ -756,50 +695,23 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   /**
    * Mouse layer — POLAR mode (Orbital Mouse, getreuer/orbital_mouse). DEFAULT.
    *
-   * Reached via Leader,m, which starts here. Top-row left keys switch mode:
-   *   `,` = polar (this layer)   `c` = bisect.
-   * Exit any mouse mode with Esc (shift+space combo) or Leader,space.
+   * Reached via Leader,m. Exit with Esc (shift+space combo) or Leader,space.
    *
    * Polar/heading control: fwd/bwd move the pointer forward/backward along a
    * heading; ←/→ steer that heading; slo/fst change speed while held. Left hand
    * can apply modifiers (shift+click, ctrl+wheelup).
    */
   [L_MOUSE] = LAYOUT_split_3x6_3(/* GENERATED scheme — edit the array, then `make gen-docs`.
-       ·  ·  pol  ·  bis  ·        ·  w↑  fwd  w↓  ·   ·
+       ·  ·  pol  ·  ·    ·        ·  w↑  fwd  w↓  ·   ·
        ·  ·  slo  ·  fst  ·        ·  ←   b1   →   b2  __
        ·  ·  ·    ·  ·    ·        ·  b3  bwd  ·   ·   ·
                  __  __  __        __  __  __
   */
-        XX, XX, KK_MM_POLAR,      XX, KK_MM_BISECT, XX,   XX, OM_W_U, OM_U   , OM_W_D,      XX, XX,
+        XX, XX, KK_MM_POLAR,      XX,           XX, XX,   XX, OM_W_U, OM_U   , OM_W_D,      XX, XX,
         XX, XX,     OM_SLOW,      XX,      OM_FAST, XX,   XX, OM_L  , OM_BTN1, OM_R   , OM_BTN2, __,
         XX, XX,          XX,      XX,           XX, XX,   XX, OM_BTN3, OM_D   ,      XX,      XX, XX,
 
                                    __ ,    __ ,   __ ,         __ ,  __ ,  __
   ),
 
-  /**
-   * Mouse layer — BISECT mode (digitizer binary search). Opt-in via the `c` key.
-   *
-   * Non-default: Linux does not bind the digitizer (libwacom has no entry for
-   * usb:feed:0000), so the pointer does not move on this host. Kept because the
-   * firmware side is proven correct — it needs only a host-side quirk.
-   *
-   * Pointer starts at screen center. The right-hand arrow cross halves the
-   * screen and re-centers each press:  ↑=up  <-=left  ->=right  ↓=down.
-   * clk = click (holds the digitizer tip; hold to drag).  rst = reset to full
-   * screen.  `,` switches to polar. Leaving bisect releases the digitizer
-   * (layer_state_set_user).
-   */
-  [L_MOUSE_BISECT] = LAYOUT_split_3x6_3(/* GENERATED scheme — edit the array, then `make gen-docs`.
-       ·  ·  pol  ·  bis  ·        ·  ·  ↑    ·  ·    ·
-       ·  ·  ·    ·  ·    ·        ·  ←  clk  →  rst  __
-       ·  ·  ·    ·  ·    ·        ·  ·  ↓    ·  ·    ·
-                 __  __  __        __  __  __
-  */
-        XX, XX, KK_MM_POLAR, XX, KK_MM_BISECT, XX,   XX,      XX,     KK_BI_U,      XX,          XX, XX,
-        XX, XX,          XX, XX,           XX, XX,   XX, KK_BI_L, KK_BI_CLICK, KK_BI_R, KK_BI_RESET, __,
-        XX, XX,          XX, XX,           XX, XX,   XX,      XX,     KK_BI_D,      XX,          XX, XX,
-
-                                   __ ,    __ ,   __ ,         __ ,  __ ,  __
-  ),
 };

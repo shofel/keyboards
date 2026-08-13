@@ -1,7 +1,7 @@
 /* Pure finite-state machine for the eager one-shot modifiers.
  *
  * QMK-free and header-only so the transition logic can be unit-tested
- * off-target (see tools/test_oneshot_fsm.c), mirroring bisect_geom.h. oneshot.c
+ * off-target (see tools/test_oneshot_fsm.c). oneshot.c
  * drives this table and performs the register/unregister effects; the keymap
  * derives Russian-layer suspension from the state via oneshot_mod_held().
  *

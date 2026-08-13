@@ -12,10 +12,10 @@
 #define DEBOUNCE 15
 
 /* MOUSE
- * Pointer control is Orbital Mouse (polar, getreuer/orbital_mouse) on L_MOUSE,
- * and the digitizer bisect on L_MOUSE_BISECT. Orbital replaces QMK mousekeys
- * (its module sets mousekey:false) and manages its own speed curve (defaults),
- * so the old MK_* stock-mousekey tuning is gone. */
+ * Pointer control is Orbital Mouse (polar, getreuer/orbital_mouse) on L_MOUSE.
+ * Orbital replaces QMK mousekeys (its module sets mousekey:false) and manages
+ * its own speed curve (defaults), so the old MK_* stock-mousekey tuning is
+ * gone. */
 
 /* Wheel speed: orbital's wheel is analog — it accumulates while the key is held
  * and only emits a scroll notch once it crosses a threshold. At the default 0.2

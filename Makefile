@@ -10,7 +10,7 @@ endif
 QMK_FIRMWARE_ROOT = $(shell qmk config -ro user.qmk_home 2>/dev/null | cut -d= -f2 | sed -e 's@^None$$@@g')
 
 # Convenience targets — build and flash the Cantor keymap.
-.PHONY: build flash test test-bisect test-oneshot test-compose test-schemes gen-docs
+.PHONY: build flash test test-oneshot test-compose test-schemes gen-docs
 
 build:
 	qmk compile -kb cantor -km shofel
@@ -48,11 +48,7 @@ flash: build
 	exit 1
 
 # All off-target host tests (pure logic; no QMK, no hardware).
-test: test-bisect test-oneshot test-compose test-schemes
-
-# Off-target unit test for bisect_geom.h (pure host math; no QMK, no hardware).
-test-bisect:
-	gcc -Wall -Wextra -Ilayouts/split_3x6_3/shofel -o /tmp/test_bisect_geom tools/test_bisect_geom.c -lm && /tmp/test_bisect_geom
+test: test-oneshot test-compose test-schemes
 
 # Off-target unit test for oneshot_fsm.h (the eager one-shot state machine).
 test-oneshot:
