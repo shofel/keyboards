@@ -83,3 +83,23 @@ A single tap still arms for the next key as before; only a *second* press of the
 same trigger, while still armed, releases. Implemented purely in the FSM
 (`oneshot_fsm.h`, `os_trigger_down`); no timer, so there is no double-tap window
 to tune.
+
+## A fast roll after a one-shot Shift can still shift the second key (`CA`)
+
+Tap the one-shot Shift and then roll two letters fast — `Shift` then `c a` with
+`a` going down before `c` comes up — and the host can print `CA` (both shifted)
+instead of the intended `Ca` (only the first).
+
+The pure FSM *does* drop the modifier on the second rolled key — this is the
+"88 bug" case, and `tools/test_oneshot_fsm.c` locks it (the second key gets no
+mod in the modelled event order). The gap is below the FSM: on hardware, under a
+fast enough roll, the eager modifier's release does not reliably land before the
+second key's HID report, so the host still sees Shift held when that key is sent.
+This is a timing gap between the FSM and the wire, not a logic error — which is
+why the unit test (idealised event order) stays green.
+
+Left as-is: it only bites on a deliberately fast two-letter roll immediately
+after a one-shot Shift, which is rare in normal typing. A real fix would mean
+holding back the second key's report until the one-shot state settles — more
+machinery than the occasional stray capital is worth. (Confirmed on real
+hardware 2026-08-13; pre-existing — not introduced by the second-press change.)
