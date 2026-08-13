@@ -13,47 +13,68 @@ Procedure: score the four factors per task, take the weighted sum, round to 2 de
 descending; on ties the earlier-listed task stays first. Re-rank whenever a task is added or an
 estimate changes. Bugs tend to top the list because Impact carries the most weight on a daily driver.
 
-## Ranked — 2026-08-07
+## Ranked — 2026-08-13
 
 | # | Score | Task | Where |
 |---|-------|------|-------|
-| 1 | 2.55 | Absolute-mouse HID descriptor so bisect needs no host config | Layout |
-| 2 | 2.30 | Shared layout for cantor & dactyl (keymap transform program + tests) | Dactyl |
-| 3 | 2.00 | Sturdier cantor case with quieter sound | Hardware |
+| 1 | 2.55 | Combos are positional: strip key-label names from combo comments + enforce in the generator | Docs |
+| 2 | 2.50 | Remove bisect mouse mode; document its history (existed, never worked) in known-limitations | Layout |
+| 3 | 2.45 | Russian backend selection under a single leader prefix (`l,r` / `l,r,c` / `l,r,w` / `l,r,v`) | Layout |
+| 4 | 2.40 | README: dedicated keymap-reference section (header links to the file, body a clickable TOC) | Docs |
+| 5 | 2.00 | Sturdier cantor case with quieter sound | Hardware |
+
+Scores are estimates applying the rubric above — re-weight freely; the cluster (2.40–2.55) means
+these are close in priority.
+
+## Docs
+
+- **Combos are positional — enforce it.** Combo comments must not name key labels; every combo
+  is defined by *position*, not the legend on the key. Make this a strict rule both in the source
+  (rename any label-naming combo comments) and in the generator (`tools/gen_layer_schemes.py` — a
+  check that fails on a label-named combo). Keeps the comment from drifting from the positional
+  reality.
+- **README keymap-reference section.** Add a dedicated section: a header that links to the full
+  generated reference (`docs/reference.md`), and a body that is a clickable table of contents into
+  it.
 
 ## Layout
 
-- Bisect needs the host to bind the digitizer. The proposed fix — stop
-  presenting as a digitizer and emit an absolute-mouse HID descriptor (no host
-  config on any OS) — turns out to be **core-only**: that descriptor lives in
-  QMK's `usb_descriptor.c` (non-weak `const`, no userspace override, no
-  absolute-mouse build knob), so it's an upstream-QMK-PR / local-fork task, not a
-  keymap change. Cheaper first step: re-test a *correct* libwacom `.tablet` entry
-  (the earlier attempt may have been an ID/descriptor mismatch, not a dead lane).
-  See [docs/known-limitations.md](docs/known-limitations.md).
+- **Remove bisect mouse mode.** The digitizer binary-search mode never drove a cursor on the host
+  (libwacom won't bind `usb:feed:0000`; the absolute-mouse descriptor is QMK-core-only). Remove
+  `L_MOUSE_BISECT` and its glue (`bisect_geom.h`, the digitizer arming in `layer_state_set_user`,
+  the mode-switch key, `tools/test_bisect_geom.c` + its Makefile target), leaving Polar/Orbital as
+  the sole mouse mode. Document the history — that it existed and why it never worked — in
+  `docs/known-limitations.md` (much of it is already there under the bisect section).
+- **Russian backend under one leader prefix.** Collapse backend selection into a nested leader
+  prefix instead of separate sequences:
+  - `l,r`   → compose (default)
+  - `l,r,c` → compose
+  - `l,r,w` → windows  (open question: use QMK's facility, or vendor its piece into our module?)
+  - `l,r,v` → vim
 
-## Dactyl
+  Needs a small design pass on nested-prefix leader handling.
 
-- get the dactyl building on stock qmk. It's not in `qmk.json` build targets
-  (so not in CI) because the shared keymap reaches it by adding the
-  `split_3x6_3` community layout to the *mainline* `handwired/dactyl_manuform/5x6_5`
-  via a userspace `keyboards/.../info.json` overlay — and stock qmk's
-  `find_info_json` never reads the userspace keyboards dir (that was a fork-only
-  patch, now dropped). Cantor is unaffected: its mainline `keyboard.json`
-  already declares `split_3x6_3`. Paths forward: (a) upstream PR adding the
-  `split_3x6_3` community layout to mainline dactyl, or (b) define the dactyl as
-  a standalone userspace keyboard that declares the layout itself.
-- make a shared layout for cantor and dactyl
-  - transform dactyl keymap to a cantor's
-    - make a text transform program
-    - which removes keys not presented on cantor
-      - from the comment
-      - from the code
-    - which is covered by tests
+## Hardware
 
-## TODO cantor hardware
+- A sturdier case with quieter sound.
 
-- a sturdier case with quieter sound
+## Done
+
+- **2026-08-13** — one-shot: a *second* press of an armed one-shot now releases it (the mod is
+  held eagerly from the first tap, so the release is a bare modifier tap — double-tapping the Gui
+  combo opens the launcher). Uniform across Ctrl/Alt/Gui/Sft. Shipped to `main` (`ff022e1`). Was
+  the inbox item "osm module: second press means release".
+
+## Removed as obsolete — 2026-08-13
+
+- **Absolute-mouse HID descriptor** (was ranked #1) — moot once the bisect mouse mode is removed;
+  the digitizer/host-binding history is preserved in `docs/known-limitations.md`.
+- **Cantor/dactyl keymap transform program** (was ranked #2) — superseded: the dactyl overlay
+  (`keyboards/handwired/dactyl_manuform/5x6_5/info.json`) already shares the single `split_3x6_3`
+  keymap via `community_layouts`, so there is nothing to "transform". The remaining dactyl blocker
+  (stock qmk's `find_info_json` ignores the userspace `keyboards/` dir, so dactyl is not a CI build
+  target) is an upstream-QMK PR / standalone-keyboard-definition task — deferred, not a keymap
+  change.
 
 ## References
 
