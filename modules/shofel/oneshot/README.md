@@ -1,6 +1,6 @@
 # Oneshot Modifiers Community Module
 
-Eager oneshot modifier implementation inspired by Callum's oneshot. Allows stacking multiple oneshot modifiers and carrying them between layers.
+Eager oneshot modifier implementation inspired by [Callum Oakley's oneshot](https://github.com/callum-oakley/qmk_firmware/blob/master/users/callum/oneshot.c). Allows stacking multiple oneshot modifiers and carrying them between layers.
 
 ## Documentation
 

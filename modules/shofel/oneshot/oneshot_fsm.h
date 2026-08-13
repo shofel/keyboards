@@ -8,6 +8,15 @@
  * Eager = the modifier is pressed (register_code) on the trigger keydown, not
  * deferred to the next key. That lets a one-shot be chorded/held. The subtlety
  * is releasing it after exactly ONE key when tapped, even under fast rolls.
+ *
+ * Design constraint — NO TIMEOUTS. The machine advances only on key events
+ * (see oneshot_event_t); there is no timer, matrix-scan, or deferred-exec
+ * transition. So a tapped one-shot holds its modifier until the next key event
+ * (or an explicit oneshot_cancel()) — it never auto-expires. This is
+ * deliberate: it keeps the FSM pure and unit-testable off-target. QMK's
+ * ONESHOT_TIMEOUT does NOT apply here — this is a custom register_code16
+ * module, not QMK's built-in OSM. The next keypress always releases the mod, so
+ * a stray tap is invisible in normal typing.
  */
 #pragma once
 
