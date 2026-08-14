@@ -136,7 +136,7 @@ def test_extract_combos_real():
     assert by_keys[("KK_RET", "KC_SPACE", "KK_LEAD_R")] == "QK_BOOT"
     assert by_keys[("KK_LEAD_L", "KK_SYMBO")] == "QK_REBOOT"
     assert by_keys[("KK_RET", "KK_LEAD_R")] == "QK_REBOOT"
-    assert len(combos) == 26
+    assert len(combos) == 31
 
 def test_extract_leader_seqs_real():
     seqs = g.extract_leader_seqs(g.KEYMAP.read_text(encoding="utf-8"))
@@ -284,9 +284,10 @@ def test_combo_board_real():
     # non-adjacent combos are no longer captioned on the board — they move out
     assert "Other combos" not in board
     nonadj = g.nonadjacent_combos(base, g.extract_combos(src))
-    assert len(nonadj) == 8
+    assert len(nonadj) == 13
     assert {"KC_ESC", "QK_BOOT", "QK_REBOOT",
-            "KK_RIGHT_ARROW"} == {o for _k, o in nonadj}
+            "KK_RIGHT_ARROW", "KK_FAT_RIGHT_ARROW", "KK_FAT_LEFT_ARROW",
+            "KK_LEFT_ARROW", "KK_RESET_STATE"} == {o for _k, o in nonadj}
 
 def test_combo_board_only_home_anchors():
     src = g.KEYMAP.read_text(encoding="utf-8")
@@ -405,8 +406,13 @@ def test_nonadjacent_combos_have_diagrams():
     assert "┌" in combos                          # the boxed board is still there
     # the non-adjacent combos are described AND diagrammed (thumbs included)
     assert "sft + spc → Esc" in combos
-    assert "h + m → Esc" in combos
-    assert ". + w → Esc" in combos
+    assert "h + m → =>" in combos
+    assert ". + w → <=" in combos
+    assert "x + w → <-" in combos
+    assert "c + u → Esc" in combos
+    assert "f + d → Esc" in combos
+    assert ", + c → reset (drop toggles, cancel one-shots)" in combos
+    assert "f + l → reset (drop toggles, cancel one-shots)" in combos
     # boot = all three thumbs of a half; reset = outer + inner thumb of that half
     assert "LEAD + sft + SYM → bootloader" in combos
     assert "ret + spc + LEAD → bootloader" in combos

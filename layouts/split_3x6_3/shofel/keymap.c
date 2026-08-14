@@ -26,7 +26,11 @@ void keyboard_post_init_user(void) {
 #define XX KC_NO
 
 enum my_keycodes {
-  KK_RIGHT_ARROW = SAFE_RANGE,
+  KK_RIGHT_ARROW = SAFE_RANGE,  // emits "->"
+  KK_FAT_RIGHT_ARROW,           // emits "=>"
+  KK_FAT_LEFT_ARROW,            // emits "<="
+  KK_LEFT_ARROW,                // emits "<-"
+  KK_RESET_STATE,               // disable toggle layers, cancel one-shots (like leader,space)
   KK_LANGLE,  // « when shifted, < otherwise
   KK_RANGLE,  // » when shifted, > otherwise
 
@@ -189,9 +193,17 @@ const key_override_t *key_overrides[] = {
 
 /* Hit both middle thumb keys for esc. */
 const uint16_t PROGMEM esc_combo[]      = {KK_SHIFT, KC_SPACE, COMBO_END};
-/* One-handed esc, one per hand: bottom-row h+m (right) and .+w (left). */
-const uint16_t PROGMEM esc_hm_combo[]   = {KC_H, KC_M, COMBO_END};
-const uint16_t PROGMEM esc_dotw_combo[] = {KC_DOT, KC_W, COMBO_END};
+/* Arrows — mirror-symmetric, bottom row: index+middle = fat (=> / <=), index+ring = thin (-> / <-);
+   left hand points left, right points right. It's strange, but consistent :D */
+const uint16_t PROGMEM fat_right_arrow_combo[] = {KC_H, KC_M, COMBO_END};
+const uint16_t PROGMEM fat_left_arrow_combo[]  = {KC_DOT, KC_W, COMBO_END};
+const uint16_t PROGMEM thin_left_arrow_combo[] = {KC_X, KC_W, COMBO_END};
+/* One-handed Esc, one per hand: top row, index+middle. */
+const uint16_t PROGMEM esc_left_combo[]  = {KC_C, KC_U, COMBO_END};
+const uint16_t PROGMEM esc_right_combo[] = {KC_F, KC_D, COMBO_END};
+/* Reset / cancel — like leader,space (drop toggle layers, cancel one-shots): top row, index+ring, each hand. */
+const uint16_t PROGMEM reset_left_combo[]  = {KC_COMM, KC_C, COMBO_END};
+const uint16_t PROGMEM reset_right_combo[] = {KC_F, KC_L, COMBO_END};
 /* All three thumb keys of one half at once -> bootloader (for flashing). */
 const uint16_t PROGMEM boot_combo_left[]  = {KK_LEAD_L, KK_SHIFT, KK_SYMBO, COMBO_END};
 const uint16_t PROGMEM boot_combo_right[] = {KK_RET, KC_SPACE, KK_LEAD_R, COMBO_END};
@@ -202,9 +214,8 @@ const uint16_t PROGMEM boot_combo_right[] = {KK_RET, KC_SPACE, KK_LEAD_R, COMBO_
  * bootloads and a 2-thumb press reboots. */
 const uint16_t PROGMEM reset_combo_left[]  = {KK_LEAD_L, KK_SYMBO, COMBO_END};
 const uint16_t PROGMEM reset_combo_right[] = {KK_RET, KK_LEAD_R, COMBO_END};
-/* Digraphs. (=> retired: h+m is now the one-handed Esc combo above.) */
-const uint16_t PROGMEM right_arrow_combo[]     = {KC_H, KC_K, COMBO_END}; // ->
-/* := and != are gone: the SYM `:`->`=` roll and `!` make them unnecessary. */
+/* Thin right arrow: bottom row, right hand, index+ring. */
+const uint16_t PROGMEM right_arrow_combo[] = {KC_H, KC_K, COMBO_END}; // ->
 /* [(<>)] */
 const uint16_t PROGMEM square_left_combo[]  = {KC_S, KC_W, COMBO_END};
 const uint16_t PROGMEM square_right_combo[] = {KC_N, KC_H, COMBO_END};
@@ -212,7 +223,7 @@ const uint16_t PROGMEM brace_left_combo[]   = {KC_E, KC_DOT, COMBO_END};
 const uint16_t PROGMEM brace_right_combo[]  = {KC_T, KC_M, COMBO_END};
 const uint16_t PROGMEM angle_left_combo[]   = {KC_G, KC_Z, COMBO_END};
 const uint16_t PROGMEM angle_right_combo[]  = {KC_B, KC_P, COMBO_END};
-/* Curly braces: vertical home+below — left o+x -> { , right r+k -> } . */
+/* Curly braces: ring finger, home+below — left = { , right = } . */
 const uint16_t PROGMEM curly_left_combo[]   = {KC_O, KC_X, COMBO_END};
 const uint16_t PROGMEM curly_right_combo[]  = {KC_R, KC_K, COMBO_END};
 /* Vertical combos for mods */
@@ -224,19 +235,23 @@ const uint16_t PROGMEM rctl_combo[] = {KC_N, KC_F, COMBO_END};
 const uint16_t PROGMEM rlt2_combo[] = {KC_T, KC_D, COMBO_END};
 const uint16_t PROGMEM ralt_combo[] = {KC_R, KC_L, COMBO_END};
 const uint16_t PROGMEM rgui_combo[] = {KC_I, KC_Y, COMBO_END};
-/* G+V -> "  (took over the old backspace slot; backspace now lives on SYM). */
+/* Double-quote ": left inner-index, top+home (took over the old backspace slot; backspace now lives on SYM). */
 const uint16_t PROGMEM dquo_combo[] = {KC_G, KC_V, COMBO_END};
-/* / + - -> one-shot FKEYS/SYS layer. A vertical same-column combo on the right
- * pinky column ('/' top-right pinky, '-' home-row right pinky). SYM no longer needs
- * this combo: it is reached via the left thumb (KK_SYMBO) and the RET layer-tap
- * (right inner thumb). */
+/* One-shot FKEYS/SYS layer: right pinky, outer column, top+home.
+ * SYM no longer needs this combo: it is reached via the left thumb (KK_SYMBO)
+ * and the RET layer-tap (right inner thumb). */
 const uint16_t PROGMEM fkeys_combo[] = {KC_SLASH, KC_MINUS, COMBO_END};
 
 /* Indices for all combos (designated initializers) */
 enum combos {
   CMB_ESC,
-  CMB_ESC_HM,
-  CMB_ESC_DOTW,
+  CMB_FAT_RIGHT_ARROW,
+  CMB_FAT_LEFT_ARROW,
+  CMB_THIN_LEFT_ARROW,
+  CMB_ESC_LEFT,
+  CMB_ESC_RIGHT,
+  CMB_RESET_LEFT,
+  CMB_RESET_RIGHT,
 
   CMB_BOOT_L,
   CMB_BOOT_R,
@@ -269,9 +284,14 @@ enum combos {
 };
 
 combo_t key_combos[] = {
-  [CMB_ESC]        = COMBO(esc_combo, KC_ESC),
-  [CMB_ESC_HM]     = COMBO(esc_hm_combo, KC_ESC),
-  [CMB_ESC_DOTW]   = COMBO(esc_dotw_combo, KC_ESC),
+  [CMB_ESC]             = COMBO(esc_combo, KC_ESC),
+  [CMB_FAT_RIGHT_ARROW] = COMBO(fat_right_arrow_combo, KK_FAT_RIGHT_ARROW),
+  [CMB_FAT_LEFT_ARROW]  = COMBO(fat_left_arrow_combo,  KK_FAT_LEFT_ARROW),
+  [CMB_THIN_LEFT_ARROW] = COMBO(thin_left_arrow_combo, KK_LEFT_ARROW),
+  [CMB_ESC_LEFT]        = COMBO(esc_left_combo,  KC_ESC),
+  [CMB_ESC_RIGHT]       = COMBO(esc_right_combo, KC_ESC),
+  [CMB_RESET_LEFT]      = COMBO(reset_left_combo,  KK_RESET_STATE),
+  [CMB_RESET_RIGHT]     = COMBO(reset_right_combo, KK_RESET_STATE),
 
   [CMB_BOOT_L]     = COMBO(boot_combo_left,  QK_BOOT),
   [CMB_BOOT_R]     = COMBO(boot_combo_right, QK_BOOT),
@@ -456,6 +476,30 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         SEND_STRING("->");
       }
       return false;
+    case KK_FAT_RIGHT_ARROW:
+      if (record->event.pressed) {
+        SEND_STRING("=>");
+      }
+      return false;
+    case KK_FAT_LEFT_ARROW:
+      if (record->event.pressed) {
+        SEND_STRING("<=");
+      }
+      return false;
+    case KK_LEFT_ARROW:
+      if (record->event.pressed) {
+        SEND_STRING("<-");
+      }
+      return false;
+    case KK_RESET_STATE:
+      if (record->event.pressed) {
+        /* Behaves like leader,space: disable any active toggle layer and cancel
+         * one-shots. Clearing in-flight leader-sequence state is deferred to the
+         * timeoutless-leader work (stock QMK's timeout leader exposes no
+         * mid-sequence abort). */
+        toggle_reset();
+      }
+      return false;
     case KK_LANGLE:
     case KK_RANGLE:
       if (record->event.pressed) {
@@ -548,6 +592,17 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
  * host compose setup. Both are emitted in userspace, so the firmware no longer
  * needs the out-of-tree UNICODE_MODE_VIM patch (QMK PR #25188).
  *
+ * ### Symmetry
+ *
+ * The layout aims to be mirror-symmetric: the left and right hands hold matching
+ * structures, and the finger-pair picks the variant. Brackets illustrate it most
+ * cleanly — one finger, home+below, left hand opens and right closes. Arrows on
+ * the bottom row follow the same logic: index+middle gives the fat arrow (=> / <=),
+ * index+ring the thin one (-> / <-), and the direction follows the hand (left
+ * points left, right points right). The Esc and reset pairs complete the picture
+ * on the top row: index+middle for Esc, index+ring for reset/cancel — one pair per
+ * hand, same positions, symmetric actions.
+ *
  * ### Key comfort scores
  *
  * Layout-wide ergonomic weights, higher = easier (scale 0-9). Combos resolve
@@ -628,7 +683,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    * - `⌫` backspace (right inner) and `⌦` delete (left inner).
    *
    * Not on SYM (all global, so they work while Russian is active):
-   * - `"`  — the G+V combo (KC_DQUO).
+   * - `"`  — the left inner-index top+home combo (KC_DQUO).
    * - `« »` — the angle combos via KK_LANGLE / KK_RANGLE (unshifted = `<` `>`).
    * - `?` is suppressed from base Shift+/, so SYM is its one canonical home.
    *
@@ -678,7 +733,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    * Layer for F keys and multimedia buttons.
    *
    * Sticky via Leader,f (exit with Esc or Leader,space). Also reachable as a
-   * one-shot via the Q+B combo.
+   * one-shot via the right-pinky outer-column combo (top+home).
    */
   [L_FKEYS_SYS] = LAYOUT_split_3x6_3(/* GENERATED scheme — edit the array, then `make gen-docs`.
        ·     F12  F7  F8  F9  ·        ·  br↑  vl↑  ·     DBG  ·
