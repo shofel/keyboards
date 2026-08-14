@@ -13,19 +13,19 @@ Procedure: score the four factors per task, take the weighted sum, round to 2 de
 descending; on ties the earlier-listed task stays first. Re-rank whenever a task is added or an
 estimate changes. Bugs tend to top the list because Impact carries the most weight on a daily driver.
 
-## Ranked — 2026-08-13
+## Ranked — 2026-08-14
 
 | # | Score | Task | Where |
 |---|-------|------|-------|
 | 1 | 2.70 | Timeoutless leader: fire-on-unique-match, prefix-free sequence set + collision lint | Leader |
 | 2 | 2.55 | Combos are positional: strip key-label names from combo comments + enforce in the generator | Docs |
-| 3 | 2.50 | Remove bisect mouse mode; document its history (existed, never worked) in known-limitations | Layout |
-| 4 | 2.45 | Russian backend selection under a single leader prefix (`l,r` / `l,r,c` / `l,r,w` / `l,r,v`) | Layout |
-| 5 | 2.40 | README: dedicated keymap-reference section (header links to the file, body a clickable TOC) | Docs |
-| 6 | 2.00 | Sturdier cantor case with quieter sound | Hardware |
+| 3 | 2.45 | Russian backend selection under a single leader prefix (`l,r` / `l,r,c` / `l,r,w` / `l,r,v`) | Layout |
+| 4 | 2.00 | Sturdier cantor case with quieter sound | Hardware |
 
-Scores are estimates applying the rubric above — re-weight freely; the cluster (2.40–2.55) means
-these are close in priority.
+Scores are estimates applying the rubric above — re-weight freely; #1–#3 (2.45–2.70) are close
+in priority. **#1 and #3 are mutually exclusive as written**: a prefix-free timeoutless leader
+cannot keep a standalone `l,r` alongside `l,r,c/w/v` — pick one, or drop the bare `l,r` (see both
+sections). #4 is hardware.
 
 ## Leader
 
@@ -63,18 +63,9 @@ these are close in priority.
   (rename any label-naming combo comments) and in the generator (`tools/gen_layer_schemes.py` — a
   check that fails on a label-named combo). Keeps the comment from drifting from the positional
   reality.
-- **README keymap-reference section.** Add a dedicated section: a header that links to the full
-  generated reference (`docs/reference.md`), and a body that is a clickable table of contents into
-  it.
 
 ## Layout
 
-- **Remove bisect mouse mode.** The digitizer binary-search mode never drove a cursor on the host
-  (libwacom won't bind `usb:feed:0000`; the absolute-mouse descriptor is QMK-core-only). Remove
-  `L_MOUSE_BISECT` and its glue (`bisect_geom.h`, the digitizer arming in `layer_state_set_user`,
-  the mode-switch key, `tools/test_bisect_geom.c` + its Makefile target), leaving Polar/Orbital as
-  the sole mouse mode. Document the history — that it existed and why it never worked — in
-  `docs/known-limitations.md` (much of it is already there under the bisect section).
 - **Russian backend under one leader prefix.** Collapse backend selection into a nested leader
   prefix instead of separate sequences:
   - `l,r`   → compose (default)
@@ -93,6 +84,16 @@ these are close in priority.
 
 ## Done
 
+- **2026-08-14** — removed the bisect mouse mode (was ranked #3): the digitizer binary-search mode
+  never drove a host cursor (libwacom won't bind `usb:feed:0000`). Orbital/polar is the sole mouse
+  mode now; the "why it never worked" history is kept in `docs/known-limitations.md`. Shipped to
+  `main` (`d010720`, PR #21).
+- **2026-08-14** — README keymap-reference section (was ranked #5): a dedicated section linking to
+  the generated `docs/reference.md`, with a clickable TOC into its sections. Shipped to `main`
+  (`201eff2`, PR #22).
+- **2026-08-14** — ingested the inbox into the timeoutless-leader item as requirement 4 (cancel /
+  abort a half-typed sequence via a both-hands soft-reset combo, `x+w` / `h+k`, retiring the last
+  `->` arrow). Shipped to `main` (`4679a29`, PR #20).
 - **2026-08-13** — one-shot: a *second* press of an armed one-shot now releases it (the mod is
   held eagerly from the first tap, so the release is a bare modifier tap — double-tapping the Gui
   combo opens the launcher). Uniform across Ctrl/Alt/Gui/Sft. Shipped to `main` (`ff022e1`). Was
