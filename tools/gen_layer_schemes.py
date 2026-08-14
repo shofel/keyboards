@@ -190,6 +190,7 @@ COMBO_OUT = {  # combo outputs that aren't plain layer glyphs
 
 # Short labels for the combo board — each must fit a border cell (<= CW-2 chars).
 COMBO_SHORT = {
+    "KC_ESC": "Esc",
     "OS_CTL": "Ctl", "OS_ALT": "Alt", "OS_GUI": "Gui",
     "OSL(L_NUM_NAV)": "Nav", "OSL(L_FKEYS_SYS)": "Fky",
     "KC_LBRC": "[", "KC_RBRC": "]", "KC_LPRN": "(", "KC_RPRN": ")",
