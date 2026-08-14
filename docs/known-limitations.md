@@ -103,3 +103,27 @@ after a one-shot Shift, which is rare in normal typing. A real fix would mean
 holding back the second key's report until the one-shot state settles — more
 machinery than the occasional stray capital is worth. (Confirmed on real
 hardware 2026-08-13; pre-existing — not introduced by the second-press change.)
+
+## Combos that share a key can dump literal characters on a fast roll
+
+Two combos that share a key — or a combo whose two keys each belong to a
+*different* combo, "bridging" them — can misfire on a fast roll: instead of
+firing, QMK's combo engine gives up on the ambiguous buffer and sends the keys
+as literal taps. Concretely, when Esc briefly lived on `c+u`, it bridged the
+Ctrl combo (`s+c`) and the Nav combo (`e+u`); chording Ctrl then Nav in quick
+succession (`c-s-u-e`) made `{c,s,u}` ambiguous between `s+c` and `c+u`, so the
+board typed a literal `cs`.
+
+Why: with the default combo settings (no `COMBO_MUST_HOLD`, `COMBO_TERM` 50 ms),
+a key held across two overlapping combos has no unambiguous resolution during a
+roll, and the engine falls back to emitting the raw keys.
+
+Mitigated, not eliminated: Esc moved to a **vertical same-column** combo (`q+b`)
+that shares no key with any cross-finger combo — same-column pairs are safe
+because a single finger's column is never rolled in normal typing (this is why
+the default combo class here is vertical). A few horizontal combos still share a
+key on purpose (the reset combos `,+c` / `f+l` share with the Ctrl combos), so an
+unlucky roll through those could still dump; they sit on rare bigrams, so it is
+left as-is. Rule of thumb when adding a combo: a key landing in 3+ combos, or a
+combo bridging two independent ones, is a roll-dump risk. (Root-caused and fixed
+2026-08-14, PR #26.)
