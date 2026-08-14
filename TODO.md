@@ -17,42 +17,16 @@ estimate changes. Bugs tend to top the list because Impact carries the most weig
 
 | # | Score | Task | Where |
 |---|-------|------|-------|
-| 1 | 2.80 | Symmetric combos reorg: restore `=>`, mirror `<=`/`<-`, move Esc→`c+u`/`f+d` & reset→`,+c`/`f+l`; positional (finger+row) comments + a symmetry doc note | Combos |
-| 2 | 2.70 | Timeoutless leader: fire-on-unique-match, prefix-free sequence set + collision lint | Leader |
-| 3 | 2.55 | Russian backend selection under one leader prefix, via **combos** on the 2nd token (`l,r` tap vs `l,(r+c/v/w)` chord) | Layout |
-| 4 | 2.00 | Sturdier cantor case with quieter sound | Hardware |
+| 1 | 2.70 | Timeoutless leader: fire-on-unique-match, prefix-free sequence set + collision lint | Leader |
+| 2 | 2.55 | Russian backend selection under one leader prefix, via **combos** on the 2nd token (`l,r` tap vs `l,(r+c/v/w)` chord) | Layout |
+| 3 | 2.00 | Sturdier cantor case with quieter sound | Hardware |
 
-Scores are estimates. #1 (symmetric combos) **subsumes** the old "combos are positional" item —
-the finger+row comments get written as part of the reorg — and the old "docs: symmetry" inbox note
-becomes its capstone. The former #1↔#3 mutual-exclusivity is **dissolved** by #3's combo approach: a
-bare `r` tap and an `r+c` chord emit distinct keycodes, so `l,r` and `l,(r+c)` are not a prefix pair
-— you keep the standalone `l,r` under a timeoutless leader. #4 is hardware.
-
-## Combos — symmetric reorg (next up)
-
-The combo block becomes mirror-symmetric: **row picks the function, finger-pair picks the
-variant**. Left arrows point left, right point right — *"strange, but consistent :D"* (that line
-goes in as a code comment and renders into the docs).
-
-| position (both hands) | pair | left | right |
-|---|---|---|---|
-| bottom row, index+middle | fat arrows | `w+.` → `<=` | `h+m` → `=>` (restore) |
-| bottom row, index+ring   | thin arrows | `x+w` → `<-` | `h+k` → `->` (keep) |
-| top row, index+middle    | **Esc**   | `c+u` | `f+d` |
-| top row, index+ring      | **reset/cancel** | `,+c` | `f+l` |
-
-It interlocks: Esc vacates `h+m`/`.+w` (→ top row) freeing the bottom row for `=>`/`<=`; reset
-vacates `x+w` (→ top row) freeing it for `<-`. Details:
-- **Keycodes:** restore `KK_FAT_RIGHT_ARROW` (`=>`); add `<=` and `<-` (mirrors of `=>`/`->`);
-  `->` (`KK_RIGHT_ARROW`) stays. All `SEND_STRING`.
-- **Reset/cancel action:** behaves like `leader,space` (disable toggle layers, cancel one-shots).
-  Extract that into a reusable reset function and extend it to also clear leader-sequence state
-  (forward-looking for the timeoutless leader). Wire `,+c`/`f+l` to it.
-- **Comments:** rewrite all combo comments in the approved finger+row vocabulary; add the
-  "strange but consistent" note on the arrows.
-- **RISK — misfire:** Esc moves to `c+u`/`f+d`, **adjacent top-row combos on common letters**
-  (c,u,f,d) — higher misfire risk than the current vertical/bottom-row combos; `f+l` is a common
-  bigram too. Validate on hardware / tune `COMBO_TERM`; revisit if it misfires in normal typing.
+Scores are estimates. The symmetric-combos reorg that used to top this list shipped and moved to
+**Done** (PR #25/#26); it already carried the "combos are positional" finger+row comments and the
+"docs: symmetry" note as part of the work. #1 (timeoutless leader) and #2 (RU backend) couple: a
+bare `r` tap and an `r+c` chord emit distinct keycodes, so `l,r` and `l,(r+c)` are not a prefix
+pair — the RU set stays prefix-free without dropping the standalone `l,r`, which is what keeps it
+compatible with a timeoutless leader. #3 is hardware.
 
 ## Leader
 
@@ -72,26 +46,16 @@ vacates `x+w` (→ top row) freeing it for `<-`. Details:
   3. **Prefix-collision lint.** A generator/CI check that fails if any two
      sequences ever form a prefix pair — guards the invariant forever.
   4. **Cancel / abort a half-typed sequence.** A timeoutless leader has no clock
-     to bail you out, so it needs an explicit escape hatch. This is the **reset
-     combo** from the symmetric-combos reorg (`,+c` / `f+l`, top row): it behaves
-     like `leader,space` (disable toggle layers, cancel one-shots) and, once the
-     reset logic is extracted into a reusable function, also clears in-flight
-     leader-sequence state. (The earlier `x+w` / `h+k` idea moved: those positions
-     now hold the mirror arrows `<-` / `->`.)
+     to bail you out, so it needs an explicit escape hatch. The **reset combo**
+     (`,+c` / `f+l`, top row) already ships from the symmetric-combos reorg and
+     fires `KK_RESET_STATE` → `toggle_reset()` (disable toggle layers, cancel
+     one-shots), with the reset logic already extracted into a reusable function.
+     **Remaining:** extend that reset to also clear in-flight leader-sequence
+     state once the fire-on-unique-match matcher (req 2) holds that state.
 
   Couples with the "Russian backend under one leader prefix" item: `l,r` plus
   `l,r,c`/`l,r,w`/`l,r,v` is *not* prefix-free, so the two are incompatible unless
   the bare `l,r` standalone is dropped (always require the 3rd key).
-
-## Docs
-
-- **Combos are positional (finger+row).** Folded into the symmetric-combos reorg (#1): its comments
-  are written in the approved finger+row vocabulary. The generator-side *lint* was dropped as
-  over-engineering (scanning free-form English → false positives); the convention lives in the
-  comments and this note instead.
-- **Symmetry, documented from the code.** State that the layout aims to be symmetric and illustrate
-  it (arrows, brackets, Esc/reset pairs). Author the claim as code comments so `make gen-docs`
-  renders it into `docs/reference.md` naturally, rather than hand-writing prose in the doc.
 
 ## Layout
 
@@ -116,6 +80,14 @@ vacates `x+w` (→ top row) freeing it for `<-`. Details:
 
 ## Done
 
+- **2026-08-14** — symmetric combos reorg (was ranked #1): restored `=>`, mirrored `<=`/`<-`,
+  relocated reset→`,+c`/`f+l`, rewrote every combo comment in the finger+row vocabulary, and added
+  the "strange but consistent" symmetry note that `make gen-docs` renders into `docs/reference.md`.
+  Shipped to `main` (`1cdf3cc`, PR #25). **Esc placement corrected in a follow-up:** the reorg first
+  put Esc on `c+u`/`f+d`, but `c+u` bridged the Ctrl (`s+c`) and Nav (`e+u`) combos and dumped a
+  literal `cs` on a fast roll — so Esc moved to the vertical same-column combo `q+b` (`9466211`,
+  PR #26), and the roll-dump pitfall is documented in `docs/known-limitations.md` (`aae18a9`,
+  PR #27). This subsumed the old "combos are positional" and "docs: symmetry" inbox items.
 - **2026-08-14** — removed the bisect mouse mode (was ranked #3): the digitizer binary-search mode
   never drove a host cursor (libwacom won't bind `usb:feed:0000`). Orbital/polar is the sole mouse
   mode now; the "why it never worked" history is kept in `docs/known-limitations.md`. Shipped to
