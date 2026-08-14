@@ -92,7 +92,7 @@ Combos fire on two physical key positions (they resolve from the base layer). A 
 ```
 ┌─────┬─────┬─────┬─────┬─────┬─────┐    ┌─────┬─────┬─────┬─────┬─────┬─────┐
 │     │     │     │     │     │     │    │     │     │     │     │     │     │
-├─────┼─Gui─┼─Alt─┼─Nav─┼─Ctl─┼─ " ─┤    ├─────┼─Ctl─┼─Nav─┼─Alt─┼─Gui─┼─Fky─┤
+├─────┼─Gui─┼─Alt─┼─Nav─┼─Ctl─┼─ " ─┤    ├─Esc─┼─Ctl─┼─Nav─┼─Alt─┼─Gui─┼─Fky─┤
 │     │  a  │  o  │  e  │  s  │     │    │     │  n  │  t  │  r  │  i  │     │
 ├─────┼─────┼─ { ─┼─ ( ─┼─ [ ─┼─ < ─┤    ├─ > ─┼─ ] ─┼─ ) ─┼─ } ─┼─────┼─────┤
 │     │     │     │     │     │     │    │     │     │     │     │     │     │
@@ -136,24 +136,6 @@ x + w → <-
 · · · · · ·       · · · · · ·
 · · · · · ·       · · · · · ·
 · · ● · ● ·       · · · · · ·
-        · · ·   · · ·
-```
-
-c + u → Esc
-
-```
-· · · ● ● ·       · · · · · ·
-· · · · · ·       · · · · · ·
-· · · · · ·       · · · · · ·
-        · · ·   · · ·
-```
-
-f + d → Esc
-
-```
-· · · · · ·       · ● ● · · ·
-· · · · · ·       · · · · · ·
-· · · · · ·       · · · · · ·
         · · ·   · · ·
 ```
 
@@ -430,9 +412,10 @@ structures, and the finger-pair picks the variant. Brackets illustrate it most
 cleanly — one finger, home+below, left hand opens and right closes. Arrows on
 the bottom row follow the same logic: index+middle gives the fat arrow (=> / <=),
 index+ring the thin one (-> / <-), and the direction follows the hand (left
-points left, right points right). The Esc and reset pairs complete the picture
-on the top row: index+middle for Esc, index+ring for reset/cancel — one pair per
-hand, same positions, symmetric actions.
+points left, right points right). Reset/cancel keeps a symmetric top-row pair
+(index+ring, one per hand). Esc sits apart on a vertical same-column combo (right
+inner-index, top+home) plus the two-thumb chord — it was moved off c+u/f+d because
+those bridged the Ctrl and Nav combos into misfires.
 
 ### Key comfort scores
 

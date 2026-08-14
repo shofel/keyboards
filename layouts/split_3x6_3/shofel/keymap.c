@@ -198,9 +198,11 @@ const uint16_t PROGMEM esc_combo[]      = {KK_SHIFT, KC_SPACE, COMBO_END};
 const uint16_t PROGMEM fat_right_arrow_combo[] = {KC_H, KC_M, COMBO_END};
 const uint16_t PROGMEM fat_left_arrow_combo[]  = {KC_DOT, KC_W, COMBO_END};
 const uint16_t PROGMEM thin_left_arrow_combo[] = {KC_X, KC_W, COMBO_END};
-/* One-handed Esc, one per hand: top row, index+middle. */
-const uint16_t PROGMEM esc_left_combo[]  = {KC_C, KC_U, COMBO_END};
-const uint16_t PROGMEM esc_right_combo[] = {KC_F, KC_D, COMBO_END};
+/* One-handed Esc: right inner-index, top+home (vertical same-column, misfire-free).
+ * Was two top-row combos (c+u / f+d), but c+u bridged the Ctrl (s+c) and Nav (e+u)
+ * combos, so a fast c-s-u-e roll dumped literal "cs"; a vertical combo shares no key
+ * with them. */
+const uint16_t PROGMEM esc_qb_combo[] = {KC_Q, KC_B, COMBO_END};
 /* Reset / cancel — like leader,space (drop toggle layers, cancel one-shots): top row, index+ring, each hand. */
 const uint16_t PROGMEM reset_left_combo[]  = {KC_COMM, KC_C, COMBO_END};
 const uint16_t PROGMEM reset_right_combo[] = {KC_F, KC_L, COMBO_END};
@@ -248,8 +250,7 @@ enum combos {
   CMB_FAT_RIGHT_ARROW,
   CMB_FAT_LEFT_ARROW,
   CMB_THIN_LEFT_ARROW,
-  CMB_ESC_LEFT,
-  CMB_ESC_RIGHT,
+  CMB_ESC_QB,
   CMB_RESET_LEFT,
   CMB_RESET_RIGHT,
 
@@ -288,8 +289,7 @@ combo_t key_combos[] = {
   [CMB_FAT_RIGHT_ARROW] = COMBO(fat_right_arrow_combo, KK_FAT_RIGHT_ARROW),
   [CMB_FAT_LEFT_ARROW]  = COMBO(fat_left_arrow_combo,  KK_FAT_LEFT_ARROW),
   [CMB_THIN_LEFT_ARROW] = COMBO(thin_left_arrow_combo, KK_LEFT_ARROW),
-  [CMB_ESC_LEFT]        = COMBO(esc_left_combo,  KC_ESC),
-  [CMB_ESC_RIGHT]       = COMBO(esc_right_combo, KC_ESC),
+  [CMB_ESC_QB]          = COMBO(esc_qb_combo, KC_ESC),
   [CMB_RESET_LEFT]      = COMBO(reset_left_combo,  KK_RESET_STATE),
   [CMB_RESET_RIGHT]     = COMBO(reset_right_combo, KK_RESET_STATE),
 
@@ -599,9 +599,10 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
  * cleanly — one finger, home+below, left hand opens and right closes. Arrows on
  * the bottom row follow the same logic: index+middle gives the fat arrow (=> / <=),
  * index+ring the thin one (-> / <-), and the direction follows the hand (left
- * points left, right points right). The Esc and reset pairs complete the picture
- * on the top row: index+middle for Esc, index+ring for reset/cancel — one pair per
- * hand, same positions, symmetric actions.
+ * points left, right points right). Reset/cancel keeps a symmetric top-row pair
+ * (index+ring, one per hand). Esc sits apart on a vertical same-column combo (right
+ * inner-index, top+home) plus the two-thumb chord — it was moved off c+u/f+d because
+ * those bridged the Ctrl and Nav combos into misfires.
  *
  * ### Key comfort scores
  *
