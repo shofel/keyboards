@@ -155,6 +155,24 @@ qmk compile -kb cantor -km shofel --compiledb
 See [TODO.md](TODO.md) for planned improvements, and
 [docs/known-limitations.md](docs/known-limitations.md) for accepted quirks.
 
-## Reference
+## Keymap reference
+
+The complete, always-current keymap — every layer, combo, leader sequence and
+emoji — is generated from `keymap.c` into
+**[docs/reference.md](docs/reference.md)**. Jump straight to a section:
+
+- [Base (BOO)](docs/reference.md#base-boo-l_boo)
+- [Russian](docs/reference.md#russian-l_russian)
+- [Symbols](docs/reference.md#symbols-l_symbols)
+- [Numbers & Navigation](docs/reference.md#numbers--navigation-l_num_nav)
+- [F-keys & System](docs/reference.md#f-keys--system-l_fkeys_sys)
+- [Mouse — Polar](docs/reference.md#mouse--polar-l_mouse)
+- [Combos](docs/reference.md#combos)
+- [Leader sequences](docs/reference.md#leader-sequences)
+- [Emoji](docs/reference.md#emoji)
+- [Design](docs/reference.md#design)
+- [Legend](docs/reference.md#legend)
+
+## Upstream template
 
 This repository is based on the [official QMK userspace template](https://github.com/qmk/qmk_userspace). For more information about external userspaces, see the [QMK documentation](https://docs.qmk.fm/).
