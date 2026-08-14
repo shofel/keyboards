@@ -17,15 +17,42 @@ estimate changes. Bugs tend to top the list because Impact carries the most weig
 
 | # | Score | Task | Where |
 |---|-------|------|-------|
-| 1 | 2.70 | Timeoutless leader: fire-on-unique-match, prefix-free sequence set + collision lint | Leader |
-| 2 | 2.55 | Combos are positional: strip key-label names from combo comments + enforce in the generator | Docs |
-| 3 | 2.45 | Russian backend selection under a single leader prefix (`l,r` / `l,r,c` / `l,r,w` / `l,r,v`) | Layout |
+| 1 | 2.80 | Symmetric combos reorg: restore `=>`, mirror `<=`/`<-`, move Esc→`c+u`/`f+d` & reset→`,+c`/`f+l`; positional (finger+row) comments + a symmetry doc note | Combos |
+| 2 | 2.70 | Timeoutless leader: fire-on-unique-match, prefix-free sequence set + collision lint | Leader |
+| 3 | 2.55 | Russian backend selection under one leader prefix, via **combos** on the 2nd token (`l,r` tap vs `l,(r+c/v/w)` chord) | Layout |
 | 4 | 2.00 | Sturdier cantor case with quieter sound | Hardware |
 
-Scores are estimates applying the rubric above — re-weight freely; #1–#3 (2.45–2.70) are close
-in priority. **#1 and #3 are mutually exclusive as written**: a prefix-free timeoutless leader
-cannot keep a standalone `l,r` alongside `l,r,c/w/v` — pick one, or drop the bare `l,r` (see both
-sections). #4 is hardware.
+Scores are estimates. #1 (symmetric combos) **subsumes** the old "combos are positional" item —
+the finger+row comments get written as part of the reorg — and the old "docs: symmetry" inbox note
+becomes its capstone. The former #1↔#3 mutual-exclusivity is **dissolved** by #3's combo approach: a
+bare `r` tap and an `r+c` chord emit distinct keycodes, so `l,r` and `l,(r+c)` are not a prefix pair
+— you keep the standalone `l,r` under a timeoutless leader. #4 is hardware.
+
+## Combos — symmetric reorg (next up)
+
+The combo block becomes mirror-symmetric: **row picks the function, finger-pair picks the
+variant**. Left arrows point left, right point right — *"strange, but consistent :D"* (that line
+goes in as a code comment and renders into the docs).
+
+| position (both hands) | pair | left | right |
+|---|---|---|---|
+| bottom row, index+middle | fat arrows | `w+.` → `<=` | `h+m` → `=>` (restore) |
+| bottom row, index+ring   | thin arrows | `x+w` → `<-` | `h+k` → `->` (keep) |
+| top row, index+middle    | **Esc**   | `c+u` | `f+d` |
+| top row, index+ring      | **reset/cancel** | `,+c` | `f+l` |
+
+It interlocks: Esc vacates `h+m`/`.+w` (→ top row) freeing the bottom row for `=>`/`<=`; reset
+vacates `x+w` (→ top row) freeing it for `<-`. Details:
+- **Keycodes:** restore `KK_FAT_RIGHT_ARROW` (`=>`); add `<=` and `<-` (mirrors of `=>`/`->`);
+  `->` (`KK_RIGHT_ARROW`) stays. All `SEND_STRING`.
+- **Reset/cancel action:** behaves like `leader,space` (disable toggle layers, cancel one-shots).
+  Extract that into a reusable reset function and extend it to also clear leader-sequence state
+  (forward-looking for the timeoutless leader). Wire `,+c`/`f+l` to it.
+- **Comments:** rewrite all combo comments in the approved finger+row vocabulary; add the
+  "strange but consistent" note on the arrows.
+- **RISK — misfire:** Esc moves to `c+u`/`f+d`, **adjacent top-row combos on common letters**
+  (c,u,f,d) — higher misfire risk than the current vertical/bottom-row combos; `f+l` is a common
+  bigram too. Validate on hardware / tune `COMBO_TERM`; revisit if it misfires in normal typing.
 
 ## Leader
 
@@ -45,12 +72,12 @@ sections). #4 is hardware.
   3. **Prefix-collision lint.** A generator/CI check that fails if any two
      sequences ever form a prefix pair — guards the invariant forever.
   4. **Cancel / abort a half-typed sequence.** A timeoutless leader has no clock
-     to bail you out, so it needs an explicit escape hatch: a way to drop out of
-     leader capture without firing anything. Candidate — a *soft-reset* combo,
-     both hands, mirroring the one-handed Esc combos (`h+m` / `.+w`): `x+w` on the
-     left and `h+k` on the right abort the in-flight sequence. `h+k` currently
-     holds the last remaining arrow combo (`->`), which this retires; `x+w` is
-     free today.
+     to bail you out, so it needs an explicit escape hatch. This is the **reset
+     combo** from the symmetric-combos reorg (`,+c` / `f+l`, top row): it behaves
+     like `leader,space` (disable toggle layers, cancel one-shots) and, once the
+     reset logic is extracted into a reusable function, also clears in-flight
+     leader-sequence state. (The earlier `x+w` / `h+k` idea moved: those positions
+     now hold the mirror arrows `<-` / `->`.)
 
   Couples with the "Russian backend under one leader prefix" item: `l,r` plus
   `l,r,c`/`l,r,w`/`l,r,v` is *not* prefix-free, so the two are incompatible unless
@@ -58,25 +85,30 @@ sections). #4 is hardware.
 
 ## Docs
 
-- **Combos are positional — enforce it.** Combo comments must not name key labels; every combo
-  is defined by *position*, not the legend on the key. Make this a strict rule both in the source
-  (rename any label-naming combo comments) and in the generator (`tools/gen_layer_schemes.py` — a
-  check that fails on a label-named combo). Keeps the comment from drifting from the positional
-  reality.
+- **Combos are positional (finger+row).** Folded into the symmetric-combos reorg (#1): its comments
+  are written in the approved finger+row vocabulary. The generator-side *lint* was dropped as
+  over-engineering (scanning free-form English → false positives); the convention lives in the
+  comments and this note instead.
+- **Symmetry, documented from the code.** State that the layout aims to be symmetric and illustrate
+  it (arrows, brackets, Esc/reset pairs). Author the claim as code comments so `make gen-docs`
+  renders it into `docs/reference.md` naturally, rather than hand-writing prose in the doc.
 
 ## Layout
 
-- **Russian backend under one leader prefix.** Collapse backend selection into a nested leader
-  prefix instead of separate sequences:
-  - `l,r`   → compose (default)
-  - `l,r,c` → compose
-  - `l,r,w` → windows  (open question: use QMK's facility, or vendor its piece into our module?)
-  - `l,r,v` → vim
+- **Russian backend under one leader prefix — via combos.** The 2nd token after `l` is either a
+  *tap* of `r` or a *chord*:
+  - `l , r`      → Ru (default / compose)
+  - `l , (r+c)`  → Ru compose
+  - `l , (r+v)`  → Ru vim
+  - `l , (r+w)`  → Ru windows   `()` = a combo
 
-  Needs a small design pass on nested-prefix leader handling. **Conflicts with
-  the timeoutless-leader item** (see the Leader section): a bare `l,r` is a prefix
-  of `l,r,c/w/v`, so a prefix-free timeoutless leader requires dropping the
-  standalone `l,r` (always require the 3rd key).
+  A bare `r` tap and the `r+c` combo emit **distinct keycodes**, so `l,r` and `l,(r+c)` are not a
+  prefix pair — the set is prefix-free **without** dropping the standalone `l,r`. This is why it no
+  longer conflicts with the timeoutless leader. **Gate before building:** a hardware spike on the
+  combo×leader interaction — stock QMK processes combos before the leader, so the combo's *output*
+  keycode should reach the leader, but that can't be proven off-target. Confirm `l,(r+c)` captures
+  the combo keycode (not a bare `r`) and `l,r` alone still fires Ru. (`windows` backend still open:
+  QMK facility vs. vendor into our module.)
 
 ## Hardware
 
