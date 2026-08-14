@@ -177,7 +177,9 @@ def glyph(token):
 
 COMBO_OUT = {  # combo outputs that aren't plain layer glyphs
     "KC_ESC": "Esc", "QK_BOOT": "bootloader", "QK_REBOOT": "reboot",
-    "KK_RIGHT_ARROW": "->",
+    "KK_RIGHT_ARROW": "->", "KK_FAT_RIGHT_ARROW": "=>",
+    "KK_FAT_LEFT_ARROW": "<=", "KK_LEFT_ARROW": "<-",
+    "KK_RESET_STATE": "reset (drop toggles, cancel one-shots)",
     "KC_LBRC": "[", "KC_RBRC": "]", "KC_LPRN": "(", "KC_RPRN": ")",
     "KC_LCBR": "{", "KC_RCBR": "}",
     "KK_LANGLE": "< (« when shifted)", "KK_RANGLE": "> (» when shifted)",
@@ -193,6 +195,9 @@ COMBO_SHORT = {
     "KC_LBRC": "[", "KC_RBRC": "]", "KC_LPRN": "(", "KC_RPRN": ")",
     "KC_LCBR": "{", "KC_RCBR": "}",
     "KK_LANGLE": "<", "KK_RANGLE": ">", "KC_DQUO": '"',
+    "KK_RIGHT_ARROW": "->", "KK_FAT_RIGHT_ARROW": "=>",
+    "KK_FAT_LEFT_ARROW": "<=", "KK_LEFT_ARROW": "<-",
+    "KK_RESET_STATE": "rst",
 }
 CW = 5  # combo-board cell width
 

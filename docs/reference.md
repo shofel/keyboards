@@ -112,7 +112,7 @@ sft + spc → Esc
         · ● ·   · ● ·
 ```
 
-h + m → Esc
+h + m → =>
 
 ```
 · · · · · ·       · · · · · ·
@@ -121,12 +121,57 @@ h + m → Esc
         · · ·   · · ·
 ```
 
-. + w → Esc
+. + w → <=
 
 ```
 · · · · · ·       · · · · · ·
 · · · · · ·       · · · · · ·
 · · · ● ● ·       · · · · · ·
+        · · ·   · · ·
+```
+
+x + w → <-
+
+```
+· · · · · ·       · · · · · ·
+· · · · · ·       · · · · · ·
+· · ● · ● ·       · · · · · ·
+        · · ·   · · ·
+```
+
+c + u → Esc
+
+```
+· · · ● ● ·       · · · · · ·
+· · · · · ·       · · · · · ·
+· · · · · ·       · · · · · ·
+        · · ·   · · ·
+```
+
+f + d → Esc
+
+```
+· · · · · ·       · ● ● · · ·
+· · · · · ·       · · · · · ·
+· · · · · ·       · · · · · ·
+        · · ·   · · ·
+```
+
+, + c → reset (drop toggles, cancel one-shots)
+
+```
+· · ● · ● ·       · · · · · ·
+· · · · · ·       · · · · · ·
+· · · · · ·       · · · · · ·
+        · · ·   · · ·
+```
+
+f + l → reset (drop toggles, cancel one-shots)
+
+```
+· · · · · ·       · ● · ● · ·
+· · · · · ·       · · · · · ·
+· · · · · ·       · · · · · ·
         · · ·   · · ·
 ```
 
@@ -377,6 +422,17 @@ Two backends, selected by leader (see the unicode_ru module): compose mode
 vim's native `i_CTRL-V U <hex>` so Cyrillic types inside vim/neovim with no
 host compose setup. Both are emitted in userspace, so the firmware no longer
 needs the out-of-tree UNICODE_MODE_VIM patch (QMK PR #25188).
+
+### Symmetry
+
+The layout aims to be mirror-symmetric: the left and right hands hold matching
+structures, and the finger-pair picks the variant. Brackets illustrate it most
+cleanly — one finger, home+below, left hand opens and right closes. Arrows on
+the bottom row follow the same logic: index+middle gives the fat arrow (=> / <=),
+index+ring the thin one (-> / <-), and the direction follows the hand (left
+points left, right points right). The Esc and reset pairs complete the picture
+on the top row: index+middle for Esc, index+ring for reset/cancel — one pair per
+hand, same positions, symmetric actions.
 
 ### Key comfort scores
 
