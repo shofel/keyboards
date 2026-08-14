@@ -68,11 +68,22 @@ compatible with a timeoutless leader. #3 is hardware.
 
   A bare `r` tap and the `r+c` combo emit **distinct keycodes**, so `l,r` and `l,(r+c)` are not a
   prefix pair — the set is prefix-free **without** dropping the standalone `l,r`. This is why it no
-  longer conflicts with the timeoutless leader. **Gate before building:** a hardware spike on the
-  combo×leader interaction — stock QMK processes combos before the leader, so the combo's *output*
-  keycode should reach the leader, but that can't be proven off-target. Confirm `l,(r+c)` captures
-  the combo keycode (not a bare `r`) and `l,r` alone still fires Ru. (`windows` backend still open:
-  QMK facility vs. vendor into our module.)
+  longer conflicts with the timeoutless leader.
+
+  **Gate — CLEARED (hardware spike, 2026-08-14).** Flashed a throwaway spike (`r+c`/`r+v`/`r+w`
+  combos → distinct keycodes; leader sequences on those keycodes printing markers). On the LEFT
+  half: `l,(r+c)` → `SPK:RC` and `l,(r+v)` → `SPK:RV` (the combo's *output* keycode), while `l,r`
+  → the bare-`r` marker. So the leader captures a combo's output as its 2nd token — RU-via-combos
+  is feasible. Matches the source trace: stock QMK runs `process_record_user` before
+  `process_leader`, and a combo's output flows through `process_record`.
+
+  **Caveat surfaced by the spike — combo reliability, not the leader.** The planned pairs overlap
+  existing combos (`r` is already in `ralt {r+l}` and `curly_right {r+k}`; `c` in `lctl`/`reset_left`;
+  `w` in `fat_left`/`thin_left`). `r+c` and `r+v` chorded cleanly, but `r+w` once registered as a
+  bare `r` (the chord didn't resolve — a `COMBO_TERM`/simultaneity miss). The real build should
+  confirm each 2nd-token pair chords reliably — ideally not sharing keys with other combos — and/or
+  tune `COMBO_TERM`, then re-verify on hardware. (`windows` backend still open: QMK facility vs.
+  vendor into our module.)
 
 ## Hardware
 
