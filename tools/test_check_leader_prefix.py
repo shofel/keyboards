@@ -69,17 +69,17 @@ def test_parse_expands_emoji_a_and_i():
     assert ("I", "R") in seqs, seqs
 
 
-def test_real_keymap_mouse_currency_collision_is_detected():
-    # The live keymap is knowingly NOT prefix-free (bare M/. mouse vs M,L/M,R/M,E
-    # currencies). The lint must catch exactly that until the cutover fixes it.
+def test_real_keymap_is_prefix_free():
+    # After the currency relocation (leader,u,{l|r|e}, off the bare M/. mouse
+    # prefix) the live set is a prefix code. Mirrors the blocking `make
+    # lint-leader` gate at the unit-test level — a regression guard for the
+    # timeoutless-leader invariant.
     import os
     here = os.path.dirname(os.path.abspath(__file__))
     keymap = os.path.join(here, "..", "layouts", "split_3x6_3", "shofel", "keymap.c")
     seqs = m.parse_leader_sequences(open(keymap, encoding="utf-8").read())
     cols = m.prefix_collisions(seqs)
-    shorts = {c[0] for c in cols}
-    assert ("M",) in shorts, f"expected bare-M collision, got {cols}"
-    assert ("DOT",) in shorts, f"expected bare-. (DOT) collision, got {cols}"
+    assert cols == [], f"live leader set must be prefix-free, got {cols}"
 
 
 def _run():
