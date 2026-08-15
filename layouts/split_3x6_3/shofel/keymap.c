@@ -410,12 +410,12 @@ static const leader_seq_t leader_seqs[] = {
   {KC_M,     KC_NO, lead_mouse,    "mouse layer, polar mode (mirror pair m·.)"},
   {KC_DOT,   KC_NO, lead_mouse,    "mouse layer, polar mode (mirror pair m·.)"},
   {KC_T,     KC_NO, lead_num,      "num/nav layer (sticky)"},
-  {KC_M,     KC_L,  lead_lira,     "₺ lira"},
-  {KC_DOT,   KC_L,  lead_lira,     "₺ lira (mirror)"},
-  {KC_M,     KC_R,  lead_rub,      "₽ ruble"},
-  {KC_DOT,   KC_R,  lead_rub,      "₽ ruble (mirror)"},
-  {KC_M,     KC_E,  lead_eur,      "€ euro"},
-  {KC_DOT,   KC_E,  lead_eur,      "€ euro (mirror)"},
+  /* Currencies moved off the M/. mouse prefix (bare M was a prefix of M,L/M,R/M,E
+   * — illegal under a timeoutless leader). New home: leader,u,{l|r|e} (u =
+   * currency unit). Rare symbols, so the m·. mirror is dropped; single-hand. */
+  {KC_U,     KC_L,  lead_lira,     "₺ lira"},
+  {KC_U,     KC_R,  lead_rub,      "₽ ruble"},
+  {KC_U,     KC_E,  lead_eur,      "€ euro"},
   {KC_D,     KC_A,  lead_del_all,  "delete all (Ctrl+A, Del)"},
   {KC_D,     KC_U,  lead_del_line, "delete to line start (like Ctrl-U)"},
   {KC_D,     KC_W,  lead_del_word, "delete word (Ctrl+Backspace)"},

@@ -48,7 +48,7 @@ flash: build
 	exit 1
 
 # All off-target host tests (pure logic; no QMK, no hardware).
-test: test-oneshot test-leader-fsm test-compose test-schemes test-leader-prefix
+test: test-oneshot test-leader-fsm test-compose test-schemes test-leader-prefix lint-leader
 
 # Off-target unit test for oneshot_fsm.h (the eager one-shot state machine).
 test-oneshot:
@@ -68,9 +68,9 @@ test-schemes:
 test-leader-prefix:
 	python3 tools/test_check_leader_prefix.py
 
-# Informational: report prefix collisions in the LIVE leader set. Kept out of
-# `make test` for now — the set is knowingly not prefix-free until the
-# timeoutless-leader cutover, which makes this a blocking gate.
+# Blocking gate: the LIVE leader set must stay a prefix code (no sequence a
+# prefix of another) so the timeoutless fire-on-unique-match leader can never be
+# shadowed. Enforced in `make test` now that the currencies moved off bare M/..
 lint-leader:
 	python3 tools/check_leader_prefix.py
 
