@@ -10,7 +10,7 @@ endif
 QMK_FIRMWARE_ROOT = $(shell qmk config -ro user.qmk_home 2>/dev/null | cut -d= -f2 | sed -e 's@^None$$@@g')
 
 # Convenience targets — build and flash the Cantor keymap.
-.PHONY: build flash test test-oneshot test-compose test-schemes gen-docs
+.PHONY: build flash test test-oneshot test-compose test-schemes test-leader-prefix lint-leader gen-docs
 
 build:
 	qmk compile -kb cantor -km shofel
@@ -48,7 +48,7 @@ flash: build
 	exit 1
 
 # All off-target host tests (pure logic; no QMK, no hardware).
-test: test-oneshot test-compose test-schemes
+test: test-oneshot test-compose test-schemes test-leader-prefix
 
 # Off-target unit test for oneshot_fsm.h (the eager one-shot state machine).
 test-oneshot:
@@ -59,6 +59,16 @@ test-compose:
 
 test-schemes:
 	python3 tools/gen_layer_schemes.py --check
+
+# Unit test for the leader prefix-collision lint (pure logic; synthetic inputs).
+test-leader-prefix:
+	python3 tools/test_check_leader_prefix.py
+
+# Informational: report prefix collisions in the LIVE leader set. Kept out of
+# `make test` for now — the set is knowingly not prefix-free until the
+# timeoutless-leader cutover, which makes this a blocking gate.
+lint-leader:
+	python3 tools/check_leader_prefix.py
 
 # Regenerate docs/reference.md + the in-LAYOUT scheme comments from keymap.c.
 gen-docs:
