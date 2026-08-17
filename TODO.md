@@ -17,42 +17,13 @@ estimate changes. Bugs tend to top the list because Impact carries the most weig
 
 | # | Score | Task | Where |
 |---|-------|------|-------|
-| 1 | 2.55 | Russian backend selection under one leader prefix — **needs a design decision** (the specced combo approach misfires in normal typing; see Layout) | Layout |
-| 2 | 2.00 | Sturdier cantor case with quieter sound | Hardware |
+| 1 | 2.00 | Sturdier cantor case with quieter sound | Hardware |
 
-Scores are estimates. The **timeoutless leader** (was #1) shipped and moved to **Done** (PRs
-#30–#33): fire-on-unique-match, a prefix-free sequence set, a blocking prefix-collision lint, and
-an off-target-tested matcher + capture FSM. Completing it changed the picture for #1 (RU backend):
-the leader now handles 3-key sequences with no clock, so `l,r,{c|v|w}` is viable as a **combo-free**
-alternative to the specced combos — which matters because the combos misfire (see Layout). #2 is
-hardware.
-
-## Layout
-
-- **Russian backend selection under one leader prefix.** Goal: pick the Russian backend from a
-  single `l,r`-family gateway — `compose` (default), `vim`, and `windows` (new). Today this is two
-  separate keys: `l,r`/`l,c` → compose, `l,v` → vim.
-
-  **The specced combo approach is blocked — it misfires in normal typing.** The plan was `l,r` tap
-  vs `l,(r+c)` / `l,(r+v)` / `l,(r+w)` chords, so the tap and chords emit distinct keycodes and the
-  set stays prefix-free. A 2026-08-14 hardware spike confirmed the *leader* captures a combo's
-  output keycode (`l,(r+c)` → `SPK:RC`, `l,(r+v)` → `SPK:RV`, vs `l,r` → bare-`r`). **But** those
-  combos are **global base-layer combos** (`COMBO_ONLY_FROM_LAYER 0`, no per-context restriction),
-  so they also fire during ordinary typing: `r+c` eats "a**rc**", `r+v` eats "se**rv**e"/"cu**rv**e".
-  That is the same roll-dump class as `docs/known-limitations.md`; the spike only tested deliberate
-  chords, so it never surfaced it. Verified 2026-08-17 against the live combo config.
-
-  **Recommended alternative — combo-free, enabled by the now-shipped timeoutless leader.** The
-  leader now fires on unique match and handles 3-key sequences, so `l,r,c` / `l,r,v` / `l,r,w` are a
-  clean prefix code **with no combos and no misfire** — *provided bare `l,r` is dropped* (require the
-  3rd key; `r` becomes a pure prefix). Cost: retrains the current `l,r`/`l,v` muscle memory; a
-  non-repeat default key is needed (the doc generator rejects a repeated-key sequence like `l,r,r`).
-
-  **Decision needed before building** (pick one): (a) combo-free sequences `l,r,{c|v|w}`, dropping
-  bare `l,r` — recommended; (b) keep combos but choose rare-bigram / vertical same-column 2nd-token
-  pairs that won't misfire; (c) leave Russian selection as-is (`l,r`/`l,v`). Independently, the
-  **`windows` backend is unbuilt** — it needs a Windows unicode input method (QMK facility vs.
-  vendor into the `unicode_ru` module), a separate feature from the selection UX.
+Scores are estimates. Both software items shipped to **Done** this cycle: the **timeoutless
+leader** (was #1; PRs #30–#33) and **Russian backend selection** (was #1 after the leader; PR #35,
+simplified in #36). The only open item is hardware. **One QA gap carries forward:** the `windows`
+RU backend is UNVERIFIED — it needs a Windows host + `EnableHexNumpad=1` (un-QA-able on NixOS);
+compose and vim are QA'd on-device.
 
 ## Hardware
 
@@ -60,6 +31,19 @@ hardware.
 
 ## Done
 
+- **2026-08-17** — Russian backend selection (was #1 after the leader): pick the emission backend
+  from the leader, one bare key each — `leader,r` → compose (default, rolling-safe, host-wide),
+  `leader,v` → vim (`i_CTRL-V U`), `leader,w` → Windows (Alt+numpad hex; needs `EnableHexNumpad`).
+  Shipped as PR #35 — first under a combo-free `l,r,{c|v|w}` 3-key gateway (the specced `r+c`/`r+v`/
+  `r+w` combos would misfire in normal typing: `se**rv**e`, `cu**rv**e`, `a**rc**`), then simplified
+  to bare single keys in PR #36 so `leader,r` is the fast default again. Adds a 3rd userspace
+  backend, `RU_BACKEND_WINDOWS`, a faithful port of QMK's `UNICODE_MODE_WINDOWS`. **compose + vim
+  QA'd on-device 2026-08-17; `windows` UNVERIFIED** — needs a Windows host + `EnableHexNumpad=1`
+  (BMP-only, which covers Cyrillic and ₺/₽/€; astral emoji stay on compose).
+- **2026-08-17** — reset-combo cleanup (PR #36): unmapped the `,+c` / `f+l` soft-reset chords and
+  removed the orphaned `KK_RESET_STATE` keycode + its dead handlers. Soft-reset (drop toggle layers,
+  cancel one-shots) is now solely `leader,space` (also `Esc` / `leader,e`); the `QK_BOOT` /
+  `QK_REBOOT` thumb combos are untouched.
 - **2026-08-17** — timeoutless leader (was ranked #1): the leader now fires the instant a sequence
   is uniquely matched, with no per-key timeout (QMK's stock leader is off, `LEADER_ENABLE=no`).
   Shipped in four PRs: prefix-collision lint as a blocking gate (`bcc5e9c`, PR #30); the
@@ -68,8 +52,8 @@ hardware.
   PR #32); and the cutover — a custom capture in `process_record_user` driving the matcher, with
   the reset combo / `leader,space` as the abort escape hatch (`cc64160`, PR #33). A code review
   caught a stuck-key defect (releases were being swallowed during capture) that was fixed before
-  merge. **Hardware QA still pending** (batch) — the `process_record` integration can't be verified
-  off-target.
+  merge. **Hardware QA passed 2026-08-17** — flashed to the left half: fires on unique match, no
+  stuck keys on fast rolls, silent abort on non-match, `leader,space` reset all confirmed on-device.
 - **2026-08-14** — symmetric combos reorg (was ranked #1): restored `=>`, mirrored `<=`/`<-`,
   relocated reset→`,+c`/`f+l`, rewrote every combo comment in the finger+row vocabulary, and added
   the "strange but consistent" symmetry note that `make gen-docs` renders into `docs/reference.md`.
