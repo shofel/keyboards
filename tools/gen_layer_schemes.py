@@ -117,6 +117,7 @@ GLYPHS = {
     "KC_ENTER": "⏎", "KC_TAB": "⮀",
     "KC_BRIU": "br↑", "KC_BRID": "br↓", "KC_VOLU": "vl↑", "KC_VOLD": "vl↓",
     "KC_MUTE": "mute", "DB_TOGG": "DBG", "QK_BOOT": "boot",
+    "PB_1": "nois",
     "KK_MM_POLAR": "pol",
     "OM_U": "fwd", "OM_D": "bwd", "OM_L": "←", "OM_R": "→",
     "OM_W_U": "w↑", "OM_W_D": "w↓", "OM_SLOW": "slo", "OM_FAST": "fst",
@@ -155,6 +156,7 @@ LEGEND = [
     ("b1", "mouse: button 1"), ("b2", "mouse: button 2"), ("b3", "mouse: button 3"),
     ("br↑", "brightness up"), ("br↓", "brightness down"),
     ("vl↑", "volume up"), ("vl↓", "volume down"), ("mute", "mute"),
+    ("nois", "toggle focus audio (brown noise) — programmable button 1"),
     ("DBG", "toggle debug logging"), ("boot", "bootloader (for flashing)"),
 ]
 

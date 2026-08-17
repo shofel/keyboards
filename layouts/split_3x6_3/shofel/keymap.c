@@ -809,14 +809,14 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    * one-shot via the right-pinky outer-column combo (top+home).
    */
   [L_FKEYS_SYS] = LAYOUT_split_3x6_3(/* GENERATED scheme — edit the array, then `make gen-docs`.
-       ·     F12  F7  F8  F9  ·        ·  br↑  vl↑  ·     DBG  ·
-       ·     F11  F4  F5  F6  ·        ·  ·    ·    ·     ·    __
-       boot  F10  F1  F2  F3  ·        ·  br↓  vl↓  mute  ·    boot
+       ·     F12  F7  F8  F9  ·        ·  br↑   vl↑   ·  DBG  ·
+       ·     F11  F4  F5  F6  ·        ·  nois  mute  ·  ·    __
+       boot  F10  F1  F2  F3  ·        ·  br↓   vl↓   ·  ·    boot
                      __  __  __        __  __  __
   */
         XX,  KC_F12,  KC_F7,  KC_F8,  KC_F9,     XX,       XX, KC_BRIU,  KC_VOLU,       XX,  DB_TOGG, XX,
-        XX,  KC_F11,  KC_F4,  KC_F5,  KC_F6,     XX,       XX,      XX,       XX,       XX,       XX, __,
-   QK_BOOT,  KC_F10,  KC_F1,  KC_F2,  KC_F3,     XX,       XX, KC_BRID,  KC_VOLD,  KC_MUTE,  XX, QK_BOOT,
+        XX,  KC_F11,  KC_F4,  KC_F5,  KC_F6,     XX,       XX,    PB_1,  KC_MUTE,       XX,       XX, __,
+   QK_BOOT,  KC_F10,  KC_F1,  KC_F2,  KC_F3,     XX,       XX, KC_BRID,  KC_VOLD,       XX,  XX, QK_BOOT,
                                 __ ,    __ ,   __ ,         __ ,   __ ,   __
   ),
 
