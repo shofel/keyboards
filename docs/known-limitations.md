@@ -122,8 +122,7 @@ Mitigated, not eliminated: Esc moved to a **vertical same-column** combo (`q+b`)
 that shares no key with any cross-finger combo — same-column pairs are safe
 because a single finger's column is never rolled in normal typing (this is why
 the default combo class here is vertical). A few horizontal combos still share a
-key on purpose (the reset combos `,+c` / `f+l` share with the Ctrl combos), so an
-unlucky roll through those could still dump; they sit on rare bigrams, so it is
-left as-is. Rule of thumb when adding a combo: a key landing in 3+ combos, or a
+key on purpose, so an unlucky roll through those could still dump; they sit on
+rare bigrams, so it is left as-is. Rule of thumb when adding a combo: a key landing in 3+ combos, or a
 combo bridging two independent ones, is a roll-dump risk. (Root-caused and fixed
 2026-08-14, PR #26.)

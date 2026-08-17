@@ -36,7 +36,6 @@ enum my_keycodes {
   KK_FAT_RIGHT_ARROW,           // emits "=>"
   KK_FAT_LEFT_ARROW,            // emits "<="
   KK_LEFT_ARROW,                // emits "<-"
-  KK_RESET_STATE,               // disable toggle layers, cancel one-shots (like leader,space)
   KK_LANGLE,  // « when shifted, < otherwise
   KK_RANGLE,  // » when shifted, > otherwise
 
@@ -210,9 +209,6 @@ const uint16_t PROGMEM thin_left_arrow_combo[] = {KC_X, KC_W, COMBO_END};
  * combos, so a fast c-s-u-e roll dumped literal "cs"; a vertical combo shares no key
  * with them. */
 const uint16_t PROGMEM esc_qb_combo[] = {KC_Q, KC_B, COMBO_END};
-/* Reset / cancel — like leader,space (drop toggle layers, cancel one-shots): top row, index+ring, each hand. */
-const uint16_t PROGMEM reset_left_combo[]  = {KC_COMM, KC_C, COMBO_END};
-const uint16_t PROGMEM reset_right_combo[] = {KC_F, KC_L, COMBO_END};
 /* All three thumb keys of one half at once -> bootloader (for flashing). */
 const uint16_t PROGMEM boot_combo_left[]  = {KK_LEAD_L, KK_SHIFT, KK_SYMBO, COMBO_END};
 const uint16_t PROGMEM boot_combo_right[] = {KK_RET, KC_SPACE, KK_LEAD_R, COMBO_END};
@@ -258,8 +254,6 @@ enum combos {
   CMB_FAT_LEFT_ARROW,
   CMB_THIN_LEFT_ARROW,
   CMB_ESC_QB,
-  CMB_RESET_LEFT,
-  CMB_RESET_RIGHT,
 
   CMB_BOOT_L,
   CMB_BOOT_R,
@@ -297,8 +291,6 @@ combo_t key_combos[] = {
   [CMB_FAT_LEFT_ARROW]  = COMBO(fat_left_arrow_combo,  KK_FAT_LEFT_ARROW),
   [CMB_THIN_LEFT_ARROW] = COMBO(thin_left_arrow_combo, KK_LEFT_ARROW),
   [CMB_ESC_QB]          = COMBO(esc_qb_combo, KC_ESC),
-  [CMB_RESET_LEFT]      = COMBO(reset_left_combo,  KK_RESET_STATE),
-  [CMB_RESET_RIGHT]     = COMBO(reset_right_combo, KK_RESET_STATE),
 
   [CMB_BOOT_L]     = COMBO(boot_combo_left,  QK_BOOT),
   [CMB_BOOT_R]     = COMBO(boot_combo_right, QK_BOOT),
@@ -407,12 +399,11 @@ static void lead_kitty(void)    { tap_code16(LGUI(KC_T)); }
 static void lead_pscr(void)     { tap_code(KC_PSCR); }
 
 static const leader_seq_t leader_seqs[] = {
-  /* Russian backend selection, all under the `r` gateway (prefix-free: bare l,r
-   * is intentionally NOT a sequence, so `r` is a pure prefix). The old bare
-   * l,r/l,c (compose) and l,v (vim) were dropped for this. */
-  {KC_R,     KC_C,  lead_ru,       "Russian — compose backend (rolling-safe, host-wide)"},
-  {KC_R,     KC_V,  lead_vim,      "Russian — vim backend (i_CTRL-V U, no host setup)"},
-  {KC_R,     KC_W,  lead_win,      "Russian — Windows backend (Alt+numpad hex; EnableHexNumpad)"},
+  /* Russian backend selection, one bare key each (prefix-free single-key seqs):
+   * r = compose (the default; rolling-safe, host-wide), v = vim, w = Windows. */
+  {KC_R,     KC_NO, lead_ru,       "Russian — compose backend (default; rolling-safe, host-wide)"},
+  {KC_V,     KC_NO, lead_vim,      "Russian — vim backend (i_CTRL-V U, no host setup)"},
+  {KC_W,     KC_NO, lead_win,      "Russian — Windows backend (Alt+numpad hex; EnableHexNumpad)"},
   {KC_E,     KC_NO, lead_en,       "back to English (drop the toggle layer)"},
   {KC_SPACE, KC_NO, lead_reset,    "disable any toggle layer, cancel one-shots"},
   {KC_F,     KC_NO, lead_fkeys,    "F-keys / system layer (sticky)"},
@@ -547,10 +538,6 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
    * token key's own release is harmless — its press never registered, so QMK's
    * source-layer cache resolves the release to a no-op unregister. */
   if (lead_cap.active && record->event.pressed) {
-    if (keycode == KK_RESET_STATE) {
-      toggle_reset();   // the reset combo is the escape hatch: full reset + abort
-      return false;
-    }
     lead_feed(keycode);
     return false;
   }
@@ -584,15 +571,6 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     case KK_LEFT_ARROW:
       if (record->event.pressed) {
         SEND_STRING("<-");
-      }
-      return false;
-    case KK_RESET_STATE:
-      if (record->event.pressed) {
-        /* Behaves like leader,space: disable any active toggle layer and cancel
-         * one-shots. Clearing in-flight leader-sequence state is deferred to the
-         * timeoutless-leader work (stock QMK's timeout leader exposes no
-         * mid-sequence abort). */
-        toggle_reset();
       }
       return false;
     case KK_LANGLE:
@@ -679,10 +657,11 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
  * the OS can't tell which map to apply. So the laptop switches language with
  * `win+space`, and the QMK board carries its own Russian layer instead.
  *
- * Two backends, selected by leader (see the unicode_ru module): compose mode
- * (default, rolling-safe, host-wide) and vim mode (`leader,v`), which emits
- * vim's native `i_CTRL-V U <hex>` so Cyrillic types inside vim/neovim with no
- * host compose setup. Both are emitted in userspace, so the firmware no longer
+ * Three backends, selected by leader (see the unicode_ru module): compose mode
+ * (`leader,r`, default, rolling-safe, host-wide), vim mode (`leader,v`), which
+ * emits vim's native `i_CTRL-V U <hex>` so Cyrillic types inside vim/neovim with
+ * no host compose setup, and Windows mode (`leader,w`, Alt+numpad hex; needs
+ * EnableHexNumpad). All are emitted in userspace, so the firmware no longer
  * needs the out-of-tree UNICODE_MODE_VIM patch (QMK PR #25188).
  *
  * ### Symmetry
@@ -692,8 +671,8 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
  * cleanly — one finger, home+below, left hand opens and right closes. Arrows on
  * the bottom row follow the same logic: index+middle gives the fat arrow (=> / <=),
  * index+ring the thin one (-> / <-), and the direction follows the hand (left
- * points left, right points right). Reset/cancel keeps a symmetric top-row pair
- * (index+ring, one per hand). Esc sits apart on a vertical same-column combo (right
+ * points left, right points right). Reset/cancel (drop toggle layers, cancel
+ * one-shots) is `leader,space`. Esc sits apart on a vertical same-column combo (right
  * inner-index, top+home) plus the two-thumb chord — it was moved off c+u/f+d because
  * those bridged the Ctrl and Nav combos into misfires.
  *
