@@ -86,14 +86,16 @@ enum unicode_names {
 extern const uint32_t PROGMEM unicode_map[];
 
 /* Userspace Russian emission backends (see unicode_ru.c). The keymap selects a
- * backend via `ru_backend` (leader,c = compose, leader,v = vim) and calls
- * `ru_unicode_process` at the top of process_record_user; when it returns true
- * the unicode_map key was emitted in userspace and must not be processed further.
- * Both backends are self-contained — QMK's unicode input-mode machinery (and the
- * out-of-tree UNICODE_MODE_VIM) is no longer used. */
+ * backend via `ru_backend` (leader,r,c = compose, leader,r,v = vim,
+ * leader,r,w = windows) and calls `ru_unicode_process` at the top of
+ * process_record_user; when it returns true the unicode_map key was emitted in
+ * userspace and must not be processed further. All backends are self-contained —
+ * QMK's unicode input-mode machinery (and the out-of-tree UNICODE_MODE_VIM) is
+ * no longer used. */
 typedef enum {
   RU_BACKEND_COMPOSE,  // Compose + private code (rolling-safe, host-wide)
   RU_BACKEND_VIM,      // vim `i_CTRL-V U <hex>` (vim/neovim only, no host setup)
+  RU_BACKEND_WINDOWS,  // Windows Alt+numpad hex (needs EnableHexNumpad; BMP only)
 } ru_backend_t;
 extern ru_backend_t ru_backend;
 bool ru_unicode_process(uint16_t keycode, keyrecord_t *record);

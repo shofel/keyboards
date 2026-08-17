@@ -7,19 +7,23 @@ the `unicode_ru` name it covers Russian Cyrillic **and** the typographic symbols
 
 ## Backends
 
-Which one is live is held in `ru_backend`:
+Which one is live is held in `ru_backend`, selected by the leader (`leader,r,c`
+compose · `leader,r,v` vim · `leader,r,w` windows):
 
-| | `RU_BACKEND_COMPOSE` (default) | `RU_BACKEND_VIM` |
-|---|---|---|
-| Emits | `Compose` + a private 2-char code | `i_CTRL-V U <8 hex>` |
-| Works in | anything, host-wide | vim / neovim only |
-| Needs | host xkb `compose:sclk` + `~/.XCompose` | nothing |
+| | `RU_BACKEND_COMPOSE` (default) | `RU_BACKEND_VIM` | `RU_BACKEND_WINDOWS` |
+|---|---|---|---|
+| Emits | `Compose` + a private 2-char code | `i_CTRL-V U <8 hex>` | `Alt`+numpad hex (BMP only) |
+| Works in | anything, host-wide | vim / neovim only | anything, on Windows |
+| Needs | host xkb `compose:sclk` + `~/.XCompose` | nothing | `EnableHexNumpad=1` (+reboot) |
 
 Compose is rolling-safe: its commit boundary doesn't depend on modifier timing,
 unlike the ibus hex handshake it replaced. Vim mode needs no host setup at all,
-which is the whole point of having it.
+which is the whole point of having it. Windows mode is a faithful port of QMK's
+`UNICODE_MODE_WINDOWS` for hosts without a compose key — it is **unverified on
+Linux** (needs a Windows host to QA) and BMP-only, which suffices for Cyrillic
+and ₺/₽/€ (astral emoji stay on compose).
 
-Both are emitted here in userspace, so neither `UNICODE_MODE_LINUX` nor the
+All are emitted here in userspace, so neither `UNICODE_MODE_LINUX` nor the
 out-of-tree `UNICODE_MODE_VIM` patch is involved.
 
 The backend is per-session state, not a persisted setting: the keymap selects it

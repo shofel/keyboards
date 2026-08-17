@@ -206,21 +206,30 @@ h + k → ->
 
 Tap `LEAD`, then the keys in order. Mirror pairs (either hand) share one entry; the diagram numbers the presses — `0` is `LEAD` (either outer thumb), then `1`, `2` for the keys after it.
 
-`LEAD, r` / `LEAD, c` — Russian — compose backend (default)
+`LEAD, r, c` — Russian — compose backend (rolling-safe, host-wide)
 
 ```
-· · · · 1 ·       · · · · · ·
+· · · · 2 ·       · · · · · ·
 · · · · · ·       · · · 1 · ·
 · · · · · ·       · · · · · ·
         0 · ·   · · 0
 ```
 
-`LEAD, v` — Russian — vim backend (vim-native unicode)
+`LEAD, r, v` — Russian — vim backend (i_CTRL-V U, no host setup)
 
 ```
-· · · · · 1       · · · · · ·
+· · · · · 2       · · · · · ·
+· · · · · ·       · · · 1 · ·
 · · · · · ·       · · · · · ·
+        0 · ·   · · 0
+```
+
+`LEAD, r, w` — Russian — Windows backend (Alt+numpad hex; EnableHexNumpad)
+
+```
 · · · · · ·       · · · · · ·
+· · · · · ·       · · · 1 · ·
+· · · · 2 ·       · · · · · ·
         0 · ·   · · 0
 ```
 

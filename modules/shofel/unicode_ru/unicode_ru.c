@@ -104,13 +104,50 @@ void ru_vim_emit_codepoint(uint32_t cp) {
     set_weak_mods(weak);
 }
 
+/* Windows mode: native Alt+numpad hex input (EnableHexNumpad). Hold Left Alt,
+ * tap numpad `+`, type the 4 hex digits (0-9 on the numpad, A-F as letters),
+ * release Alt. A faithful port of QMK's UNICODE_MODE_WINDOWS start/finish +
+ * send_nibble_wrapper (quantum/unicode/unicode.c). BMP only (<= U+FFFF): Russian
+ * and ₺/₽/€ are all BMP, and astral emoji stay on the compose backend anyway.
+ * Requires the host's `HKCU\Control Panel\Input Method\EnableHexNumpad = 1`
+ * (+reboot). UNVERIFIED on Linux — needs a Windows host to QA. */
+void ru_windows_emit_codepoint(uint32_t cp) {
+    if (cp > 0xFFFF) {
+        return;  // EnableHexNumpad handles the BMP only
+    }
+    uint8_t held = get_mods();
+    uint8_t weak = get_weak_mods();
+    led_t   led  = host_keyboard_led_state();
+    clear_oneshot_mods();
+    clear_mods();
+    clear_weak_mods();
+    if (!led.num_lock) {
+        tap_code(KC_NUM_LOCK);  // numpad digits require Num Lock on
+    }
+    register_code(KC_LEFT_ALT);
+    wait_ms(UNICODE_TYPE_DELAY);
+    tap_code(KC_KP_PLUS);
+    for (int i = 3; i >= 0; i--) {
+        uint8_t d  = (cp >> (i * 4)) & 0xF;
+        uint8_t kc = (d < 10) ? (uint8_t)(KC_KP_1 + (10 + d - 1) % 10)  // 0-9 -> numpad
+                              : (uint8_t)(KC_A + (d - 10));             // A-F -> letters
+        tap_code(kc);
+    }
+    unregister_code(KC_LEFT_ALT);
+    if (!led.num_lock) {
+        tap_code(KC_NUM_LOCK);  // restore prior Num Lock state
+    }
+    set_mods(held);
+    set_weak_mods(weak);
+}
+
 /* Emit a standalone glyph (e.g. « ») via the active backend: compose uses its
- * private 2-char code, vim uses the codepoint. */
+ * private 2-char code; vim and windows use the codepoint. */
 void ru_emit_glyph(const char *compose_code, uint32_t cp) {
-    if (ru_backend == RU_BACKEND_VIM) {
-        ru_vim_emit_codepoint(cp);
-    } else {
-        ru_compose_emit_code(compose_code);
+    switch (ru_backend) {
+        case RU_BACKEND_VIM:     ru_vim_emit_codepoint(cp);          break;
+        case RU_BACKEND_WINDOWS: ru_windows_emit_codepoint(cp);      break;
+        default:                 ru_compose_emit_code(compose_code); break;
     }
 }
 
@@ -125,10 +162,16 @@ bool ru_unicode_process(uint16_t keycode, keyrecord_t *record) {
         return false;
     }
     uint8_t idx = unicodemap_index(keycode);
-    if (ru_backend == RU_BACKEND_VIM) {
-        ru_vim_emit_codepoint(pgm_read_dword(&unicode_map[idx]));
-    } else {
-        ru_compose_emit_index(idx);
+    switch (ru_backend) {
+        case RU_BACKEND_VIM:
+            ru_vim_emit_codepoint(pgm_read_dword(&unicode_map[idx]));
+            break;
+        case RU_BACKEND_WINDOWS:
+            ru_windows_emit_codepoint(pgm_read_dword(&unicode_map[idx]));
+            break;
+        default:
+            ru_compose_emit_index(idx);
+            break;
     }
     return true;
 }

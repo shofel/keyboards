@@ -391,6 +391,7 @@ typedef struct {
 /* Ru compose is the default backend; see the unicode_ru module. */
 static void lead_ru(void)       { ru_backend = RU_BACKEND_COMPOSE; toggle_enable(L_RUSSIAN); }
 static void lead_vim(void)      { ru_backend = RU_BACKEND_VIM; toggle_enable(L_RUSSIAN); }
+static void lead_win(void)      { ru_backend = RU_BACKEND_WINDOWS; toggle_enable(L_RUSSIAN); }
 static void lead_en(void)       { ru_backend = RU_BACKEND_COMPOSE; toggle_disable(); }
 static void lead_reset(void)    { toggle_reset(); }
 static void lead_fkeys(void)    { toggle_enable(L_FKEYS_SYS); }
@@ -406,9 +407,12 @@ static void lead_kitty(void)    { tap_code16(LGUI(KC_T)); }
 static void lead_pscr(void)     { tap_code(KC_PSCR); }
 
 static const leader_seq_t leader_seqs[] = {
-  {KC_R,     KC_NO, lead_ru,       "Russian — compose backend (default)"},
-  {KC_C,     KC_NO, lead_ru,       "Russian — compose backend (mirror of r)"},
-  {KC_V,     KC_NO, lead_vim,      "Russian — vim backend (vim-native unicode)"},
+  /* Russian backend selection, all under the `r` gateway (prefix-free: bare l,r
+   * is intentionally NOT a sequence, so `r` is a pure prefix). The old bare
+   * l,r/l,c (compose) and l,v (vim) were dropped for this. */
+  {KC_R,     KC_C,  lead_ru,       "Russian — compose backend (rolling-safe, host-wide)"},
+  {KC_R,     KC_V,  lead_vim,      "Russian — vim backend (i_CTRL-V U, no host setup)"},
+  {KC_R,     KC_W,  lead_win,      "Russian — Windows backend (Alt+numpad hex; EnableHexNumpad)"},
   {KC_E,     KC_NO, lead_en,       "back to English (drop the toggle layer)"},
   {KC_SPACE, KC_NO, lead_reset,    "disable any toggle layer, cancel one-shots"},
   {KC_F,     KC_NO, lead_fkeys,    "F-keys / system layer (sticky)"},
