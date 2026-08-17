@@ -7,6 +7,11 @@
 
 #define LAYER_STATE_8BIT
 #define COMBO_ONLY_FROM_LAYER 0
+/* Enables the combo_should_trigger() callback (keymap.c), which gates the RU
+ * backend-select chords (r+v -> vim, r+w -> Windows) to the armed leader. Without
+ * this define the callback is never compiled in, so those combos fire in ordinary
+ * typing and their swallowed output keycodes eat the keys. */
+#define COMBO_SHOULD_TRIGGER
 
 #define DEBOUNCE 15
 
