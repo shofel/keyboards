@@ -7,8 +7,8 @@ the `unicode_ru` name it covers Russian Cyrillic **and** the typographic symbols
 
 ## Backends
 
-Which one is live is held in `ru_backend`, selected by the leader (`leader,r,c`
-compose · `leader,r,v` vim · `leader,r,w` windows):
+Which one is live is held in `ru_backend`, selected by the leader (`leader,r`
+compose · `leader,v` vim · `leader,w` windows):
 
 | | `RU_BACKEND_COMPOSE` (default) | `RU_BACKEND_VIM` | `RU_BACKEND_WINDOWS` |
 |---|---|---|---|

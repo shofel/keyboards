@@ -139,24 +139,6 @@ x + w → <-
         · · ·   · · ·
 ```
 
-, + c → reset (drop toggles, cancel one-shots)
-
-```
-· · ● · ● ·       · · · · · ·
-· · · · · ·       · · · · · ·
-· · · · · ·       · · · · · ·
-        · · ·   · · ·
-```
-
-f + l → reset (drop toggles, cancel one-shots)
-
-```
-· · · · · ·       · ● · ● · ·
-· · · · · ·       · · · · · ·
-· · · · · ·       · · · · · ·
-        · · ·   · · ·
-```
-
 LEAD + sft + SYM → bootloader
 
 ```
@@ -206,30 +188,30 @@ h + k → ->
 
 Tap `LEAD`, then the keys in order. Mirror pairs (either hand) share one entry; the diagram numbers the presses — `0` is `LEAD` (either outer thumb), then `1`, `2` for the keys after it.
 
-`LEAD, r, c` — Russian — compose backend (rolling-safe, host-wide)
+`LEAD, r` — Russian — compose backend (default; rolling-safe, host-wide)
 
 ```
-· · · · 2 ·       · · · · · ·
+· · · · · ·       · · · · · ·
 · · · · · ·       · · · 1 · ·
 · · · · · ·       · · · · · ·
         0 · ·   · · 0
 ```
 
-`LEAD, r, v` — Russian — vim backend (i_CTRL-V U, no host setup)
+`LEAD, v` — Russian — vim backend (i_CTRL-V U, no host setup)
 
 ```
-· · · · · 2       · · · · · ·
-· · · · · ·       · · · 1 · ·
+· · · · · 1       · · · · · ·
+· · · · · ·       · · · · · ·
 · · · · · ·       · · · · · ·
         0 · ·   · · 0
 ```
 
-`LEAD, r, w` — Russian — Windows backend (Alt+numpad hex; EnableHexNumpad)
+`LEAD, w` — Russian — Windows backend (Alt+numpad hex; EnableHexNumpad)
 
 ```
 · · · · · ·       · · · · · ·
-· · · · · ·       · · · 1 · ·
-· · · · 2 ·       · · · · · ·
+· · · · · ·       · · · · · ·
+· · · · 1 ·       · · · · · ·
         0 · ·   · · 0
 ```
 
@@ -408,10 +390,11 @@ wrong. And with two keyboards attached — a qwerty laptop and the BOO board —
 the OS can't tell which map to apply. So the laptop switches language with
 `win+space`, and the QMK board carries its own Russian layer instead.
 
-Two backends, selected by leader (see the unicode_ru module): compose mode
-(default, rolling-safe, host-wide) and vim mode (`leader,v`), which emits
-vim's native `i_CTRL-V U <hex>` so Cyrillic types inside vim/neovim with no
-host compose setup. Both are emitted in userspace, so the firmware no longer
+Three backends, selected by leader (see the unicode_ru module): compose mode
+(`leader,r`, default, rolling-safe, host-wide), vim mode (`leader,v`), which
+emits vim's native `i_CTRL-V U <hex>` so Cyrillic types inside vim/neovim with
+no host compose setup, and Windows mode (`leader,w`, Alt+numpad hex; needs
+EnableHexNumpad). All are emitted in userspace, so the firmware no longer
 needs the out-of-tree UNICODE_MODE_VIM patch (QMK PR #25188).
 
 ### Symmetry
@@ -421,8 +404,8 @@ structures, and the finger-pair picks the variant. Brackets illustrate it most
 cleanly — one finger, home+below, left hand opens and right closes. Arrows on
 the bottom row follow the same logic: index+middle gives the fat arrow (=> / <=),
 index+ring the thin one (-> / <-), and the direction follows the hand (left
-points left, right points right). Reset/cancel keeps a symmetric top-row pair
-(index+ring, one per hand). Esc sits apart on a vertical same-column combo (right
+points left, right points right). Reset/cancel (drop toggle layers, cancel
+one-shots) is `leader,space`. Esc sits apart on a vertical same-column combo (right
 inner-index, top+home) plus the two-thumb chord — it was moved off c+u/f+d because
 those bridged the Ctrl and Nav combos into misfires.
 
