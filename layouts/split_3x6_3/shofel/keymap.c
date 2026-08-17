@@ -8,17 +8,23 @@
 #include "introspection.h"
 #include "modules/shofel/unicode_ru/introspection.h"
 #include "modules/getreuer/orbital_mouse/introspection.h"
+#include "modules/shofel/leader/leader_fsm.h"
 
 /*
  * Runtime debug logging — all off by default.
  * Flip any flag to `true` (and build with CONSOLE_ENABLE) to stream the
  * corresponding events to `qmk console`. Kept as a ready-to-use toggle hook.
  */
+/* Timeoutless leader (defined with the leader machinery further down). */
+static void leader_build(void);   // build the matcher table once at boot
+static void lead_abort(void);     // drop an in-flight sequence (reset escape hatch)
+
 void keyboard_post_init_user(void) {
   debug_enable   = false;
   debug_matrix   = false;
   debug_keyboard = false;
   debug_mouse    = false;
+  leader_build();
 }
 
 /* Fancy looking spare keys. */
@@ -145,6 +151,7 @@ static void toggle_disable(void) {
 static void toggle_reset(void) {
     oneshot_cancel();
     toggle_disable();
+    lead_abort();   // timeoutless leader has no clock — this is its escape hatch
 }
 
 void leader_suspend(void) {
@@ -367,11 +374,9 @@ void oneshot_process_event(oneshot_state_entry_t *oneshot) {
   }
 }
 
-/* Leader */
-
-void leader_start_user(void) {
-  leader_suspend();
-}
+/* Leader — timeoutless, fire-on-unique-match. QMK's stock leader is disabled
+ * (LEADER_ENABLE=no); the machinery below captures keys and fires the moment a
+ * sequence is uniquely matched, with no per-key timeout. */
 
 /* Leader sequences — data so tools/gen_layer_schemes.py can extract them into
  * docs/reference.md. k2 == KC_NO marks a one-key sequence; doc strings appear
@@ -423,43 +428,129 @@ static const leader_seq_t leader_seqs[] = {
   {KC_P,     KC_NO, lead_pscr,     "Print Screen"},
 };
 
-void leader_end_user(void) {
-  leader_resume();
+/* Emoji: leader,{a|i},<sel> -> a flower or reaction, host-wide, via the compose
+ * backend (Compose + a private '@' code; the code<->glyph map lives in
+ * tools/gen_unicode_compose.py and the generated ~/.XCompose). `a` (left home)
+ * and `i` (right home) are a mirror pair, so either hand triggers it. Always
+ * compose — emoji go to chat/host apps, so the vim backend is irrelevant. File
+ * scope so both the table builder below and tools/gen_layer_schemes.py read it. */
+static const struct { uint16_t sel; const char *code; } emoji_seqs[] = {
+  {KC_T, "@t"},  // 🌷 tulip
+  {KC_R, "@r"},  // 🌹 rose
+  {KC_C, "@c"},  // 🌸 cherry
+  {KC_H, "@h"},  // 🌺 hibiscus
+  {KC_S, "@s"},  // 🌻 sunflower
+  {KC_D, "@d"},  // 🌼 daisy
+  {KC_U, "@u"},  // 👍 thumbup
+  {KC_O, "@o"},  // 👌 ok
+  {KC_K, "@k"},  // 🤔 think
+  {KC_M, "@m"},  // 🧐 monocle
+  {KC_N, "@n"},  // 🤝 handshake
+};
 
-  for (size_t i = 0; i < sizeof(leader_seqs) / sizeof(leader_seqs[0]); i++) {
-    const leader_seq_t *e = &leader_seqs[i];
-    bool hit = (e->k2 == KC_NO) ? leader_sequence_one_key(e->k1)
-                                : leader_sequence_two_keys(e->k1, e->k2);
-    if (hit) { e->act(); }
+/* The matcher's view of the leader set: keys (lead_key_table) + the action each
+ * fires (lead_acts), built once at boot from leader_seqs[] and emoji_seqs[]. An
+ * action is either a plain fn() or, for emoji, a compose code. */
+#define LEADER_SEQS_N  (sizeof(leader_seqs) / sizeof(leader_seqs[0]))
+#define EMOJI_SEQS_N   (sizeof(emoji_seqs) / sizeof(emoji_seqs[0]))
+#define LEAD_ENTRIES_N (LEADER_SEQS_N + 2 * EMOJI_SEQS_N)
+
+typedef struct {
+  void (*fn)(void);   // plain leader action, or NULL for an emoji entry
+  const char *emoji;  // compose code for an emoji entry, or NULL
+} lead_action_t;
+
+static leader_seq_keys_t lead_key_table[LEAD_ENTRIES_N];
+static lead_action_t     lead_acts[LEAD_ENTRIES_N];
+static size_t            lead_entries_n = 0;
+
+static void leader_build(void) {
+  lead_entries_n = 0;
+  for (size_t i = 0; i < LEADER_SEQS_N; i++) {
+    leader_seq_keys_t *k = &lead_key_table[lead_entries_n];
+    k->len     = (leader_seqs[i].k2 == KC_NO) ? 1 : 2;
+    k->keys[0] = leader_seqs[i].k1;
+    if (k->len == 2) { k->keys[1] = leader_seqs[i].k2; }
+    lead_acts[lead_entries_n].fn    = leader_seqs[i].act;
+    lead_acts[lead_entries_n].emoji = NULL;
+    lead_entries_n++;
   }
-
-  /* Emoji: leader,{a|i},<sel> -> a flower or reaction, host-wide, via the
-   * compose backend (Compose + a private '@' code; the code<->glyph map lives in
-   * tools/gen_unicode_compose.py and the generated ~/.XCompose). `a` (left home)
-   * and `i` (right home) are a mirror pair, so either hand triggers it. Always
-   * compose — emoji go to chat/host apps, so the vim backend is irrelevant. */
-  static const struct { uint16_t sel; const char *code; } emoji_seqs[] = {
-    {KC_T, "@t"},  // 🌷 tulip
-    {KC_R, "@r"},  // 🌹 rose
-    {KC_C, "@c"},  // 🌸 cherry
-    {KC_H, "@h"},  // 🌺 hibiscus
-    {KC_S, "@s"},  // 🌻 sunflower
-    {KC_D, "@d"},  // 🌼 daisy
-    {KC_U, "@u"},  // 👍 thumbup
-    {KC_O, "@o"},  // 👌 ok
-    {KC_K, "@k"},  // 🤔 think
-    {KC_M, "@m"},  // 🧐 monocle
-    {KC_N, "@n"},  // 🤝 handshake
-  };
-  for (size_t i = 0; i < sizeof(emoji_seqs) / sizeof(emoji_seqs[0]); i++) {
-    if (leader_sequence_two_keys(KC_A, emoji_seqs[i].sel) ||
-        leader_sequence_two_keys(KC_I, emoji_seqs[i].sel)) {
-      ru_compose_emit_code(emoji_seqs[i].code);
+  const uint16_t emoji_prefix[2] = {KC_A, KC_I};  // either home index triggers
+  for (size_t i = 0; i < EMOJI_SEQS_N; i++) {
+    for (int p = 0; p < 2; p++) {
+      leader_seq_keys_t *k = &lead_key_table[lead_entries_n];
+      k->len     = 2;
+      k->keys[0] = emoji_prefix[p];
+      k->keys[1] = emoji_seqs[i].sel;
+      lead_acts[lead_entries_n].fn    = NULL;
+      lead_acts[lead_entries_n].emoji = emoji_seqs[i].code;
+      lead_entries_n++;
     }
   }
 }
 
+static leader_capture_t lead_cap;
+
+static void lead_begin(void) {
+  leader_capture_begin(&lead_cap);
+  leader_suspend();   // mask toggle layers so tokens read the base layout
+}
+
+/* End capture and un-mask layers. Safe to call when not capturing. */
+static void lead_abort(void) {
+  if (lead_cap.active) {
+    lead_cap.active = false;
+    leader_resume();
+  }
+}
+
+static void lead_fire(size_t idx) {
+  if (lead_acts[idx].fn) {
+    lead_acts[idx].fn();
+  } else if (lead_acts[idx].emoji) {
+    ru_compose_emit_code(lead_acts[idx].emoji);
+  }
+}
+
+/* Feed one captured key. Fires on a unique match, aborts on no match, else keeps
+ * waiting. leader_resume() runs before the action (as leader_end_user did) so
+ * the action's layer/toggle changes actually apply. */
+static void lead_feed(uint16_t keycode) {
+  size_t idx = 0;
+  switch (leader_capture_feed(&lead_cap, keycode, lead_key_table, lead_entries_n, &idx)) {
+    case LEADER_MATCH_UNIQUE:
+      leader_resume();
+      lead_fire(idx);
+      break;
+    case LEADER_MATCH_NONE:
+    case LEADER_MATCH_AMBIGUOUS:
+      leader_resume();   // abort: un-mask, act on nothing
+      break;
+    case LEADER_MATCH_PARTIAL:
+      break;             // keep capturing
+  }
+}
+
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+  /* Timeoutless leader takes priority: while capturing, each PRESS is a sequence
+   * token fed to the matcher and swallowed (never typed nor seen by a layer).
+   * Combos resolve before us, so a combo's OUTPUT keycode is what gets captured
+   * — the basis for the RU-via-combos work.
+   *
+   * Only presses are swallowed. RELEASES fall through to normal processing: a key
+   * registered BEFORE the leader was armed (a letter still held from a fast roll,
+   * or a held OS_SFT/LT thumb) must get its release or it sticks. A swallowed
+   * token key's own release is harmless — its press never registered, so QMK's
+   * source-layer cache resolves the release to a no-op unregister. */
+  if (lead_cap.active && record->event.pressed) {
+    if (keycode == KK_RESET_STATE) {
+      toggle_reset();   // the reset combo is the escape hatch: full reset + abort
+      return false;
+    }
+    lead_feed(keycode);
+    return false;
+  }
+
   /* Russian: the RU_ and U_ unicode_map keys are emitted in userspace by the
    * active backend (compose or vim) here, and consumed before QMK's hex path. */
   if (ru_unicode_process(keycode, record)) {
@@ -518,14 +609,12 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
       return false;
 
     /* The two outer thumbs are custom leader keys (distinct so the reset combo
-     * can tell them apart); both arm the leader sequence. process_leader still
-     * captures the following keys, since it keys off the `leading` flag.
-     * Returning false is load-bearing: process_leader runs after us in the
-     * pipeline, so falling through would append this keycode into an active
-     * sequence and corrupt it. Arm here; let process_leader capture the rest. */
+     * can tell them apart); both arm the timeoutless leader. lead_begin() sets
+     * the capture flag; the intercept at the top of this function then captures
+     * every following key. Returning false swallows the arming key itself. */
     case KK_LEAD_L:
     case KK_LEAD_R:
-      if (record->event.pressed) { leader_start(); }
+      if (record->event.pressed) { lead_begin(); }
       return false;
 
     /* Mouse mode switch */

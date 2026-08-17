@@ -2,9 +2,8 @@
 
 #define UNICODE_TYPE_DELAY 0
 
-#define LEADER_PER_KEY_TIMING
-#define LEADER_NO_TIMEOUT
-#define LEADER_TIMEOUT 100
+/* No LEADER_* settings: QMK's stock leader is disabled (LEADER_ENABLE=no). The
+ * custom timeoutless leader fires on a unique match with no per-key timeout. */
 
 #define LAYER_STATE_8BIT
 #define COMBO_ONLY_FROM_LAYER 0
