@@ -39,6 +39,12 @@ enum my_keycodes {
   KK_LANGLE,  // « when shifted, < otherwise
   KK_RANGLE,  // » when shifted, > otherwise
 
+  /* Combo outputs for RU backend select, captured by the armed leader only (see
+   * combo_should_trigger): leader,(r+v) -> vim, leader,(r+w) -> Windows. Never
+   * typed on their own. */
+  KK_RU_VIM,
+  KK_RU_WIN,
+
   /* The two outer-thumb leader keys. Distinct keycodes (not a single shared
    * QK_LEAD) so the reset chord — both of them at once — is an unambiguous
    * combo: stock QMK matches combos by keycode, so a {QK_LEAD, QK_LEAD} combo
@@ -246,6 +252,12 @@ const uint16_t PROGMEM dquo_combo[] = {KC_G, KC_V, COMBO_END};
  * SYM no longer needs this combo: it is reached via the left thumb (KK_SYMBO)
  * and the RET layer-tap (right inner thumb). */
 const uint16_t PROGMEM fkeys_combo[] = {KC_SLASH, KC_MINUS, COMBO_END};
+/* RU backend select under the armed leader: leader,(r+v) -> vim, leader,(r+w) ->
+ * Windows. combo_should_trigger gates these to lead_cap.active, so they never
+ * fire in ordinary typing ("se[rv]e", "cu[rv]e"); the armed leader captures the
+ * combo's output keycode. Compose stays the bare tap, leader,r. */
+const uint16_t PROGMEM ru_vim_combo[] = {KC_R, KC_V, COMBO_END};
+const uint16_t PROGMEM ru_win_combo[] = {KC_R, KC_W, COMBO_END};
 
 /* Indices for all combos (designated initializers) */
 enum combos {
@@ -283,6 +295,9 @@ enum combos {
 
   CMB_DQUO,
   CMB_FSYS,
+
+  CMB_RU_VIM,
+  CMB_RU_WIN,
 };
 
 combo_t key_combos[] = {
@@ -321,6 +336,9 @@ combo_t key_combos[] = {
 
   [CMB_DQUO]       = COMBO(dquo_combo, KC_DQUO),
   [CMB_FSYS]       = COMBO(fkeys_combo, OSL(L_FKEYS_SYS)),
+
+  [CMB_RU_VIM]     = COMBO(ru_vim_combo, KK_RU_VIM),
+  [CMB_RU_WIN]     = COMBO(ru_win_combo, KK_RU_WIN),
 };
 
 /* Oneshot */
@@ -395,15 +413,16 @@ static void lead_eur(void)      { ru_emit_glyph("$e", 0x20AC); }
 static void lead_del_all(void)  { tap_code16(LCTL(KC_A)); tap_code16(KC_DEL); }
 static void lead_del_line(void) { tap_code16(LSFT(KC_HOME)); tap_code16(KC_DEL); }
 static void lead_del_word(void) { tap_code16(LCTL(KC_BSPC)); }
-static void lead_kitty(void)    { tap_code16(LGUI(KC_T)); }
+static void lead_kitty(void)    { toggle_disable(); tap_code16(LGUI(KC_T)); }  // drop RU so terminal typing is Latin
 static void lead_pscr(void)     { tap_code(KC_PSCR); }
 
 static const leader_seq_t leader_seqs[] = {
-  /* Russian backend selection, one bare key each (prefix-free single-key seqs):
-   * r = compose (the default; rolling-safe, host-wide), v = vim, w = Windows. */
+  /* Russian backend selection. Compose (the default) is the bare tap leader,r;
+   * vim and Windows are the leader chords r+v / r+w (combos gated to the armed
+   * leader by combo_should_trigger, so they can't misfire in normal typing).
+   * Those two are handled in process_record_user's capture intercept, not here,
+   * since their tokens (KK_RU_VIM/KK_RU_WIN) aren't physical keys. */
   {KC_R,     KC_NO, lead_ru,       "Russian — compose backend (default; rolling-safe, host-wide)"},
-  {KC_V,     KC_NO, lead_vim,      "Russian — vim backend (i_CTRL-V U, no host setup)"},
-  {KC_W,     KC_NO, lead_win,      "Russian — Windows backend (Alt+numpad hex; EnableHexNumpad)"},
   {KC_E,     KC_NO, lead_en,       "back to English (drop the toggle layer)"},
   {KC_SPACE, KC_NO, lead_reset,    "disable any toggle layer, cancel one-shots"},
   {KC_F,     KC_NO, lead_fkeys,    "F-keys / system layer (sticky)"},
@@ -419,7 +438,7 @@ static const leader_seq_t leader_seqs[] = {
   {KC_D,     KC_A,  lead_del_all,  "delete all (Ctrl+A, Del)"},
   {KC_D,     KC_U,  lead_del_line, "delete to line start (like Ctrl-U)"},
   {KC_D,     KC_W,  lead_del_word, "delete word (Ctrl+Backspace)"},
-  {KC_K,     KC_NO, lead_kitty,    "kitty terminal (Gui+T)"},
+  {KC_K,     KC_NO, lead_kitty,    "kitty terminal (Gui+T; drops Russian so the terminal gets Latin)"},
   {KC_P,     KC_NO, lead_pscr,     "Print Screen"},
 };
 
@@ -526,6 +545,17 @@ static void lead_feed(uint16_t keycode) {
   }
 }
 
+/* Gate the RU-select chords (r+v -> vim, r+w -> Windows) to the armed leader:
+ * they fire only while a leader sequence is being captured. In ordinary typing
+ * lead_cap.active is false, so they're inert — no misfire on "serve"/"curve" —
+ * and `r` keeps its usual combo footprint. All other combos are unaffected. */
+bool combo_should_trigger(uint16_t combo_index, combo_t *combo, uint16_t keycode, keyrecord_t *record) {
+  if (combo_index == CMB_RU_VIM || combo_index == CMB_RU_WIN) {
+    return lead_cap.active;
+  }
+  return true;
+}
+
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   /* Timeoutless leader takes priority: while capturing, each PRESS is a sequence
    * token fed to the matcher and swallowed (never typed nor seen by a layer).
@@ -538,6 +568,15 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
    * token key's own release is harmless — its press never registered, so QMK's
    * source-layer cache resolves the release to a no-op unregister. */
   if (lead_cap.active && record->event.pressed) {
+    /* The RU-select chords resolve to a combo keycode, not a physical key, so
+     * they can't live in leader_seqs — complete the sequence directly, mirroring
+     * lead_feed's UNIQUE path (clear capture, un-mask layers, then fire). */
+    if (keycode == KK_RU_VIM || keycode == KK_RU_WIN) {
+      lead_cap.active = false;
+      leader_resume();
+      if (keycode == KK_RU_VIM) { lead_vim(); } else { lead_win(); }
+      return false;
+    }
     lead_feed(keycode);
     return false;
   }
@@ -572,6 +611,11 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
       if (record->event.pressed) {
         SEND_STRING("<-");
       }
+      return false;
+    case KK_RU_VIM:
+    case KK_RU_WIN:
+      /* Combo tokens for RU select; the press is consumed by the leader capture.
+       * A stray release (combo key-up after the sequence completed) is a no-op. */
       return false;
     case KK_LANGLE:
     case KK_RANGLE:
@@ -658,11 +702,11 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
  * `win+space`, and the QMK board carries its own Russian layer instead.
  *
  * Three backends, selected by leader (see the unicode_ru module): compose mode
- * (`leader,r`, default, rolling-safe, host-wide), vim mode (`leader,v`), which
- * emits vim's native `i_CTRL-V U <hex>` so Cyrillic types inside vim/neovim with
- * no host compose setup, and Windows mode (`leader,w`, Alt+numpad hex; needs
- * EnableHexNumpad). All are emitted in userspace, so the firmware no longer
- * needs the out-of-tree UNICODE_MODE_VIM patch (QMK PR #25188).
+ * (`leader,r` tap, default, rolling-safe, host-wide), vim mode (`leader,(r+v)`
+ * chord), which emits vim's native `i_CTRL-V U <hex>` so Cyrillic types inside
+ * vim/neovim with no host compose setup, and Windows mode (`leader,(r+w)` chord,
+ * Alt+numpad hex; needs EnableHexNumpad). All are emitted in userspace, so the
+ * firmware no longer needs the out-of-tree UNICODE_MODE_VIM patch (QMK PR #25188).
  *
  * ### Symmetry
  *

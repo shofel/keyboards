@@ -86,8 +86,8 @@ enum unicode_names {
 extern const uint32_t PROGMEM unicode_map[];
 
 /* Userspace Russian emission backends (see unicode_ru.c). The keymap selects a
- * backend via `ru_backend` (leader,r = compose, leader,v = vim,
- * leader,w = windows) and calls `ru_unicode_process` at the top of
+ * backend via `ru_backend` (leader,r = compose, leader,(r+v) = vim,
+ * leader,(r+w) = windows) and calls `ru_unicode_process` at the top of
  * process_record_user; when it returns true the unicode_map key was emitted in
  * userspace and must not be processed further. All backends are self-contained —
  * QMK's unicode input-mode machinery (and the out-of-tree UNICODE_MODE_VIM) is

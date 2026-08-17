@@ -32,14 +32,20 @@ compose and vim are QA'd on-device.
 ## Done
 
 - **2026-08-17** — Russian backend selection (was #1 after the leader): pick the emission backend
-  from the leader, one bare key each — `leader,r` → compose (default, rolling-safe, host-wide),
-  `leader,v` → vim (`i_CTRL-V U`), `leader,w` → Windows (Alt+numpad hex; needs `EnableHexNumpad`).
-  Shipped as PR #35 — first under a combo-free `l,r,{c|v|w}` 3-key gateway (the specced `r+c`/`r+v`/
-  `r+w` combos would misfire in normal typing: `se**rv**e`, `cu**rv**e`, `a**rc**`), then simplified
-  to bare single keys in PR #36 so `leader,r` is the fast default again. Adds a 3rd userspace
-  backend, `RU_BACKEND_WINDOWS`, a faithful port of QMK's `UNICODE_MODE_WINDOWS`. **compose + vim
-  QA'd on-device 2026-08-17; `windows` UNVERIFIED** — needs a Windows host + `EnableHexNumpad=1`
-  (BMP-only, which covers Cyrillic and ₺/₽/€; astral emoji stay on compose).
+  from the leader — `leader,r` (tap) → compose (default, rolling-safe, host-wide), `leader,(r+v)`
+  (chord) → vim (`i_CTRL-V U`), `leader,(r+w)` (chord) → Windows (Alt+numpad hex; needs
+  `EnableHexNumpad`). Shipped as PR #35 (combo-free `l,r,{c|v|w}` 3-key gateway) → PR #36 (bare
+  single keys) → **PR #37, the final form**: compose is the bare tap, vim/Windows are the `r+v`/`r+w`
+  chords captured by the armed leader and gated by `combo_should_trigger` so they never misfire in
+  normal typing (`se**rv**e`, `cu**rv**e`). Adds a 3rd userspace backend, `RU_BACKEND_WINDOWS`, a
+  faithful port of QMK's `UNICODE_MODE_WINDOWS`. **compose + vim QA'd on-device 2026-08-17; `windows`
+  UNVERIFIED** — needs a Windows host + `EnableHexNumpad=1` (BMP-only, which covers Cyrillic and
+  ₺/₽/€; astral emoji stay on compose).
+- **2026-08-17** — `leader,k` now drops Russian (PR #37): opening kitty (`Gui+T`) first calls
+  `toggle_disable()`, so terminal typing lands in Latin instead of Cyrillic — reversing the
+  documented "keep the layer" decision (its section removed from `known-limitations.md`). Also wired
+  `test_gen_layer_schemes.py` into `make test` (`test-schemes-unit`); it had silently rotted across
+  PRs #32/#36.
 - **2026-08-17** — reset-combo cleanup (PR #36): unmapped the `,+c` / `f+l` soft-reset chords and
   removed the orphaned `KK_RESET_STATE` keycode + its dead handlers. Soft-reset (drop toggle layers,
   cancel one-shots) is now solely `leader,space` (also `Esc` / `leader,e`); the `QK_BOOT` /
