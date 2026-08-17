@@ -13,77 +13,46 @@ Procedure: score the four factors per task, take the weighted sum, round to 2 de
 descending; on ties the earlier-listed task stays first. Re-rank whenever a task is added or an
 estimate changes. Bugs tend to top the list because Impact carries the most weight on a daily driver.
 
-## Ranked — 2026-08-14
+## Ranked — 2026-08-17
 
 | # | Score | Task | Where |
 |---|-------|------|-------|
-| 1 | 2.70 | Timeoutless leader: fire-on-unique-match, prefix-free sequence set + collision lint | Leader |
-| 2 | 2.55 | Russian backend selection under one leader prefix, via **combos** on the 2nd token (`l,r` tap vs `l,(r+c/v/w)` chord) | Layout |
-| 3 | 2.00 | Sturdier cantor case with quieter sound | Hardware |
+| 1 | 2.55 | Russian backend selection under one leader prefix — **needs a design decision** (the specced combo approach misfires in normal typing; see Layout) | Layout |
+| 2 | 2.00 | Sturdier cantor case with quieter sound | Hardware |
 
-Scores are estimates. The symmetric-combos reorg that used to top this list shipped and moved to
-**Done** (PR #25/#26); it already carried the "combos are positional" finger+row comments and the
-"docs: symmetry" note as part of the work. #1 (timeoutless leader) and #2 (RU backend) couple: a
-bare `r` tap and an `r+c` chord emit distinct keycodes, so `l,r` and `l,(r+c)` are not a prefix
-pair — the RU set stays prefix-free without dropping the standalone `l,r`, which is what keeps it
-compatible with a timeoutless leader. #3 is hardware.
-
-## Leader
-
-- **Timeoutless leader.** Today the leader still terminates each sequence on a
-  100 ms per-key timeout (`LEADER_TIMEOUT 100` + `LEADER_PER_KEY_TIMING`;
-  `LEADER_NO_TIMEOUT` only removes the *initial* wait). Make it fire the instant a
-  sequence is uniquely matched — consistent with the no-timeout one-shot design,
-  snappier, and with no "too slow" misfire. Requires, in order:
-  1. **Prefix-free sequence set.** A timeoutless leader only works if no sequence
-     is a prefix of another. Current blockers: `M` (mouse layer) is a prefix of
-     `M,L`/`M,R`/`M,E` (₺/₽/€), and `.` mirrors it. Relocate the mouse layer off
-     bare `M`/`.` (or move the currencies) so the set is a prefix code.
-  2. **Fire-on-unique-match.** Replace timeout-termination with a small custom
-     matcher (same shape as the one-shot module) that tests the growing buffer
-     against the sequence table and fires the moment a unique complete match is
-     found; abort immediately on a non-matching key. Off-target testable.
-  3. **Prefix-collision lint.** A generator/CI check that fails if any two
-     sequences ever form a prefix pair — guards the invariant forever.
-  4. **Cancel / abort a half-typed sequence.** A timeoutless leader has no clock
-     to bail you out, so it needs an explicit escape hatch. The **reset combo**
-     (`,+c` / `f+l`, top row) already ships from the symmetric-combos reorg and
-     fires `KK_RESET_STATE` → `toggle_reset()` (disable toggle layers, cancel
-     one-shots), with the reset logic already extracted into a reusable function.
-     **Remaining:** extend that reset to also clear in-flight leader-sequence
-     state once the fire-on-unique-match matcher (req 2) holds that state.
-
-  Couples with the "Russian backend under one leader prefix" item: `l,r` plus
-  `l,r,c`/`l,r,w`/`l,r,v` is *not* prefix-free, so the two are incompatible unless
-  the bare `l,r` standalone is dropped (always require the 3rd key).
+Scores are estimates. The **timeoutless leader** (was #1) shipped and moved to **Done** (PRs
+#30–#33): fire-on-unique-match, a prefix-free sequence set, a blocking prefix-collision lint, and
+an off-target-tested matcher + capture FSM. Completing it changed the picture for #1 (RU backend):
+the leader now handles 3-key sequences with no clock, so `l,r,{c|v|w}` is viable as a **combo-free**
+alternative to the specced combos — which matters because the combos misfire (see Layout). #2 is
+hardware.
 
 ## Layout
 
-- **Russian backend under one leader prefix — via combos.** The 2nd token after `l` is either a
-  *tap* of `r` or a *chord*:
-  - `l , r`      → Ru (default / compose)
-  - `l , (r+c)`  → Ru compose
-  - `l , (r+v)`  → Ru vim
-  - `l , (r+w)`  → Ru windows   `()` = a combo
+- **Russian backend selection under one leader prefix.** Goal: pick the Russian backend from a
+  single `l,r`-family gateway — `compose` (default), `vim`, and `windows` (new). Today this is two
+  separate keys: `l,r`/`l,c` → compose, `l,v` → vim.
 
-  A bare `r` tap and the `r+c` combo emit **distinct keycodes**, so `l,r` and `l,(r+c)` are not a
-  prefix pair — the set is prefix-free **without** dropping the standalone `l,r`. This is why it no
-  longer conflicts with the timeoutless leader.
+  **The specced combo approach is blocked — it misfires in normal typing.** The plan was `l,r` tap
+  vs `l,(r+c)` / `l,(r+v)` / `l,(r+w)` chords, so the tap and chords emit distinct keycodes and the
+  set stays prefix-free. A 2026-08-14 hardware spike confirmed the *leader* captures a combo's
+  output keycode (`l,(r+c)` → `SPK:RC`, `l,(r+v)` → `SPK:RV`, vs `l,r` → bare-`r`). **But** those
+  combos are **global base-layer combos** (`COMBO_ONLY_FROM_LAYER 0`, no per-context restriction),
+  so they also fire during ordinary typing: `r+c` eats "a**rc**", `r+v` eats "se**rv**e"/"cu**rv**e".
+  That is the same roll-dump class as `docs/known-limitations.md`; the spike only tested deliberate
+  chords, so it never surfaced it. Verified 2026-08-17 against the live combo config.
 
-  **Gate — CLEARED (hardware spike, 2026-08-14).** Flashed a throwaway spike (`r+c`/`r+v`/`r+w`
-  combos → distinct keycodes; leader sequences on those keycodes printing markers). On the LEFT
-  half: `l,(r+c)` → `SPK:RC` and `l,(r+v)` → `SPK:RV` (the combo's *output* keycode), while `l,r`
-  → the bare-`r` marker. So the leader captures a combo's output as its 2nd token — RU-via-combos
-  is feasible. Matches the source trace: stock QMK runs `process_record_user` before
-  `process_leader`, and a combo's output flows through `process_record`.
+  **Recommended alternative — combo-free, enabled by the now-shipped timeoutless leader.** The
+  leader now fires on unique match and handles 3-key sequences, so `l,r,c` / `l,r,v` / `l,r,w` are a
+  clean prefix code **with no combos and no misfire** — *provided bare `l,r` is dropped* (require the
+  3rd key; `r` becomes a pure prefix). Cost: retrains the current `l,r`/`l,v` muscle memory; a
+  non-repeat default key is needed (the doc generator rejects a repeated-key sequence like `l,r,r`).
 
-  **Caveat surfaced by the spike — combo reliability, not the leader.** The planned pairs overlap
-  existing combos (`r` is already in `ralt {r+l}` and `curly_right {r+k}`; `c` in `lctl`/`reset_left`;
-  `w` in `fat_left`/`thin_left`). `r+c` and `r+v` chorded cleanly, but `r+w` once registered as a
-  bare `r` (the chord didn't resolve — a `COMBO_TERM`/simultaneity miss). The real build should
-  confirm each 2nd-token pair chords reliably — ideally not sharing keys with other combos — and/or
-  tune `COMBO_TERM`, then re-verify on hardware. (`windows` backend still open: QMK facility vs.
-  vendor into our module.)
+  **Decision needed before building** (pick one): (a) combo-free sequences `l,r,{c|v|w}`, dropping
+  bare `l,r` — recommended; (b) keep combos but choose rare-bigram / vertical same-column 2nd-token
+  pairs that won't misfire; (c) leave Russian selection as-is (`l,r`/`l,v`). Independently, the
+  **`windows` backend is unbuilt** — it needs a Windows unicode input method (QMK facility vs.
+  vendor into the `unicode_ru` module), a separate feature from the selection UX.
 
 ## Hardware
 
@@ -91,6 +60,16 @@ compatible with a timeoutless leader. #3 is hardware.
 
 ## Done
 
+- **2026-08-17** — timeoutless leader (was ranked #1): the leader now fires the instant a sequence
+  is uniquely matched, with no per-key timeout (QMK's stock leader is off, `LEADER_ENABLE=no`).
+  Shipped in four PRs: prefix-collision lint as a blocking gate (`bcc5e9c`, PR #30); the
+  fire-on-unique-match matcher + capture FSM, off-target unit-tested (`0979dc1`, PR #31);
+  prefix-free set — currencies moved off the `M`/`.` mouse prefix to `l,u,{l|r|e}` (`e1dbaee`,
+  PR #32); and the cutover — a custom capture in `process_record_user` driving the matcher, with
+  the reset combo / `leader,space` as the abort escape hatch (`cc64160`, PR #33). A code review
+  caught a stuck-key defect (releases were being swallowed during capture) that was fixed before
+  merge. **Hardware QA still pending** (batch) — the `process_record` integration can't be verified
+  off-target.
 - **2026-08-14** — symmetric combos reorg (was ranked #1): restored `=>`, mirrored `<=`/`<-`,
   relocated reset→`,+c`/`f+l`, rewrote every combo comment in the finger+row vocabulary, and added
   the "strange but consistent" symmetry note that `make gen-docs` renders into `docs/reference.md`.
