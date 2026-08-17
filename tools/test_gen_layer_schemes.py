@@ -136,18 +136,24 @@ def test_extract_combos_real():
     assert by_keys[("KK_RET", "KC_SPACE", "KK_LEAD_R")] == "QK_BOOT"
     assert by_keys[("KK_LEAD_L", "KK_SYMBO")] == "QK_REBOOT"
     assert by_keys[("KK_RET", "KK_LEAD_R")] == "QK_REBOOT"
+    # RU backend select: bare tap leader,r = compose; these two chords pick vim/win
+    # (gated to the armed leader by combo_should_trigger).
+    assert by_keys[("KC_R", "KC_V")] == "KK_RU_VIM"
+    assert by_keys[("KC_R", "KC_W")] == "KK_RU_WIN"
     assert len(combos) == 30
 
 def test_extract_leader_seqs_real():
     seqs = g.extract_leader_seqs(g.KEYMAP.read_text(encoding="utf-8"))
-    assert (["KC_R"], "lead_ru", "Russian — compose backend (default)") in seqs
+    assert (["KC_R"], "lead_ru", "Russian — compose backend (default; rolling-safe, host-wide)") in seqs
     assert (["KC_D", "KC_W"], "lead_del_word", "delete word (Ctrl+Backspace)") in seqs
-    assert len(seqs) == 20
-    # Mirror pairs share an action; grouping collapses the 20 rows to 15 entries.
+    # vim/Windows are leader chords (r+v / r+w), handled as combos — not in leader_seqs.
+    assert not any(act in ("lead_vim", "lead_win") for _, act, _ in seqs)
+    assert len(seqs) == 15
+    # Mirror pairs share an action; grouping collapses the 15 rows to 14 entries.
     groups = g.group_leader_seqs(seqs)
-    assert len(groups) == 15
+    assert len(groups) == 14
     by_seqs = {tuple(map(tuple, ks)): doc for ks, doc in groups}
-    assert by_seqs[(("KC_M", "KC_L"), ("KC_DOT", "KC_L"))] == "₺ lira"
+    assert by_seqs[(("KC_M",), ("KC_DOT",))] == "mouse layer, polar mode"
 
 def test_bold_selector():
     assert g.bold_selector("tulip", "t") == "**t**ulip"
@@ -158,12 +164,12 @@ def test_bold_selector():
 def test_leader_seqs_grouped_with_diagrams():
     doc = g.gen_doc(g.KEYMAP.read_text(encoding="utf-8"))
     lead = doc.split("## Leader sequences", 1)[1].split("## Emoji", 1)[0]
-    # Mirror pairs collapse into one entry naming both hands.
-    assert "`LEAD, m, l` / `LEAD, ., l`" in lead
+    # Mirror pairs collapse into one entry naming both hands (mouse toggle m / .).
+    assert "`LEAD, m` / `LEAD, .`" in lead
     # (mirror ...) annotations are stripped from the rendered descriptions.
     assert "mirror" not in lead
     # Single (non-mirrored) sequences still appear on their own.
-    assert "`LEAD, v`" in lead
+    assert "`LEAD, r`" in lead
     # Each entry carries a numbered position diagram (LEAD=0, keys 1,2,...) —
     # combos keep ●, leaders are ordered so they read as "press here, then here".
     assert "0 · ·   · · 0" in lead
@@ -287,7 +293,7 @@ def test_combo_board_real():
     assert len(nonadj) == 11
     assert {"KC_ESC", "QK_BOOT", "QK_REBOOT",
             "KK_RIGHT_ARROW", "KK_FAT_RIGHT_ARROW", "KK_FAT_LEFT_ARROW",
-            "KK_LEFT_ARROW", "KK_RESET_STATE"} == {o for _k, o in nonadj}
+            "KK_LEFT_ARROW", "KK_RU_VIM", "KK_RU_WIN"} == {o for _k, o in nonadj}
 
 def test_combo_board_only_home_anchors():
     src = g.KEYMAP.read_text(encoding="utf-8")
@@ -409,8 +415,8 @@ def test_nonadjacent_combos_have_diagrams():
     assert "h + m → =>" in combos
     assert ". + w → <=" in combos
     assert "x + w → <-" in combos
-    assert ", + c → reset (drop toggles, cancel one-shots)" in combos
-    assert "f + l → reset (drop toggles, cancel one-shots)" in combos
+    assert "r + v → Russian — vim backend (leader-armed only)" in combos
+    assert "r + w → Russian — Windows backend (leader-armed only)" in combos
     # boot = all three thumbs of a half; reset = outer + inner thumb of that half
     assert "LEAD + sft + SYM → bootloader" in combos
     assert "ret + spc + LEAD → bootloader" in combos

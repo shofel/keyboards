@@ -3,15 +3,6 @@
 Accepted quirks and non-obvious behaviors of the shofel keymap. These are
 documented rather than fixed — each note says why.
 
-## Kitty control keys come out Cyrillic while Russian is active
-
-`leader,k` sends `Gui+T` (kitty's new-window shortcut) correctly, but the
-control keys typed *after* it land on the Russian layer and come out Cyrillic.
-This is not a leader bug — `leader,k` itself records correctly.
-
-Left as-is: fixing it would mean `leader,k` also dropping the active toggle
-layer first, which we don't want.
-
 ## Bisect mouse mode does nothing on Linux
 
 The bisect mode (digitizer binary search) is correct in firmware — keycodes,

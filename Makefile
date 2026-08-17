@@ -10,7 +10,7 @@ endif
 QMK_FIRMWARE_ROOT = $(shell qmk config -ro user.qmk_home 2>/dev/null | cut -d= -f2 | sed -e 's@^None$$@@g')
 
 # Convenience targets — build and flash the Cantor keymap.
-.PHONY: build flash test test-oneshot test-leader-fsm test-compose test-schemes test-leader-prefix lint-leader gen-docs
+.PHONY: build flash test test-oneshot test-leader-fsm test-compose test-schemes test-schemes-unit test-leader-prefix lint-leader gen-docs
 
 build:
 	qmk compile -kb cantor -km shofel
@@ -48,7 +48,7 @@ flash: build
 	exit 1
 
 # All off-target host tests (pure logic; no QMK, no hardware).
-test: test-oneshot test-leader-fsm test-compose test-schemes test-leader-prefix lint-leader
+test: test-oneshot test-leader-fsm test-compose test-schemes test-schemes-unit test-leader-prefix lint-leader
 
 # Off-target unit test for oneshot_fsm.h (the eager one-shot state machine).
 test-oneshot:
@@ -63,6 +63,10 @@ test-compose:
 
 test-schemes:
 	python3 tools/gen_layer_schemes.py --check
+
+# Unit tests for the scheme/combo/leader doc generator (extract + render logic).
+test-schemes-unit:
+	python3 tools/test_gen_layer_schemes.py
 
 # Unit test for the leader prefix-collision lint (pure logic; synthetic inputs).
 test-leader-prefix:

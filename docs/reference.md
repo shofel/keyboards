@@ -184,6 +184,24 @@ h + k → ->
         · · ·   · · ·
 ```
 
+r + v → Russian — vim backend (leader-armed only)
+
+```
+· · · · · ●       · · · · · ·
+· · · · · ·       · · · ● · ·
+· · · · · ·       · · · · · ·
+        · · ·   · · ·
+```
+
+r + w → Russian — Windows backend (leader-armed only)
+
+```
+· · · · · ·       · · · · · ·
+· · · · · ·       · · · ● · ·
+· · · · ● ·       · · · · · ·
+        · · ·   · · ·
+```
+
 ## Leader sequences
 
 Tap `LEAD`, then the keys in order. Mirror pairs (either hand) share one entry; the diagram numbers the presses — `0` is `LEAD` (either outer thumb), then `1`, `2` for the keys after it.
@@ -194,24 +212,6 @@ Tap `LEAD`, then the keys in order. Mirror pairs (either hand) share one entry; 
 · · · · · ·       · · · · · ·
 · · · · · ·       · · · 1 · ·
 · · · · · ·       · · · · · ·
-        0 · ·   · · 0
-```
-
-`LEAD, v` — Russian — vim backend (i_CTRL-V U, no host setup)
-
-```
-· · · · · 1       · · · · · ·
-· · · · · ·       · · · · · ·
-· · · · · ·       · · · · · ·
-        0 · ·   · · 0
-```
-
-`LEAD, w` — Russian — Windows backend (Alt+numpad hex; EnableHexNumpad)
-
-```
-· · · · · ·       · · · · · ·
-· · · · · ·       · · · · · ·
-· · · · 1 ·       · · · · · ·
         0 · ·   · · 0
 ```
 
@@ -314,7 +314,7 @@ Tap `LEAD`, then the keys in order. Mirror pairs (either hand) share one entry; 
         0 · ·   · · 0
 ```
 
-`LEAD, k` — kitty terminal (Gui+T)
+`LEAD, k` — kitty terminal (Gui+T; drops Russian so the terminal gets Latin)
 
 ```
 · · · · · ·       · · · · · ·
@@ -391,11 +391,11 @@ the OS can't tell which map to apply. So the laptop switches language with
 `win+space`, and the QMK board carries its own Russian layer instead.
 
 Three backends, selected by leader (see the unicode_ru module): compose mode
-(`leader,r`, default, rolling-safe, host-wide), vim mode (`leader,v`), which
-emits vim's native `i_CTRL-V U <hex>` so Cyrillic types inside vim/neovim with
-no host compose setup, and Windows mode (`leader,w`, Alt+numpad hex; needs
-EnableHexNumpad). All are emitted in userspace, so the firmware no longer
-needs the out-of-tree UNICODE_MODE_VIM patch (QMK PR #25188).
+(`leader,r` tap, default, rolling-safe, host-wide), vim mode (`leader,(r+v)`
+chord), which emits vim's native `i_CTRL-V U <hex>` so Cyrillic types inside
+vim/neovim with no host compose setup, and Windows mode (`leader,(r+w)` chord,
+Alt+numpad hex; needs EnableHexNumpad). All are emitted in userspace, so the
+firmware no longer needs the out-of-tree UNICODE_MODE_VIM patch (QMK PR #25188).
 
 ### Symmetry
 
