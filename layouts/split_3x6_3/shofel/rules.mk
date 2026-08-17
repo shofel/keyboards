@@ -10,7 +10,7 @@ MOUSEKEY_ENABLE = no       # stock mousekeys replaced by getreuer/orbital_mouse 
 EXTRAKEY_ENABLE = yes      # Audio control and System control
 
 COMBO_ENABLE = yes
-LEADER_ENABLE = yes
+LEADER_ENABLE = no         # custom timeoutless leader (modules/shofel/leader), not QMK's timeout leader
 TAP_DANCE_ENABLE = no
 CAPS_WORD_ENABLE = no
 DEFERRED_EXEC_ENABLE = yes

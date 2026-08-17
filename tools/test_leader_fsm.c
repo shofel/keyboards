@@ -126,6 +126,60 @@ int main(void) {
               "empty buffer -> PARTIAL");
     }
 
+    /* --- capture state machine (buffer + fire/abort) --- */
+
+    /* Single-key unique: fires and deactivates. */
+    {
+        leader_capture_t c;
+        leader_capture_begin(&c);
+        CHECK(c.active, "capture: begin -> active");
+        CHECK(leader_capture_feed(&c, 'R', PREFIX_FREE, PREFIX_FREE_N, &idx) == LEADER_MATCH_UNIQUE,
+              "capture: R -> UNIQUE");
+        CHECK(!c.active, "capture: UNIQUE deactivates");
+        CHECK(idx == 0, "capture: R -> idx 0");
+    }
+
+    /* Two-key: PARTIAL stays active, then UNIQUE deactivates. */
+    {
+        leader_capture_t c;
+        leader_capture_begin(&c);
+        CHECK(leader_capture_feed(&c, 'M', PREFIX_FREE, PREFIX_FREE_N, &idx) == LEADER_MATCH_PARTIAL,
+              "capture: M -> PARTIAL");
+        CHECK(c.active, "capture: PARTIAL stays active");
+        CHECK(leader_capture_feed(&c, 'L', PREFIX_FREE, PREFIX_FREE_N, &idx) == LEADER_MATCH_UNIQUE,
+              "capture: M,L -> UNIQUE");
+        CHECK(!c.active, "capture: M,L deactivates");
+        CHECK(idx == 3, "capture: M,L -> idx 3");
+    }
+
+    /* A non-matching key aborts and deactivates. */
+    {
+        leader_capture_t c;
+        leader_capture_begin(&c);
+        CHECK(leader_capture_feed(&c, 'Z', PREFIX_FREE, PREFIX_FREE_N, &idx) == LEADER_MATCH_NONE,
+              "capture: Z -> NONE");
+        CHECK(!c.active, "capture: NONE deactivates");
+    }
+
+    /* An ambiguous set never fires -> deactivates without acting. */
+    {
+        leader_capture_t c;
+        leader_capture_begin(&c);
+        CHECK(leader_capture_feed(&c, 'M', WITH_COLLISION, WITH_COLLISION_N, &idx) == LEADER_MATCH_AMBIGUOUS,
+              "capture: M (collision) -> AMBIGUOUS");
+        CHECK(!c.active, "capture: AMBIGUOUS deactivates");
+    }
+
+    /* Overflow guard: a full buffer refuses more and deactivates. */
+    {
+        leader_capture_t c;
+        leader_capture_begin(&c);
+        c.len = LEADER_SEQ_MAX;
+        CHECK(leader_capture_feed(&c, 'R', PREFIX_FREE, PREFIX_FREE_N, &idx) == LEADER_MATCH_NONE,
+              "capture: overflow -> NONE");
+        CHECK(!c.active, "capture: overflow deactivates");
+    }
+
     if (failures) {
         printf("\n%d leader_fsm test(s) FAILED.\n", failures);
         return 1;
