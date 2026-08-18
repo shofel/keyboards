@@ -17,7 +17,9 @@ Scheme (collision-free private prefixes; every sequence is exactly 3 keys):
     prefix 'q'  -> lowercase Cyrillic / typographic symbols (« » via q[ q])
     prefix 'Q'  -> uppercase Cyrillic   (Shift+q -> keysym Q)
     prefix '$'  -> currency (₺ ₽ €), self-documenting money prefix
-    prefix '@'  -> emoji (flowers + reactions), zero-collision private prefix
+    prefix '%'  -> emoji (flowers + reactions), zero-collision private prefix.
+                  ('@' was avoided: Telegram Desktop treats a bare '@' as a
+                  mention trigger, leaving a stale preedit '@' beside the glyph.)
   No sequence is a prefix of another, and the private prefixes do not collide
   with the included system table.
 """
@@ -64,7 +66,9 @@ CURRENCY = [
 ]
 
 # Emoji — emitted by leader seqs (leader,{a|i},<sel>) via ru_compose_emit_code.
-# Standalone glyphs under a private '@' prefix (zero-collision, chosen like '$').
+# Standalone glyphs under a private '%' prefix (zero-collision, chosen like '$').
+# NOT '@': Telegram Desktop intercepts a bare '@' for its mention autocomplete,
+# so composing '@t' left a stale preedit '@' next to the 🌷 (see keymap.c).
 # Like EXTRA/CURRENCY: XCompose + cheatsheet, no C-table row.
 # (cp, selector, glyph, mnemonic) — the selector char appears in the mnemonic,
 # and the generated reference bolds it (its first occurrence).
@@ -83,7 +87,7 @@ EMOJI = [
 ]
 
 # Keysym names for selector chars whose keysym name isn't the char itself.
-KEYSYM = {"[": "bracketleft", "]": "bracketright", "$": "dollar", "@": "at"}
+KEYSYM = {"[": "bracketleft", "]": "bracketright", "$": "dollar", "%": "percent"}
 def keysym(ch):
     return KEYSYM.get(ch, ch)
 
@@ -127,7 +131,7 @@ def gen_xcompose():
     for cp, s, glyph in CURRENCY:
         out.append(f'<Multi_key> <dollar> <{keysym(s)}> : "{glyph}" U{cp:04X}')
     for cp, s, glyph, _word in EMOJI:
-        out.append(f'<Multi_key> <at> <{keysym(s)}> : "{glyph}" U{cp:04X}')
+        out.append(f'<Multi_key> <{keysym("%")}> <{keysym(s)}> : "{glyph}" U{cp:04X}')
     return "\n".join(out) + "\n"
 
 
@@ -140,7 +144,7 @@ def gen_cheatsheet():
     for cp, s, glyph in CURRENCY:
         out.append(f"  {glyph}  U+{cp:04X}   Compose $ {s}")
     for cp, s, glyph, _word in EMOJI:
-        out.append(f"  {glyph}  U+{cp:04X}   Compose @ {s}")
+        out.append(f"  {glyph}  U+{cp:04X}   Compose % {s}")
     return "\n".join(out) + "\n"
 
 

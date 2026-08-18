@@ -294,12 +294,12 @@ def extract_emoji(src):
     if not body_m:
         die("emoji_seqs[] not found")
     emo = []
-    for m in re.finditer(r'\{KC_(\w),\s*"@(\w)"\}', strip_comments(body_m.group(1))):
+    for m in re.finditer(r'\{KC_(\w),\s*"%(\w)"\}', strip_comments(body_m.group(1))):
         key, sel = m.group(1).lower(), m.group(2)
         if key != sel:
-            die(f"emoji selector mismatch: KC_{m.group(1)} vs @{sel}")
+            die(f"emoji selector mismatch: KC_{m.group(1)} vs %{sel}")
         if sel not in info_by_sel:
-            die(f"emoji @{sel} missing from gen_unicode_compose.EMOJI")
+            die(f"emoji %{sel} missing from gen_unicode_compose.EMOJI")
         gl, word = info_by_sel[sel]
         emo.append((sel, gl, word))
     if not emo:

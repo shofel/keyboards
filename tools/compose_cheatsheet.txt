@@ -74,14 +74,14 @@ Cantor compose-mode Russian — Compose is Scroll Lock.
   ₺  U+20BA   Compose $ l
   ₽  U+20BD   Compose $ r
   €  U+20AC   Compose $ e
-  🌷  U+1F337   Compose @ t
-  🌹  U+1F339   Compose @ r
-  🌸  U+1F338   Compose @ c
-  🌺  U+1F33A   Compose @ h
-  🌻  U+1F33B   Compose @ s
-  🌼  U+1F33C   Compose @ d
-  👍  U+1F44D   Compose @ u
-  👌  U+1F44C   Compose @ o
-  🤔  U+1F914   Compose @ k
-  🧐  U+1F9D0   Compose @ m
-  🤝  U+1F91D   Compose @ n
+  🌷  U+1F337   Compose % t
+  🌹  U+1F339   Compose % r
+  🌸  U+1F338   Compose % c
+  🌺  U+1F33A   Compose % h
+  🌻  U+1F33B   Compose % s
+  🌼  U+1F33C   Compose % d
+  👍  U+1F44D   Compose % u
+  👌  U+1F44C   Compose % o
+  🤔  U+1F914   Compose % k
+  🧐  U+1F9D0   Compose % m
+  🤝  U+1F91D   Compose % n

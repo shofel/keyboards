@@ -117,3 +117,28 @@ key on purpose, so an unlucky roll through those could still dump; they sit on
 rare bigrams, so it is left as-is. Rule of thumb when adding a combo: a key landing in 3+ combos, or a
 combo bridging two independent ones, is a roll-dump risk. (Root-caused and fixed
 2026-08-14, PR #26.)
+
+## Compose emit prefixes must avoid app-intercepted characters (`@`)
+
+The compose backend types a private sequence — `Compose <prefix> <selector>` —
+that `~/.XCompose` maps to a glyph. The prefix is never a key you press; it is
+plumbing between the firmware's `send_string` and the host compose table. But it
+*is* a real keystroke the focused app sees mid-sequence, so the prefix must be a
+character no app treats specially.
+
+`@` violated that. Emoji originally composed as `Compose @ <sel>` (e.g. `@t` →
+🌷). In **Telegram Desktop** a bare `@` opens the username-mention autocomplete,
+and that mention state does not clear when the compose commits: the glyph landed
+but a stale, underlined **preedit `@`** was left beside it (`@🌷`), vanishing
+only when you clicked to reset the input method. The exact same firmware bytes
+composed cleanly in Firefox (GTK) and the terminal — Telegram alone intercepts
+`@`. Currency (`$` prefix) and Cyrillic (`q`/`Q` prefixes) never triggered any
+Telegram mode, so they were always clean, which is what isolated `@` as the
+cause.
+
+Fixed by moving the emoji prefix to `%` (`Compose % <sel>`), which no app
+intercepts and which stays collision-free with the system compose table (that is
+why the scheme uses symbol prefixes at all). Requires re-importing the
+regenerated `~/.XCompose`. Rule of thumb for any new compose prefix: avoid the
+app-trigger characters `@` (mentions), `#` (hashtags), `/` (commands), and `:`
+(emoji/sticker shortcodes). (Root-caused and fixed 2026-08-18.)
