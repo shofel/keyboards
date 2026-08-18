@@ -443,23 +443,26 @@ static const leader_seq_t leader_seqs[] = {
 };
 
 /* Emoji: leader,{a|i},<sel> -> a flower or reaction, host-wide, via the compose
- * backend (Compose + a private '@' code; the code<->glyph map lives in
+ * backend (Compose + a private '%' code; the code<->glyph map lives in
  * tools/gen_unicode_compose.py and the generated ~/.XCompose). `a` (left home)
  * and `i` (right home) are a mirror pair, so either hand triggers it. Always
  * compose — emoji go to chat/host apps, so the vim backend is irrelevant. File
- * scope so both the table builder below and tools/gen_layer_schemes.py read it. */
+ * scope so both the table builder below and tools/gen_layer_schemes.py read it.
+ * The prefix is '%', not '@': Telegram Desktop intercepts a bare '@' for its
+ * mention autocomplete, so composing "@t" left a stale preedit '@' beside the
+ * 🌷 (host-wide compose is fine everywhere else — see docs/known-limitations). */
 static const struct { uint16_t sel; const char *code; } emoji_seqs[] = {
-  {KC_T, "@t"},  // 🌷 tulip
-  {KC_R, "@r"},  // 🌹 rose
-  {KC_C, "@c"},  // 🌸 cherry
-  {KC_H, "@h"},  // 🌺 hibiscus
-  {KC_S, "@s"},  // 🌻 sunflower
-  {KC_D, "@d"},  // 🌼 daisy
-  {KC_U, "@u"},  // 👍 thumbup
-  {KC_O, "@o"},  // 👌 ok
-  {KC_K, "@k"},  // 🤔 think
-  {KC_M, "@m"},  // 🧐 monocle
-  {KC_N, "@n"},  // 🤝 handshake
+  {KC_T, "%t"},  // 🌷 tulip
+  {KC_R, "%r"},  // 🌹 rose
+  {KC_C, "%c"},  // 🌸 cherry
+  {KC_H, "%h"},  // 🌺 hibiscus
+  {KC_S, "%s"},  // 🌻 sunflower
+  {KC_D, "%d"},  // 🌼 daisy
+  {KC_U, "%u"},  // 👍 thumbup
+  {KC_O, "%o"},  // 👌 ok
+  {KC_K, "%k"},  // 🤔 think
+  {KC_M, "%m"},  // 🧐 monocle
+  {KC_N, "%n"},  // 🤝 handshake
 };
 
 /* The matcher's view of the leader set: keys (lead_key_table) + the action each

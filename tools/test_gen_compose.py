@@ -15,7 +15,7 @@ def test_no_duplicate_sequences():
     seqs = [l.split(" : ")[0] for l in lines]
     assert len(seqs) == len(set(seqs)), "duplicate compose sequence"
 
-# Emoji: the 11 flowers + reactions, under the private '@' (keysym 'at') prefix.
+# Emoji: the 11 flowers + reactions, under the private '%' (keysym 'percent') prefix.
 EMOJI_EXPECTED = {
     "t": ("🌷", 0x1F337),
     "r": ("🌹", 0x1F339),
@@ -33,19 +33,19 @@ EMOJI_EXPECTED = {
 def test_emoji_in_xcompose():
     out = g.gen_xcompose()
     for sel, (glyph, cp) in EMOJI_EXPECTED.items():
-        assert f'<Multi_key> <at> <{sel}> : "{glyph}" U{cp:04X}' in out, f"missing emoji {sel}"
+        assert f'<Multi_key> <percent> <{sel}> : "{glyph}" U{cp:04X}' in out, f"missing emoji {sel}"
 
 def test_emoji_prefix_isolated():
-    # Every emoji sequence uses the <at> first-key, and exactly the 11 of them do —
-    # so the private '@' prefix stays clear of the q / Q / dollar maps.
+    # Every emoji sequence uses the <percent> first-key, and exactly the 11 of them
+    # do — so the private '%' prefix stays clear of the q / Q / dollar maps.
     lines = [l for l in g.gen_xcompose().splitlines() if l.startswith("<Multi_key>")]
-    at_lines = [l for l in lines if l.split()[1] == "<at>"]
-    assert len(at_lines) == len(EMOJI_EXPECTED), "emoji count under <at> prefix wrong"
+    pct_lines = [l for l in lines if l.split()[1] == "<percent>"]
+    assert len(pct_lines) == len(EMOJI_EXPECTED), "emoji count under <percent> prefix wrong"
 
 def test_emoji_in_cheatsheet():
     out = g.gen_cheatsheet()
     for sel, (glyph, _cp) in EMOJI_EXPECTED.items():
-        assert glyph in out and f"Compose @ {sel}" in out, f"missing cheatsheet {sel}"
+        assert glyph in out and f"Compose % {sel}" in out, f"missing cheatsheet {sel}"
 
 if __name__ == "__main__":
     test_currency_in_xcompose(); test_no_duplicate_sequences()
