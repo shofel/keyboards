@@ -563,6 +563,9 @@ def gen_doc(src):
                "border is *home + the key below* (brackets — opening on the left hand, "
                "closing on the right).")
     out.append("")
+    out.append("Why the same-column pairs are the safe ones — the column stagger — is "
+               "explained under [Modifiers](#modifiers) in Design.")
+    out.append("")
     base = dict(extract_layers(src))["L_BOO"]
     combos = extract_combos(src)
     out.append("```")

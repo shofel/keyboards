@@ -89,6 +89,8 @@ Mouse layer — POLAR mode (Orbital Mouse, getreuer/orbital_mouse). DEFAULT.
 
 Combos fire on two physical key positions (they resolve from the base layer). A label on a border is the combo of the two keys it sits between: the upper border is *home + the key above* (mods, `"`, F-keys), the lower border is *home + the key below* (brackets — opening on the left hand, closing on the right).
 
+Why the same-column pairs are the safe ones — the column stagger — is explained under [Modifiers](#modifiers) in Design.
+
 ```
 ┌─────┬─────┬─────┬─────┬─────┬─────┐    ┌─────┬─────┬─────┬─────┬─────┬─────┐
 │     │     │     │     │     │     │    │     │     │     │     │     │     │
@@ -363,9 +365,23 @@ Vertical combo mods: a home-row key plus the key just above it (or below it,
 for brackets). With choc's tight spacing, pressing both keys of a column at
 once is almost as easy as pressing one — no finger-flattening, just a
 different finger placement, so a vertical combo feels like an extra key
-between the two. Ordinary typing aims at the key centers, so it never fires
-one by accident. The top-row pairs (home + above) feel best; the bottom-row
-pairs (home + below) are more of a reach — which is why the highest-value
+between the two.
+
+Vertical is also the *safe* axis, and that is the column stagger's doing.
+The Cantor staggers columns, not rows: each column is offset vertically to
+its finger's length, so a column is one finger's territory and its three
+keys sit in a line under that fingertip. The overlaps of ordinary typing
+happen between fingers — across columns, never within one; two keys of the
+same column go down together only when that finger is placed between them on
+purpose. That is why the mods, brackets and layer toggles all sit on
+vertical pairs: they are the pairs typing cannot roll into. The one
+exception would be a same-finger bigram inside a column, which the BOO base
+is tuned away from anyway. (On a row-staggered board the key "above" is
+offset half a key sideways, so there is no clean spot between the two to aim
+for.)
+
+The top-row pairs (home + above) feel best; the bottom-row pairs (home +
+below) are more of a reach — which is why the highest-value
 combos (mods, backspace, primary num-layer access) take the top slots and
 brackets the bottom.
 
