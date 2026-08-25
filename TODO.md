@@ -19,13 +19,12 @@ estimate changes. Bugs tend to top the list because Impact carries the most weig
 |---|-------|------|-------|
 | 1 | 2.80 | Hand-typed character corpus from Claude Code transcripts | Tooling |
 | 2 | 2.10 | QMK keylogger for key-level data (backspace, mods, layers, combos) | Tooling |
-| 3 | 2.00 | Sturdier cantor case with quieter sound | Hardware |
 
-Scores are estimates. Both #1 and #2 score low on Impact (they remove no friction by themselves)
-and high on Leverage — they are measurement, and every layout decision below is blocked on them.
-See **Findings — number entry** for why. **One QA gap carries forward:** the `windows` RU backend
-is UNVERIFIED — it needs a Windows host + `EnableHexNumpad=1` (un-QA-able on NixOS); compose and
-vim are QA'd on-device.
+Scores are estimates. Both remaining items score low on Impact (they remove no friction by
+themselves) and high on Leverage — they are measurement, and every layout decision below is blocked
+on them. See **Findings — number entry** for why. The hardware item shipped this cycle (EVA + poron
+foam mod). **One QA gap carries forward:** the `windows` RU backend is UNVERIFIED — it needs a
+Windows host + `EnableHexNumpad=1` (un-QA-able on NixOS); compose and vim are QA'd on-device.
 
 ## Tooling
 
@@ -38,10 +37,6 @@ vim are QA'd on-device.
   type-then-correct rate** — several of which are plausibly among the most-pressed keys on the
   board. `CONSOLE_ENABLE` + `uprintf` in `process_record_user` + host-side aggregation. Needs a
   privacy design first: it will see passwords.
-
-## Hardware
-
-- A sturdier case with quieter sound.
 
 ## Findings — number entry (2026-08-25)
 
@@ -112,6 +107,9 @@ themselves rather than of the sample. Ranked items #1 and #2 exist to fix this.
 
 ## Done
 
+- **2026-08-25** — case sound/feel (was the only open item, ranked #1): applied the **EVA + poron
+  foam mod** to the Cantor. This was the last remaining hardware task; the ranked list is now
+  measurement-only.
 - **2026-08-17** — Russian backend selection (was #1 after the leader): pick the emission backend
   from the leader — `leader,r` (tap) → compose (default, rolling-safe, host-wide), `leader,(r+v)`
   (chord) → vim (`i_CTRL-V U`), `leader,(r+w)` (chord) → Windows (Alt+numpad hex; needs
