@@ -13,7 +13,8 @@ What's interesting about it:
 - **Shiftless symbols.** A dedicated Symbol layer gives every punctuation mark its
   own key, biased to the Space hand so a `symbol → Space` sequence is a one-hand roll.
 - **Vertical combos.** Mods and brackets are same-column two-key chords —
-  comfortable and misfire-free on choc switches.
+  comfortable and misfire-free: with column stagger a column is one finger's
+  territory, so normal typing never overlaps two keys of the same column.
 - **Leader sequences.** One leader key drives layer toggles, text edits, currency
   (₺ ₽ €) and emoji.
 - **Russian, host-wide.** Cyrillic is typed on a firmware layer and emitted as X

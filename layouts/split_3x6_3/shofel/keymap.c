@@ -195,8 +195,10 @@ const key_override_t *key_overrides[] = {
  * Vertical (same-column) combos: a home-row key chorded with the key directly
  * above it (mods, backspace, layer toggles) or below it (brackets). On choc the
  * two keys sit close enough that pressing both at once is almost like pressing a
- * single key between them — an easy, unambiguous placement (see the Modifiers
- * note in the DESIGN block).
+ * single key between them — an easy, unambiguous placement. The column stagger
+ * is what makes them misfire-free: a column belongs to one finger, so ordinary
+ * typing never overlaps two of its keys (see the Modifiers note in the DESIGN
+ * block).
  * The top-row pairs (home + above) feel best; the bottom-row pairs (home +
  * below) are more of a reach — which is why the highest-value combos (mods,
  * backspace, primary num-layer access) take the top slots and brackets the
@@ -677,9 +679,23 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
  * for brackets). With choc's tight spacing, pressing both keys of a column at
  * once is almost as easy as pressing one — no finger-flattening, just a
  * different finger placement, so a vertical combo feels like an extra key
- * between the two. Ordinary typing aims at the key centers, so it never fires
- * one by accident. The top-row pairs (home + above) feel best; the bottom-row
- * pairs (home + below) are more of a reach — which is why the highest-value
+ * between the two.
+ *
+ * Vertical is also the *safe* axis, and that is the column stagger's doing.
+ * The Cantor staggers columns, not rows: each column is offset vertically to
+ * its finger's length, so a column is one finger's territory and its three
+ * keys sit in a line under that fingertip. The overlaps of ordinary typing
+ * happen between fingers — across columns, never within one; two keys of the
+ * same column go down together only when that finger is placed between them on
+ * purpose. That is why the mods, brackets and layer toggles all sit on
+ * vertical pairs: they are the pairs typing cannot roll into. The one
+ * exception would be a same-finger bigram inside a column, which the BOO base
+ * is tuned away from anyway. (On a row-staggered board the key "above" is
+ * offset half a key sideways, so there is no clean spot between the two to aim
+ * for.)
+ *
+ * The top-row pairs (home + above) feel best; the bottom-row pairs (home +
+ * below) are more of a reach — which is why the highest-value
  * combos (mods, backspace, primary num-layer access) take the top slots and
  * brackets the bottom.
  *
