@@ -13,50 +13,23 @@ Procedure: score the four factors per task, take the weighted sum, round to 2 de
 descending; on ties the earlier-listed task stays first. Re-rank whenever a task is added or an
 estimate changes. Bugs tend to top the list because Impact carries the most weight on a daily driver.
 
-## Ranked — 2026-08-26
+## Ranked — 2026-08-27
 
 | # | Score | Task | Where |
 |---|-------|------|-------|
-| 1 | 2.80 | Hand-typed character corpus from Claude Code transcripts | Tooling |
-| 2 | 2.55 | QMK keylogger — key-level data to design the RU and number layers | Tooling |
-| 3 | 2.55 | Optimal Russian layout — `L_RUSSIAN` is stock ЙЦУКЕН, the one undesigned layer | Layout |
-| 4 | 2.30 | Numbers and their punctuation — re-derive punctuation on a real corpus | Layout |
+| 1 | 2.55 | Optimal Russian layout — `L_RUSSIAN` is stock ЙЦУКЕН, the one undesigned layer | Layout |
+| 2 | 2.30 | Numbers and their punctuation — re-derive punctuation on a real corpus | Layout |
 
-Scores are estimates. Factors: `corpus` and `keylogger` are measurement — low Impact (they remove
-no friction themselves), high Leverage; the keylogger is `I=2 E=2 L=5 C=3` **since it was given an
-explicit consumer** (the two layer redesigns below), up from 2.10 when it was scored as standalone
-instrumentation. The Layout items entered on 2026-08-26 as `Russian I=3 E=2 L=2 C=3` and
-`numbers I=2 E=3 L=2 C=2`. #2 and #3 tie at 2.55; the documented rule keeps the earlier-listed task
-first.
+Scores are estimates; the Layout items entered on 2026-08-26 as `Russian I=3 E=2 L=2 C=3` and
+`numbers I=2 E=3 L=2 C=2`. **Both measurement items shipped this cycle** (PRs #43, #44) and moved to
+Done, so the two consumers are now the table.
 
-**Measurement gates the table.** #3 is blocked on #1, #4 on both, and neither must be attempted
-against the current sample, which measured what Claude generates rather than what fingers type (see
-**Findings — number entry**, *Why nothing shipped*). Note the two sources are not
-interchangeable: #1 is cheap and yields **character** frequencies (enough to drive the Russian
-layout on its own), while #2 is the only source for **key-level** facts — backspace, mods, layer and
-combo usage, thumb load — which is what the number/punctuation redesign actually lacks. The hardware
-item shipped this cycle (EVA + poron foam mod). **One QA gap carries forward:** the `windows` RU
-backend is UNVERIFIED — it needs a Windows host + `EnableHexNumpad=1` (un-QA-able on NixOS); compose
-and vim are QA'd on-device.
-
-## Tooling
-
-- **Hand-typed character corpus.** `~/.claude/projects/**/*.jsonl` holds ~3,347 Claude Code
-  sessions; the user-message fields are hand-typed prompts, which is close to 100% of what actually
-  gets typed on this board. Extract them into a corpus and re-run the frequency analysis. Cheap —
-  the data already exists.
-- **QMK keylogger.** A corpus can only ever count characters that survived. It is structurally
-  blind to **backspace, modifiers, layer switches, combo usage, thumb load, and the
-  type-then-correct rate** — several of which are plausibly among the most-pressed keys on the
-  board. `CONSOLE_ENABLE` + `uprintf` in `process_record_user` + host-side aggregation. Needs a
-  privacy design first: it will see passwords.
-
-  **Purpose: this is the instrument for designing the new layers** — the Russian layout and the
-  number/punctuation set below. Aggregate per-key counts, per-layer dwell, combo hit/miss and
-  backspace-after-key; those are exactly the quantities the transcript corpus cannot recover, and
-  the number study stalled for want of them. Emit counts only, never sequences — that is most of the
-  privacy design, and it costs nothing analytically because both layer designs need frequencies
-  rather than text.
+**#1 is unblocked and #2 is not.** The Cyrillic corpus exists (531 prompts, 78,902 characters), which
+is all the Russian layout needs. The number/punctuation redesign additionally needs *key-level* facts
+— combo-misfire risk and pinned-hand reach — so it stays blocked until the keylogger has actually
+been **flashed and run**: it compiles and is merged, but it has never recorded a keystroke. **One QA
+gap carries forward:** the `windows` RU backend is UNVERIFIED — it needs a Windows host +
+`EnableHexNumpad=1` (un-QA-able on NixOS); compose and vim are QA'd on-device.
 
 ## Layout
 
@@ -87,7 +60,8 @@ and vim are QA'd on-device.
   is a `keymap.c` edit plus `make gen-docs`. The only real cost is retraining, and it cannot
   interfere with BOO because it is a separate layer.
 
-  **Blocked on #1.** Do not adopt Вестник off the shelf — use it as the baseline to beat, running
+  **Unblocked** (the corpus shipped 2026-08-27, PR #43): `make corpus-ru` gives 531 prompts /
+  78,902 Cyrillic characters. Do not adopt Вестник off the shelf — use it as the baseline to beat, running
   the optimiser against a *Russian* corpus of hand-typed text with the Cantor's own geometry and BOO
   pinned as constraints.
 
@@ -104,9 +78,11 @@ and vim are QA'd on-device.
   against **pinned-hand geometry, not the comfort map** in `keymap.c`: while `T+D` is held the
   reachable keys are `n` `l` `r`, then `f` `h`, which contradicts what the map predicts.
 
-  **Blocked on #1 and #2** — unlike the Russian layout, this one is not satisfied by character
+  **Still blocked** — unlike the Russian layout, this one is not satisfied by character
   frequencies alone: the rejected designs turned on combo-misfire risk and pinned-hand reach, which
-  only the keylogger measures. Design thread lives in the `binary-digits` session.
+  only the keylogger measures. The keylogger shipped (PR #44) but has **never been flashed**, so it
+  has recorded nothing — flash it and collect a window before reopening this. Design thread lives in
+  the `binary-digits` session.
 
 ## Findings — number entry (2026-08-25)
 
@@ -173,10 +149,36 @@ paths and identifiers, very little of the `; { } = (` that dominated the code sa
 
 So: **all punctuation-frequency conclusions here are suspect** (`;` already showed a 70× swing across
 corpora — a clear artifact). The *digit-structure* conclusions survive, being properties of numbers
-themselves rather than of the sample. Ranked items #1 and #2 exist to fix this.
+themselves rather than of the sample. The two measurement items that existed to fix this both
+shipped on 2026-08-27 (PRs #43, #44) — see Done. The corpus confirmed the worry and then some: the
+transcript premise was itself wrong by ~5×, and only 21.1% of raw user-message mass is hand-typed.
 
 ## Done
 
+- **2026-08-27** — QMK keylogger (was ranked #2; PR #44): key-level instrument as
+  `modules/shofel/keylog` — per-key presses, per-layer usage, an exact combo-firing total, and the
+  per-key **type-then-correct rate** (presses undone by an immediate backspace), which no text
+  corpus can see because the evidence is deleted before it reaches the text. Read out with
+  `leader,s,d` / `leader,s,c` over the HID console; `s` is prefix-only so the leader set stays a
+  prefix code (lint now reports 39 sequences, up from 37). **Counts, never sequences** — state is
+  counters plus one slot of history, and a test asserts two different typing orders leave
+  byte-identical state, so no password is recoverable. Two traps caught while wiring it: a combo
+  emits its keycode from key position `(0,0)`, a *real* key here, which would have silently inflated
+  key index 0 (filtered on `IS_KEYEVENT`); and combos are counted as an exact total rather than a
+  per-combo table, because QMK's only fire-time hook is called per candidate key and would overcount
+  — an exact total beats a plausible-looking wrong breakdown. **NOT hardware-QA'd**: it compiles and
+  is merged but has never been flashed, so it has recorded nothing yet.
+- **2026-08-27** — hand-typed character corpus (was ranked #1; PR #43): `tools/typing_corpus.py`
+  over `~/.claude/projects/**/*.jsonl`. **The premise recorded here was wrong by ~5×.** `type=user`
+  is a channel, not an author: 3353 of 4187 user records in one project are tool results in a
+  user-shaped envelope; of the rest, 719 JSON-ish prompts carried 54.7% of the character mass and
+  the top 8% of prompts carried 78%; the longest "prompts" are session-resume scaffolds and
+  autonomous-loop classifiers, repeated byte-identically. Filtering keeps 9182 of 12369 prompts and
+  **21.1% of the raw mass** — after which `"` falls out of the top 20 (it was 10th at 3.09%) and the
+  top bigrams become `th on at in re he to an`. Positive control: the Cyrillic slice tracks published
+  Russian prose (о 10.59 vs 10.98, а 8.38 vs 8.01, е 8.20 vs 8.45). Emits **counts, never
+  sequences** — unigrams and bigrams only, enforced by a test — which is also the native input format
+  for layout optimisers. `make corpus` / `make corpus-ru`.
 - **2026-08-25** — case sound/feel (was the only open item, ranked #1): applied the **EVA + poron
   foam mod** to the Cantor. This was the last remaining hardware task; the ranked list is now
   measurement-only.
