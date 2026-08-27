@@ -10,7 +10,7 @@ endif
 QMK_FIRMWARE_ROOT = $(shell qmk config -ro user.qmk_home 2>/dev/null | cut -d= -f2 | sed -e 's@^None$$@@g')
 
 # Convenience targets — build and flash the Cantor keymap.
-.PHONY: build flash test test-oneshot test-leader-fsm test-compose test-schemes test-schemes-unit test-leader-prefix test-typing-corpus lint-leader gen-docs corpus corpus-ru
+.PHONY: build flash test test-oneshot test-leader-fsm test-compose test-schemes test-schemes-unit test-leader-prefix test-typing-corpus test-keylog lint-leader gen-docs corpus corpus-ru
 
 build:
 	qmk compile -kb cantor -km shofel
@@ -48,7 +48,7 @@ flash: build
 	exit 1
 
 # All off-target host tests (pure logic; no QMK, no hardware).
-test: test-oneshot test-leader-fsm test-compose test-schemes test-schemes-unit test-leader-prefix test-typing-corpus lint-leader
+test: test-oneshot test-leader-fsm test-compose test-schemes test-schemes-unit test-leader-prefix test-typing-corpus test-keylog lint-leader
 
 # Off-target unit test for oneshot_fsm.h (the eager one-shot state machine).
 test-oneshot:
@@ -67,6 +67,11 @@ test-schemes:
 # Unit tests for the scheme/combo/leader doc generator (extract + render logic).
 test-schemes-unit:
 	python3 tools/test_gen_layer_schemes.py
+
+# Off-target unit test for keylog_stats.h — the pure counters behind the typing
+# instrument, including the privacy property that no key sequence is recoverable.
+test-keylog:
+	gcc -Wall -Wextra -Imodules/shofel/keylog -o /tmp/test_keylog_stats tools/test_keylog_stats.c && /tmp/test_keylog_stats
 
 # Unit test for the leader prefix-collision lint (pure logic; synthetic inputs).
 test-leader-prefix:

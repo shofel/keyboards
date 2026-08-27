@@ -2,6 +2,7 @@
     "modules": [
         "shofel/oneshot",
         "shofel/unicode_ru",
+        "shofel/keylog",
         "getreuer/orbital_mouse",
     ]
 }

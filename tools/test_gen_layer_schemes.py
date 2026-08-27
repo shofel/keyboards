@@ -148,10 +148,14 @@ def test_extract_leader_seqs_real():
     assert (["KC_D", "KC_W"], "lead_del_word", "delete word (Ctrl+Backspace)") in seqs
     # vim/Windows are leader chords (r+v / r+w), handled as combos — not in leader_seqs.
     assert not any(act in ("lead_vim", "lead_win") for _, act, _ in seqs)
-    assert len(seqs) == 15
-    # Mirror pairs share an action; grouping collapses the 15 rows to 14 entries.
+    # Typing instrument (modules/shofel/keylog). `s` is prefix-only — there is no
+    # bare leader,s — so the set stays a prefix code (lint-leader enforces it).
+    assert (["KC_S", "KC_D"], "lead_stats_dump", "typing stats — dump counters to the console") in seqs
+    assert (["KC_S", "KC_C"], "lead_stats_clear", "typing stats — clear counters") in seqs
+    assert len(seqs) == 17
+    # Mirror pairs share an action; grouping collapses the 17 rows to 16 entries.
     groups = g.group_leader_seqs(seqs)
-    assert len(groups) == 14
+    assert len(groups) == 16
     by_seqs = {tuple(map(tuple, ks)): doc for ks, doc in groups}
     assert by_seqs[(("KC_M",), ("KC_DOT",))] == "mouse layer, polar mode"
 

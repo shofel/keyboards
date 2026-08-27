@@ -9,6 +9,7 @@
 #include "modules/shofel/unicode_ru/introspection.h"
 #include "modules/getreuer/orbital_mouse/introspection.h"
 #include "modules/shofel/leader/leader_fsm.h"
+#include "modules/shofel/keylog/keylog.h"
 
 /*
  * Runtime debug logging — all off by default.
@@ -417,6 +418,11 @@ static void lead_del_line(void) { tap_code16(LSFT(KC_HOME)); tap_code16(KC_DEL);
 static void lead_del_word(void) { tap_code16(LCTL(KC_BSPC)); }
 static void lead_kitty(void)    { toggle_disable(); tap_code16(LGUI(KC_T)); }  // drop RU so terminal typing is Latin
 static void lead_pscr(void)     { tap_code(KC_PSCR); }
+/* Typing instrument (modules/shofel/keylog): counts only, dumped on demand to
+ * the HID console. `s` is a prefix-only token (there is no bare leader,s), so
+ * the set stays a prefix code under the timeoutless leader. */
+static void lead_stats_dump(void)  { keylog_dump(); }
+static void lead_stats_clear(void) { keylog_clear(); }
 
 static const leader_seq_t leader_seqs[] = {
   /* Russian backend selection. Compose (the default) is the bare tap leader,r;
@@ -442,6 +448,8 @@ static const leader_seq_t leader_seqs[] = {
   {KC_D,     KC_W,  lead_del_word, "delete word (Ctrl+Backspace)"},
   {KC_K,     KC_NO, lead_kitty,    "kitty terminal (Gui+T; drops Russian so the terminal gets Latin)"},
   {KC_P,     KC_NO, lead_pscr,     "Print Screen"},
+  {KC_S,     KC_D,  lead_stats_dump,  "typing stats — dump counters to the console"},
+  {KC_S,     KC_C,  lead_stats_clear, "typing stats — clear counters"},
 };
 
 /* Emoji: leader,{a|i},<sel> -> a flower or reaction, host-wide, via the compose
