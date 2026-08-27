@@ -334,6 +334,24 @@ Tap `LEAD`, then the keys in order. Mirror pairs (either hand) share one entry; 
         0 · ·   · · 0
 ```
 
+`LEAD, s, d` — typing stats — dump counters to the console
+
+```
+· · · · · ·       · · 2 · · ·
+· · · · 1 ·       · · · · · ·
+· · · · · ·       · · · · · ·
+        0 · ·   · · 0
+```
+
+`LEAD, s, c` — typing stats — clear counters
+
+```
+· · · · 2 ·       · · · · · ·
+· · · · 1 ·       · · · · · ·
+· · · · · ·       · · · · · ·
+        0 · ·   · · 0
+```
+
 ## Emoji
 
 `LEAD, a, <sel>` or `LEAD, i, <sel>` (mirror pair), via the Compose backend.

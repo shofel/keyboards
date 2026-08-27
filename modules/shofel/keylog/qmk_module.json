@@ -1,0 +1,7 @@
+{
+    "module_name": "Keylog",
+    "maintainer": "shofel",
+    "license": "GPL-2.0-or-later",
+    "url": "https://github.com/shofel/keyboards/tree/qmk_userspace/modules/shofel/keylog",
+    "description": "Key-level typing instrument: per-key, per-layer, backspace-correction and combo counters. Counts only, never sequences — the board cannot emit what was typed."
+}
