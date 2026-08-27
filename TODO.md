@@ -13,24 +13,103 @@ Procedure: score the four factors per task, take the weighted sum, round to 2 de
 descending; on ties the earlier-listed task stays first. Re-rank whenever a task is added or an
 estimate changes. Bugs tend to top the list because Impact carries the most weight on a daily driver.
 
-## Ranked — 2026-08-17
+## Ranked — 2026-08-25
 
 | # | Score | Task | Where |
 |---|-------|------|-------|
-| 1 | 2.00 | Sturdier cantor case with quieter sound | Hardware |
+| 1 | 2.80 | Hand-typed character corpus from Claude Code transcripts | Tooling |
+| 2 | 2.10 | QMK keylogger for key-level data (backspace, mods, layers, combos) | Tooling |
 
-Scores are estimates. Both software items shipped to **Done** this cycle: the **timeoutless
-leader** (was #1; PRs #30–#33) and **Russian backend selection** (was #1 after the leader; PR #35,
-simplified in #36). The only open item is hardware. **One QA gap carries forward:** the `windows`
-RU backend is UNVERIFIED — it needs a Windows host + `EnableHexNumpad=1` (un-QA-able on NixOS);
-compose and vim are QA'd on-device.
+Scores are estimates. Both remaining items score low on Impact (they remove no friction by
+themselves) and high on Leverage — they are measurement, and every layout decision below is blocked
+on them. See **Findings — number entry** for why. The hardware item shipped this cycle (EVA + poron
+foam mod). **One QA gap carries forward:** the `windows` RU backend is UNVERIFIED — it needs a
+Windows host + `EnableHexNumpad=1` (un-QA-able on NixOS); compose and vim are QA'd on-device.
 
-## Hardware
+## Tooling
 
-- A sturdier case with quieter sound.
+- **Hand-typed character corpus.** `~/.claude/projects/**/*.jsonl` holds ~3,347 Claude Code
+  sessions; the user-message fields are hand-typed prompts, which is close to 100% of what actually
+  gets typed on this board. Extract them into a corpus and re-run the frequency analysis. Cheap —
+  the data already exists.
+- **QMK keylogger.** A corpus can only ever count characters that survived. It is structurally
+  blind to **backspace, modifiers, layer switches, combo usage, thumb load, and the
+  type-then-correct rate** — several of which are plausibly among the most-pressed keys on the
+  board. `CONSOLE_ENABLE` + `uprintf` in `process_record_user` + host-side aggregation. Needs a
+  privacy design first: it will see passwords.
+
+## Findings — number entry (2026-08-25)
+
+A design study of number/punctuation entry. **No keymap change was made** — four designs were
+costed and all rejected. Recorded so they are not re-proposed, and so the measurements are not
+re-derived.
+
+### L_NUM is two layers, and the activation combo picks which
+
+The combo that turns the layer on **pins the finger it is made of**:
+
+- `rlt2 = {KC_T, KC_D}` is the *right middle* finger (home+top). While held, right mid-top/home/bottom
+  (`↑` `⏎` `↓`) are unreachable → **digits mode**, left hand free.
+- `llt2 = {KC_E, KC_U}` is the *left middle* finger. While held, `8` `5` `2` are unreachable →
+  **nav mode**, right hand free.
+- `leader,t` (sticky) pins nothing — the full layer is available.
+
+**Measured by hand, the comfortable keys while `T+D` is held are `n` `l` `r`, then `f` `h`** — right
+index-home, ring-top, ring-home, then index-top and index-bottom. Note this contradicts the static
+comfort map in `keymap.c`, which scores `n`=9, `r`=7, `l`=6 and would predict `n` `r` `l`. With the
+middle finger splayed up to reach `D`, the ring finger prefers the **top** row too. **The comfort
+map does not model pinned-hand geometry** — treat its scores as base-layer only.
+
+### Digits have no exploitable sequence structure
+
+Mutual information between adjacent digits I(prev;next) = **0.235 bits**, vs **0.584** for letters in
+the same corpus. Prose-only digits fall to 0.084 bits. Also: **71%** of numbers are a single digit,
+**16%** of digit bigrams are same-digit repeats no layout can help, and the residual signal is
+domain-unstable (prose 0.084 / shell 0.174 / code 0.684). **Do not build a bigram-optimised digit
+layer.**
+
+The same uniformity has a second consequence: **there is nowhere to hide a combo.** Every left
+home-row digit pair is 1.2–2.5% of digit bigrams, and the *rarest digit pair anywhere* is 0.98%.
+Letters offer dead zones (`qz`, `jx`); digits do not.
+
+### Rejected designs
+
+- **Binary chording** (4 home keys → 16 combos → 10 digits). Chording pays only when one chord emits
+  *more than one* character; this is exactly 1.0, the worst possible ratio. Stenography's number bar
+  wins because one chord emits a whole digit run.
+- **Steno-linear home row** (`1 2 3 4 5 | 0 6 7 8 9`). Scores 6.14 vs the current grid's 6.03 on
+  frequency-weighted comfort — ascending order puts `1` on the pinky and `0`/`5` on the comfort-3
+  inner column. Permuting the *existing* grid by frequency would gain +19%, five times more than
+  moving to the home row — but it discards transferable numpad muscle memory, which Armand, Redick &
+  Poulsen (2014, *Applied Ergonomics* 45(4):917–22, n=57) found measurably improves accuracy. That
+  study's one portable result: middle-row keys were faster and more accurate than top/bottom row.
+- **Punctuation on L_NUM combos.** Vertical slots are gone — 9 of 10 left-hand same-column combos are
+  already mods or brackets, and the 10th is unusable (base left pinky-bottom is `XX`). Horizontal
+  adjacent-finger combos have no safe pair (above), and their failure mode *silently corrupts a
+  number* — unlike prose, digits carry no redundancy to make the error visible. Only **same-finger
+  horizontal** survives on mechanism (index column + inner column; `{KC_S, KC_G}` is unused) — but it
+  would bridge `lctl`/`square_left` with `angle_left`/`dquo` through shared keys, the same pattern
+  that dumped literal `cs` before (see `keymap.c` Esc note).
+- **Better L_NUM punctuation slots.** Only **2–10%** of `.` and **~1%** of `-` `:` `/` are typed
+  *inside* a number — the rest come from base. The entire L_NUM punctuation set therefore serves
+  ~0.1% of keystrokes. Not worth the churn.
+
+### Why nothing shipped: the corpus was wrong
+
+Every frequency number above came from repo code + markdown + shell history. **The repos are largely
+LLM-written**, so those character frequencies measure what Claude generates, not what fingers do.
+Actual hand-typed input is almost entirely **Claude Code prompts** — natural-language English with
+paths and identifiers, very little of the `; { } = (` that dominated the code sample.
+
+So: **all punctuation-frequency conclusions here are suspect** (`;` already showed a 70× swing across
+corpora — a clear artifact). The *digit-structure* conclusions survive, being properties of numbers
+themselves rather than of the sample. Ranked items #1 and #2 exist to fix this.
 
 ## Done
 
+- **2026-08-25** — case sound/feel (was the only open item, ranked #1): applied the **EVA + poron
+  foam mod** to the Cantor. This was the last remaining hardware task; the ranked list is now
+  measurement-only.
 - **2026-08-17** — Russian backend selection (was #1 after the leader): pick the emission backend
   from the leader — `leader,r` (tap) → compose (default, rolling-safe, host-wide), `leader,(r+v)`
   (chord) → vim (`i_CTRL-V U`), `leader,(r+w)` (chord) → Windows (Alt+numpad hex; needs
