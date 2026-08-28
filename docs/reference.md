@@ -35,9 +35,9 @@ Base layer — the [BOO layout](https://ballerboo.github.io/boolayout/): Dvorak 
 Russian layer — optimised, not inherited.
 
 ```
-ш  з  к  р  г  щ        ·  у  и  ь  д  ч
-х  с  в  н  т  й        я  о  а  е  п  б
-ъ  ф  ж  л  м  ц        ·  ы  ё  ю  .  э
+·  з  у  а  г  ц        щ  л  ь  п  д  ю
+·  с  и  о  т  й        э  н  е  в  к  б
+·  ш  ё  ы  м  ж        х  р  я  ч  .  ф
       __  __  __        __  __  __
 ```
 
@@ -94,14 +94,14 @@ Why the same-column pairs are the safe ones — the column stagger — is explai
 ```
 ┌─────┬─────┬─────┬─────┬─────┬─────┐    ┌─────┬─────┬─────┬─────┬─────┬─────┐
 │     │     │     │     │     │     │    │     │     │     │     │     │     │
-├─────┼─Gui─┼─Alt─┼─Nav─┼─Ctl─┼─ " ─┤    ├─Esc─┼─Ctl─┼─Nav─┼─Alt─┼─Gui─┼─Fky─┤
+├─────┼─Gui─┼─Alt─┼─Nav─┼─Ctl─┼─ "ъ─┤    ├─Esc─┼─Ctl─┼─Nav─┼─Alt─┼─Gui─┼─Fky─┤
 │     │  a  │  o  │  e  │  s  │     │    │     │  n  │  t  │  r  │  i  │     │
 ├─────┼─────┼─ { ─┼─ ( ─┼─ [ ─┼─ < ─┤    ├─ > ─┼─ ] ─┼─ ) ─┼─ } ─┼─────┼─────┤
 │     │     │     │     │     │     │    │     │     │     │     │     │     │
 └─────┴─────┴─────┴─────┴─────┴─────┘    └─────┴─────┴─────┴─────┴─────┴─────┘
 ```
 
-The `<` `>` combos are shift-aware — g + z → < (« when shifted); b + p → > (» when shifted). A held Shift (or a one-shot Shift) turns them into the guillemets.
+The angle combos are shift-aware — g + z → `<` / `«`; b + p → `>` / `»`. A held (or one-shot) Shift picks the second glyph of each pair, so the Latin layers give `<` `>` unshifted and the guillemets shifted. The Russian layer inverts that: `«` `»` come unshifted there, since Russian prose quotes with them, and `<` `>` take the Shift.
 
 The rest fire on keys that aren't vertically adjacent — thumbs, bottom-row rolls, and the outer corners. Each diagram marks the two trigger positions:
 
@@ -454,7 +454,7 @@ score, then match highest-to-highest.
    pinky2 pinky  ring   mid  index  inner | inner  index   mid   ring  pinky pinky2
       1     4     6      8     6      2   |   2      6      8      6     4     3
       0     5     7      9     9      3   |   3      9      9      7     5     3
-      0     1     4      5     6      3   |   3      6      5      4     1     1
+      0     1     4      5     8      3   |   3      8      5      4     1     1
                    · reserved for layer/mod keys, not symbol slots ·
 ```
 

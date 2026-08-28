@@ -48,7 +48,7 @@ flash: build
 	exit 1
 
 # All off-target host tests (pure logic; no QMK, no hardware).
-test: test-oneshot test-leader-fsm test-compose test-schemes test-schemes-unit test-leader-prefix test-typing-corpus test-keylog test-ru-layout lint-leader
+test: test-oneshot test-leader-fsm test-angle test-compose test-schemes test-schemes-unit test-leader-prefix test-typing-corpus test-keylog test-ru-layout lint-leader
 
 # Off-target unit test for oneshot_fsm.h (the eager one-shot state machine).
 test-oneshot:
@@ -57,6 +57,11 @@ test-oneshot:
 # Off-target unit test for leader_fsm.h (the fire-on-unique-match matcher).
 test-leader-fsm:
 	gcc -Wall -Wextra -Imodules/shofel/leader -o /tmp/test_leader_fsm tools/test_leader_fsm.c && /tmp/test_leader_fsm
+
+# Off-target unit test for angle_case.h (which glyph the angle combos emit —
+# `< >` or `« »` — which inverts while the Russian layer is live).
+test-angle:
+	gcc -Wall -Wextra -Imodules/shofel/angle -o /tmp/test_angle_case tools/test_angle_case.c && /tmp/test_angle_case
 
 test-compose:
 	python3 tools/test_gen_compose.py

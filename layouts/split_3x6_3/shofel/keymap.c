@@ -9,6 +9,7 @@
 #include "modules/shofel/unicode_ru/introspection.h"
 #include "modules/getreuer/orbital_mouse/introspection.h"
 #include "modules/shofel/leader/leader_fsm.h"
+#include "modules/shofel/angle/angle_case.h"
 #include "modules/shofel/keylog/keylog.h"
 
 /*
@@ -37,8 +38,20 @@ enum my_keycodes {
   KK_FAT_RIGHT_ARROW,           // emits "=>"
   KK_FAT_LEFT_ARROW,            // emits "<="
   KK_LEFT_ARROW,                // emits "<-"
-  KK_LANGLE,  // « when shifted, < otherwise
-  KK_RANGLE,  // » when shifted, > otherwise
+  /* `<` `>` vs `« »`. Shift picks between them, but which one shift costs is
+   * inverted while the Russian layer is live — Russian quotes with « », Latin
+   * code is full of < >. See modules/shofel/angle/angle_case.h. */
+  KK_LANGLE,
+  KK_RANGLE,
+
+  /* The v+g vertical combo (left inner column, top+home) does double duty: `"`
+   * on the Latin layers, and the one Russian letter that does not fit the grid
+   * while L_RUSSIAN is live. The alphabet is 33 letters but column 0 is never
+   * pressed, which leaves only 32 keys once `.` keeps its home — so exactly one
+   * letter has to live on a chord, and it is the rarest one. `"` is no loss in
+   * Russian: prose there quotes with « », which the angle combos now give
+   * unshifted. */
+  KK_DQUO_RU,
 
   /* Combo outputs for RU backend select, captured by the armed leader only (see
    * combo_should_trigger): leader,(r+v) -> vim, leader,(r+w) -> Windows. Never
@@ -337,7 +350,7 @@ combo_t key_combos[] = {
   [CMB_RALT]       = COMBO(ralt_combo, OS_ALT),
   [CMB_RGUI]       = COMBO(rgui_combo, OS_GUI),
 
-  [CMB_DQUO]       = COMBO(dquo_combo, KC_DQUO),
+  [CMB_DQUO]       = COMBO(dquo_combo, KK_DQUO_RU),
   [CMB_FSYS]       = COMBO(fkeys_combo, OSL(L_FKEYS_SYS)),
 
   [CMB_RU_VIM]     = COMBO(ru_vim_combo, KK_RU_VIM),
@@ -630,18 +643,54 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
       /* Combo tokens for RU select; the press is consumed by the leader capture.
        * A stray release (combo key-up after the sequence completed) is a no-op. */
       return false;
+    /* v+g does double duty. `ъ` is the one letter the Russian layer has no key
+     * for: column 0 is never pressed, so 33 letters compete for 32 keys once
+     * `.` keeps its home, and the chord takes the loser. `ъ` is that letter by
+     * measurement — 18 occurrences in a 79k-letter corpus, twenty times rarer
+     * than the next one — so the chord is paid for at most once a page.
+     * RU_HARD is a unicodemap PAIR keycode, so it cannot be tap_code16'd; it
+     * goes through the same userspace backend as every other Russian letter,
+     * which is also what makes it follow shift/caps into `Ъ`. */
+    case KK_DQUO_RU:
+      if (record->event.pressed) {
+        if (layer_state_is(L_RUSSIAN)) {
+          ru_unicode_process(RU_HARD, record);
+        } else {
+          tap_code16(KC_DQUO);
+        }
+      }
+      return false;
+
     case KK_LANGLE:
     case KK_RANGLE:
       if (record->event.pressed) {
         /* One-shot shift is in use, so plain get_mods() would miss it — OR in
          * the pending one-shot mods too. */
-        uint8_t mods = get_mods() | get_oneshot_mods();
-        if (mods & MOD_MASK_SHIFT) {
-          /* Shifted: emit the guillemet via the active backend (it strips shift
-           * itself). Compose uses the private code; vim emits the codepoint. */
+        uint8_t mods    = get_mods() | get_oneshot_mods();
+        bool    shifted = (mods & MOD_MASK_SHIFT) != 0;
+        /* Shift picks between `< >` and `« »`, but WHICH of them costs the extra
+         * press flips with the script: Russian prose quotes with « » and hardly
+         * ever writes `<`, Latin code is the other way round. So the choice is a
+         * XOR, not a plain shift test — see modules/shofel/angle/angle_case.h.
+         *
+         * layer_state_is (rather than active_toggle) is deliberate: holding
+         * Ctrl/Alt/GUI suspends L_RUSSIAN so Latin shortcuts keep working, and
+         * an angle typed in that state is a Latin one. Shift does NOT suspend
+         * the layer (mod_ru_suspended ignores it), which is precisely what makes
+         * the shifted-Russian case reachable at all. */
+        if (angle_emits_guillemet(shifted, layer_state_is(L_RUSSIAN))) {
+          /* Emit the guillemet via the active backend (it strips shift itself).
+           * Compose uses the private code; vim emits the codepoint. */
           ru_emit_glyph(keycode == KK_LANGLE ? "q[" : "q]",
                         keycode == KK_LANGLE ? 0x00AB : 0x00BB); // « »
         } else {
+          /* Russian + shift now reaches here, which the old code never did. The
+           * shift was consumed choosing the glyph, so clear the one-shot rather
+           * than let it capitalise the next letter; KC_LABK/KC_RABK carry their
+           * own shift, so the tap still emits `<`/`>` either way. */
+          if (shifted) {
+            clear_oneshot_mods();
+          }
           tap_code16(keycode == KK_LANGLE ? KC_LABK : KC_RABK); // < >
         }
       }
@@ -758,7 +807,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
  *    pinky2 pinky  ring   mid  index  inner | inner  index   mid   ring  pinky pinky2
  *       1     4     6      8     6      2   |   2      6      8      6     4     3
  *       0     5     7      9     9      3   |   3      9      9      7     5     3
- *       0     1     4      5     6      3   |   3      6      5      4     1     1
+ *       0     1     4      5     8      3   |   3      8      5      4     1     1
  *                    · reserved for layer/mod keys, not symbol slots ·
  * ```
  * @design-end
@@ -793,35 +842,48 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    * Placed by `tools/opt_ru_layout.py` (simulated annealing, seed 20260827)
    * against two board-specific inputs: the comfort map published above, and
    * real Cyrillic letter/bigram frequencies from this keyboard's own typing
-   * (`make corpus-ru` — 79,032 letters). Scored on that corpus and this comfort
+   * (`make corpus-ru` — 79,201 letters). Scored on that corpus and this comfort
    * map, lower better:
    *
-   *     ЙЦУКЕН     15.656   effort 3.698   SFB 20.47%
-   *     Вестник     3.711   effort 2.427   SFB  2.10%
-   *     Kharlamak   3.874   effort 2.293   SFB  2.70%
-   *     this        3.078   effort 2.229   SFB  1.51%
+   *     ЙЦУКЕН     15.554   effort 3.591   SFB 20.48%
+   *     Вестник     3.617   effort 2.333   SFB  2.10%
+   *     Kharlamak   3.824   effort 2.245   SFB  2.70%
+   *     this        2.923   effort 2.034   SFB  1.55%
    *
    * Вестник and Kharlamak are excellent layouts optimised for a different corpus
    * on a different board; they are baselines here, and the comparison flatters
    * them (they place 30 letters, deriving щ/ъ/ё, so their missing letters are
-   * skipped rather than charged). All 33 letters are directly typeable here.
+   * skipped rather than charged). All 33 letters are typeable here.
    *
-   * The two XX keys are deliberate. The optimiser left the right-inner column's
-   * top and bottom empty because anything there collides on the index finger
-   * with `о` (10.6% of all letters). They are XX rather than `__` because
-   * transparent would fall through to BASE and type Latin `q`/`p` mid-word.
+   * Column 0 is empty because it is never pressed — ЙЦУКЕН put no letter on
+   * (1,0)/(2,0) either, and it is the reference for what this board's owner
+   * actually reaches. The first cut of this layer ignored that: the comfort map
+   * only scored those keys 1/0/0, a soft penalty the annealer was happy to pay
+   * to park ш/х/ъ there, while it *freed* (0,6)/(2,6) — the keys ЙЦУКЕН uses for
+   * н and т. A score cannot say "never"; the optimiser now excludes the column.
+   *
+   * That leaves 32 keys for 33 letters once `.` keeps its home, so exactly one
+   * letter lives on a chord: `ъ`, on the v+g combo (see KK_DQUO_RU). It is the
+   * rarest letter by measurement — 18 occurrences in 79,201 — so the chord is
+   * paid at most once a page. Which letter goes there is pinned, not optimised:
+   * a chord costs a COMBO_TERM window and cannot be rolled, and the per-key
+   * comfort map cannot express either, so left free the annealer priced the
+   * chord as an ordinary key and parked `ю` on it.
+   *
+   * Empty keys are XX rather than `__` because transparent would fall through to
+   * BASE and type a Latin letter mid-Russian-word.
    *
    * Activate and deactivate with leader seqs.
    */
   [L_RUSSIAN] = LAYOUT_split_3x6_3(/* GENERATED scheme — edit the array, then `make gen-docs`.
-       ш  з  к  р  г  щ        ·  у  и  ь  д  ч
-       х  с  в  н  т  й        я  о  а  е  п  б
-       ъ  ф  ж  л  м  ц        ·  ы  ё  ю  .  э
+       ·  з  у  а  г  ц        щ  л  ь  п  д  ю
+       ·  с  и  о  т  й        э  н  е  в  к  б
+       ·  ш  ё  ы  м  ж        х  р  я  ч  .  ф
              __  __  __        __  __  __
   */
-       RU_SH,  RU_Z,    RU_K,     RU_R,   RU_G,  RU_SHCH,   XX ,   RU_U,   RU_I,  RU_SOFT,RU_D,   RU_CH,
-         RU_H,  RU_S,    RU_V,     RU_N,   RU_T,  RU_Y,     RU_YA, RU_O,   RU_A,  RU_E,   RU_P,   RU_B,
-      RU_HARD,  RU_F,    RU_ZH,    RU_L,   RU_M,  RU_TS,     XX ,  RU_YERU,RU_YO, RU_YU,  RU_DOT, RU_EE,
+           XX, RU_Z,    RU_U,     RU_A,   RU_G,  RU_TS,    RU_SHCH,RU_L,   RU_SOFT,RU_P,   RU_D,   RU_YU,
+           XX, RU_S,    RU_I,     RU_O,   RU_T,  RU_Y,     RU_EE,  RU_N,   RU_E,   RU_V,   RU_K,   RU_B,
+           XX, RU_SH,   RU_YO,    RU_YERU,RU_M,  RU_ZH,    RU_H,   RU_R,   RU_YA,  RU_CH,  RU_DOT, RU_F,
                                      __ ,    __ ,   __ ,       __ ,   __ ,   __
   ),
 
@@ -854,8 +916,12 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    * - `⌫` backspace (right inner) and `⌦` delete (left inner).
    *
    * Not on SYM (all global, so they work while Russian is active):
-   * - `"`  — the left inner-index top+home combo (KC_DQUO).
-   * - `« »` — the angle combos via KK_LANGLE / KK_RANGLE (unshifted = `<` `>`).
+   * - `"`  — the left inner-index top+home combo (v+g). On the Russian layer
+   *          that same chord types `ъ` instead; `"` is no loss there, since
+   *          Russian quotes with `« »`.
+   * - `« »` — the angle combos via KK_LANGLE / KK_RANGLE. Shift picks between
+   *          `< >` and `« »`, and the Russian layer inverts which one shift
+   *          costs: unshifted gives `«` `»` there, `<` `>` on the Latin layers.
    * - `?` is suppressed from base Shift+/, so SYM is its one canonical home.
    *
    * Other combos still work here: `=>` `->`, brackets, mods.

@@ -183,10 +183,11 @@ COMBO_OUT = {  # combo outputs that aren't plain layer glyphs
     "KK_RU_WIN": "Russian — Windows backend (leader-armed only)",
     "KC_LBRC": "[", "KC_RBRC": "]", "KC_LPRN": "(", "KC_RPRN": ")",
     "KC_LCBR": "{", "KC_RCBR": "}",
-    "KK_LANGLE": "< (« when shifted)", "KK_RANGLE": "> (» when shifted)",
+    "KK_LANGLE": "`<` / `«`", "KK_RANGLE": "`>` / `»`",
     "OS_CTL": "one-shot Ctrl", "OS_ALT": "one-shot Alt", "OS_GUI": "one-shot Gui",
     "OSL(L_NUM_NAV)": "one-shot NUM_NAV", "OSL(L_FKEYS_SYS)": "one-shot FKEYS_SYS",
     "KC_DQUO": '"',
+    "KK_DQUO_RU": '" (ъ on the Russian layer)',
 }
 
 # Short labels for the combo board — each must fit a border cell (<= CW-2 chars).
@@ -196,7 +197,7 @@ COMBO_SHORT = {
     "OSL(L_NUM_NAV)": "Nav", "OSL(L_FKEYS_SYS)": "Fky",
     "KC_LBRC": "[", "KC_RBRC": "]", "KC_LPRN": "(", "KC_RPRN": ")",
     "KC_LCBR": "{", "KC_RCBR": "}",
-    "KK_LANGLE": "<", "KK_RANGLE": ">", "KC_DQUO": '"',
+    "KK_LANGLE": "<", "KK_RANGLE": ">", "KC_DQUO": '"', "KK_DQUO_RU": '"ъ',
     "KK_RIGHT_ARROW": "->", "KK_FAT_RIGHT_ARROW": "=>",
     "KK_FAT_LEFT_ARROW": "<=", "KK_LEFT_ARROW": "<-",
     "KK_RU_VIM": "RUv", "KK_RU_WIN": "RUw",
@@ -576,8 +577,12 @@ def gen_doc(src):
     if angle:
         notes = "; ".join(
             f"{' + '.join(glyph(k) for k in ks)} → {combo_out(o)}" for ks, o in angle)
-        out.append(f"The `<` `>` combos are shift-aware — {notes}. A held Shift "
-                   "(or a one-shot Shift) turns them into the guillemets.")
+        out.append(f"The angle combos are shift-aware — {notes}. A held (or "
+                   "one-shot) Shift picks the second glyph of each pair, so the "
+                   "Latin layers give `<` `>` unshifted and the guillemets "
+                   "shifted. The Russian layer inverts that: `«` `»` come "
+                   "unshifted there, since Russian prose quotes with them, and "
+                   "`<` `>` take the Shift.")
         out.append("")
     nonadj = nonadjacent_combos(base, combos)
     if nonadj:

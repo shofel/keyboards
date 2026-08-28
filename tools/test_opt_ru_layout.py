@@ -169,6 +169,101 @@ def test_render_produces_three_rows_of_twelve():
         assert len(r.split()) == 12
 
 
+# --- slot set: ЙЦУКЕН's occupied keys are the reference -----------------------
+#
+# v1 shipped letters onto column 0 — keys that carry no letter even in ЙЦУКЕН,
+# which is the empirical record of what this user actually presses. The comfort
+# map scored them 1/0/0, a soft penalty the annealer was happy to pay. Column 0
+# is now a hard exclusion, and the 33rd slot is the v+g vertical combo.
+
+def test_column_zero_is_never_a_slot():
+    assert all(c != 0 for (_r, c) in m.SLOTS)
+
+
+def test_dot_keeps_its_home_and_is_not_a_letter_slot():
+    assert m.DOT_SLOT == (2, 10)
+    assert m.DOT_SLOT not in m.SLOTS
+
+
+def test_slot_count_exactly_fits_the_alphabet():
+    """33 letters, 33 slots: 32 grid keys (36 − 3 dead − 1 dot) + the v+g combo.
+    An exact fit means every allowed key gets a letter, so no key the user does
+    press is left empty."""
+    assert len(m.ALPHABET) == 33
+    assert len(m.SLOTS) == 33
+
+
+def test_vg_combo_is_a_slot_on_the_left_index_finger():
+    assert m.COMBO_SLOT in m.SLOTS
+    assert m.finger_of(m.COMBO_SLOT[1]) == "L-index"
+    assert m.hand_of(m.COMBO_SLOT[1]) == "L"
+
+
+def test_vg_combo_has_its_own_comfort_score():
+    assert m.comfort_of(m.COMBO_SLOT) == m.COMBO_COMFORT
+
+
+def test_combo_carries_the_rarest_letter():
+    """A chord is a last resort, not a good key: it costs a COMBO_TERM window
+    and cannot be rolled, neither of which the single-key comfort map can say.
+    The combo exists only because the alphabet is one slot longer than the
+    grid, so whatever lands on it must be a letter that is almost never typed.
+    (Scoring it at 2 put `э` there — and `э` carries это/этот/эти.)"""
+    uni, bi = m.synthetic_russian()
+    # The shared synthetic fixture cannot see this bug: its tail is too flat.
+    # Use the REAL corpus tail, where `э` outnumbers `ъ` twentyfold, so the test
+    # actually discriminates — with the combo scored as a merely-mediocre key
+    # the annealer parks `э` on the chord and leaves `ъ` on a real one.
+    uni = dict(uni)
+    uni.update({"ъ": 18, "ё": 228, "ф": 252, "щ": 280, "ц": 317, "э": 389})
+    lay = m.optimize(uni, bi, seed=7, iters=60000, restarts=3)
+    combo_letter = next(ch for ch, s in lay.items() if s == m.COMBO_SLOT)
+    assert combo_letter == "ъ", (
+        f"combo got {combo_letter!r} (freq {uni[combo_letter]}) "
+        f"instead of the rarest letter ъ (freq {uni['ъ']})")
+
+
+def test_bottom_row_index_columns_score_eight():
+    """User's correction: promote the lower index 6 -> 8."""
+    assert m.COMFORT[2][4] == 8   # left index, bottom row
+    assert m.COMFORT[2][7] == 8   # right index, bottom row
+
+
+def test_optimize_fills_every_slot():
+    """Exact fit -> the layout is a bijection letters <-> slots."""
+    uni, bi = m.synthetic_russian()
+    lay = m.optimize(uni, bi, seed=5, iters=500)
+    assert set(lay.values()) == set(m.SLOTS)
+
+
+def test_optimize_uses_the_right_inner_column_top_and_bottom():
+    """The v1 defect, inverted: it freed (0,6)/(2,6) — where ЙЦУКЕН puts н and
+    т — while taking column 0. With an exact fit these can never be empty."""
+    uni, bi = m.synthetic_russian()
+    lay = m.optimize(uni, bi, seed=6, iters=500)
+    assert (0, 6) in lay.values()
+    assert (2, 6) in lay.values()
+
+
+def test_comfort_map_matches_keymap_c():
+    """The comfort map is duplicated in keymap.c (canonical) and here. The two
+    drifting apart is silent and steers the whole search wrong, so pin it."""
+    import os
+    import re
+    here = os.path.dirname(os.path.abspath(__file__))
+    src = os.path.join(here, "..", "layouts", "split_3x6_3", "shofel", "keymap.c")
+    with open(src, encoding="utf-8") as fh:
+        text = fh.read()
+    block = text.split("### Key comfort scores", 1)[1].split("```", 2)[1]
+    rows = []
+    for line in block.splitlines():
+        nums = re.findall(r"(?<![\w.])\d(?![\w.])", line.replace("|", " "))
+        if len(nums) == 12:
+            rows.append([int(n) for n in nums])
+    assert len(rows) == 3, f"expected 3 comfort rows in keymap.c, got {len(rows)}"
+    assert rows == m.COMFORT, f"keymap.c {rows} != optimiser {m.COMFORT}"
+
+
 def _run():
     tests = [v for k, v in sorted(globals().items()) if k.startswith("test_")]
     for t in tests:
