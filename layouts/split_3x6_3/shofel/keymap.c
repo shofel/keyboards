@@ -782,19 +782,46 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   ),
 
   /**
-   * Russian layer.
+   * Russian layer — optimised, not inherited.
+   *
+   * Was stock ЙЦУКЕН: the only layer on this board nobody designed, carrying
+   * GOST 6431-52 (1953), whose real constraint was stopping typewriter typebars
+   * from jamming. On this geometry it put 20.5% of bigram mass on a single
+   * finger, because the index column and the inner column are the SAME finger —
+   * `какие` was five keystrokes and all five were the left index.
+   *
+   * Placed by `tools/opt_ru_layout.py` (simulated annealing, seed 20260827)
+   * against two board-specific inputs: the comfort map published above, and
+   * real Cyrillic letter/bigram frequencies from this keyboard's own typing
+   * (`make corpus-ru` — 79,032 letters). Scored on that corpus and this comfort
+   * map, lower better:
+   *
+   *     ЙЦУКЕН     15.656   effort 3.698   SFB 20.47%
+   *     Вестник     3.711   effort 2.427   SFB  2.10%
+   *     Kharlamak   3.874   effort 2.293   SFB  2.70%
+   *     this        3.078   effort 2.229   SFB  1.51%
+   *
+   * Вестник and Kharlamak are excellent layouts optimised for a different corpus
+   * on a different board; they are baselines here, and the comparison flatters
+   * them (they place 30 letters, deriving щ/ъ/ё, so their missing letters are
+   * skipped rather than charged). All 33 letters are directly typeable here.
+   *
+   * The two XX keys are deliberate. The optimiser left the right-inner column's
+   * top and bottom empty because anything there collides on the index finger
+   * with `о` (10.6% of all letters). They are XX rather than `__` because
+   * transparent would fall through to BASE and type Latin `q`/`p` mid-word.
    *
    * Activate and deactivate with leader seqs.
    */
   [L_RUSSIAN] = LAYOUT_split_3x6_3(/* GENERATED scheme — edit the array, then `make gen-docs`.
-       ё   й  ц  у  к  е        н  г  ш  щ  з  х
-       __  ф  ы  в  а  п        р  о  л  д  ж  э
-       __  я  ч  с  м  и        т  ь  б  ю  .  ъ
-              __  __  __        __  __  __
+       ш  з  к  р  г  щ        ·  у  и  ь  д  ч
+       х  с  в  н  т  й        я  о  а  е  п  б
+       ъ  ф  ж  л  м  ц        ·  ы  ё  ю  .  э
+             __  __  __        __  __  __
   */
-         RU_YO,   RU_Y,    RU_TS,    RU_U,   RU_K,  RU_E,     RU_N,  RU_G,   RU_SH, RU_SHCH,RU_Z,   RU_H,
-           __ ,   RU_F,    RU_YERU,  RU_V,   RU_A,  RU_P,     RU_R,  RU_O,   RU_L,  RU_D,   RU_ZH,  RU_EE,
-           __ ,   RU_YA,   RU_CH,    RU_S,   RU_M,  RU_I,     RU_T,  RU_SOFT,RU_B,  RU_YU,  RU_DOT, RU_HARD,
+       RU_SH,  RU_Z,    RU_K,     RU_R,   RU_G,  RU_SHCH,   XX ,   RU_U,   RU_I,  RU_SOFT,RU_D,   RU_CH,
+         RU_H,  RU_S,    RU_V,     RU_N,   RU_T,  RU_Y,     RU_YA, RU_O,   RU_A,  RU_E,   RU_P,   RU_B,
+      RU_HARD,  RU_F,    RU_ZH,    RU_L,   RU_M,  RU_TS,     XX ,  RU_YERU,RU_YO, RU_YU,  RU_DOT, RU_EE,
                                      __ ,    __ ,   __ ,       __ ,   __ ,   __
   ),
 
