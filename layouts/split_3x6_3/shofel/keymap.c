@@ -44,7 +44,7 @@ enum my_keycodes {
   KK_LANGLE,
   KK_RANGLE,
 
-  /* The v+g vertical combo (left inner column, top+home) does double duty: `"`
+  /* The left inner column's top+home vertical combo does double duty: `"`
    * on the Latin layers, and the one Russian letter that does not fit the grid
    * while L_RUSSIAN is live. The alphabet is 33 letters but column 0 is never
    * pressed, which leaves only 32 keys once `.` keeps its home — so exactly one
@@ -80,6 +80,11 @@ enum my_keycodes {
 enum my_layer_names {
   L_BOO,
   L_RUSSIAN,
+  /* TEMPORARY — adaptation scaffolding. The old ЙЦУКЕН layout, kept reachable
+   * (leader,j) while the optimised L_RUSSIAN is being learned. Delete this whole
+   * layer once the muscle memory has moved: drop the enum entry, the array, the
+   * lead_ru_jcuken seq, and bump the counts in test_gen_layer_schemes.py. */
+  L_RU_JCUKEN,
   L_SYMBOLS,
   L_NUM_NAV,
   L_FKEYS_SYS,
@@ -133,11 +138,23 @@ static bool mod_ru_suspended(void) {
     return false;
 }
 
+/* Is a Russian layer physically live right now? Both L_RUSSIAN and the
+ * temporary ЙЦУКЕН adaptation layer count: the script is what decides whether
+ * `«` or `<` is the rare glyph, not which key positions are in use.
+ *
+ * Reads the LIVE layer rather than active_toggle on purpose — a held
+ * Ctrl/Alt/Gui suspends Russian so Latin shortcuts keep working, and an angle
+ * typed in that state is a Latin one. */
+static bool typing_russian(void) {
+    return layer_state_is(L_RUSSIAN) || layer_state_is(L_RU_JCUKEN);
+}
+
 static void toggle_apply(void) {
     uint8_t want = active_toggle;
     if (leader_active) {
         want = TOGGLE_NONE;
-    } else if (active_toggle == L_RUSSIAN && mod_ru_suspended()) {
+    } else if ((active_toggle == L_RUSSIAN || active_toggle == L_RU_JCUKEN) &&
+               mod_ru_suspended()) {
         want = TOGGLE_NONE;
     }
     if (applied_layer == want) {
@@ -416,6 +433,8 @@ typedef struct {
 
 /* Ru compose is the default backend; see the unicode_ru module. */
 static void lead_ru(void)       { ru_backend = RU_BACKEND_COMPOSE; toggle_enable(L_RUSSIAN); }
+/* TEMPORARY — see L_RU_JCUKEN. Same compose backend, old key positions. */
+static void lead_ru_jcuken(void){ ru_backend = RU_BACKEND_COMPOSE; toggle_enable(L_RU_JCUKEN); }
 static void lead_vim(void)      { ru_backend = RU_BACKEND_VIM; toggle_enable(L_RUSSIAN); }
 static void lead_win(void)      { ru_backend = RU_BACKEND_WINDOWS; toggle_enable(L_RUSSIAN); }
 static void lead_en(void)       { ru_backend = RU_BACKEND_COMPOSE; toggle_disable(); }
@@ -444,6 +463,7 @@ static const leader_seq_t leader_seqs[] = {
    * Those two are handled in process_record_user's capture intercept, not here,
    * since their tokens (KK_RU_VIM/KK_RU_WIN) aren't physical keys. */
   {KC_R,     KC_NO, lead_ru,       "Russian — compose backend (default; rolling-safe, host-wide)"},
+  {KC_J,     KC_NO, lead_ru_jcuken,"Russian — old ЙЦУКЕН positions (TEMPORARY: adaptation crutch)"},
   {KC_E,     KC_NO, lead_en,       "back to English (drop the toggle layer)"},
   {KC_SPACE, KC_NO, lead_reset,    "disable any toggle layer, cancel one-shots"},
   {KC_F,     KC_NO, lead_fkeys,    "F-keys / system layer (sticky)"},
@@ -643,7 +663,11 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
       /* Combo tokens for RU select; the press is consumed by the leader capture.
        * A stray release (combo key-up after the sequence completed) is a no-op. */
       return false;
-    /* v+g does double duty. `ъ` is the one letter the Russian layer has no key
+    /* This chord does double duty. On the Latin layers it is v+g and types `"`;
+     * on the Russian layer the same two keys are ц and й, and it types ъ —
+     * always name it by the letters of the layer you are actually on.
+     *
+     * `ъ` is the one letter the Russian layer has no key
      * for: column 0 is never pressed, so 33 letters compete for 32 keys once
      * `.` keeps its home, and the chord takes the loser. `ъ` is that letter by
      * measurement — 18 occurrences in a 79k-letter corpus, twenty times rarer
@@ -678,7 +702,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
          * an angle typed in that state is a Latin one. Shift does NOT suspend
          * the layer (mod_ru_suspended ignores it), which is precisely what makes
          * the shifted-Russian case reachable at all. */
-        if (angle_emits_guillemet(shifted, layer_state_is(L_RUSSIAN))) {
+        if (angle_emits_guillemet(shifted, typing_russian())) {
           /* Emit the guillemet via the active backend (it strips shift itself).
            * Compose uses the private code; vim emits the codepoint. */
           ru_emit_glyph(keycode == KK_LANGLE ? "q[" : "q]",
@@ -863,7 +887,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    * н and т. A score cannot say "never"; the optimiser now excludes the column.
    *
    * That leaves 32 keys for 33 letters once `.` keeps its home, so exactly one
-   * letter lives on a chord: `ъ`, on the v+g combo (see KK_DQUO_RU). It is the
+   * letter lives on a chord: `ъ`, on the ц + й combo (see KK_DQUO_RU). It is the
    * rarest letter by measurement — 18 occurrences in 79,201 — so the chord is
    * paid at most once a page. Which letter goes there is pinned, not optimised:
    * a chord costs a COMBO_TERM window and cannot be rolled, and the per-key
@@ -884,6 +908,39 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
            XX, RU_Z,    RU_U,     RU_A,   RU_G,  RU_TS,    RU_SHCH,RU_L,   RU_SOFT,RU_P,   RU_D,   RU_YU,
            XX, RU_S,    RU_I,     RU_O,   RU_T,  RU_Y,     RU_EE,  RU_N,   RU_E,   RU_V,   RU_K,   RU_B,
            XX, RU_SH,   RU_YO,    RU_YERU,RU_M,  RU_ZH,    RU_H,   RU_R,   RU_YA,  RU_CH,  RU_DOT, RU_F,
+                                     __ ,    __ ,   __ ,       __ ,   __ ,   __
+  ),
+
+  /**
+   * ЙЦУКЕН — TEMPORARY adaptation layer. Delete once the new layout is learned.
+   *
+   * The layout that was here before, kept reachable on `leader,j` (й, for
+   * ЙЦУКЕН) so there is somewhere to fall back to mid-sentence while the
+   * optimised L_RUSSIAN is still unfamiliar. Same compose backend and the same
+   * RU_* keycodes — only the positions differ.
+   *
+   * Deliberately a separate leader sequence rather than a one-chord flip: the
+   * two keystrokes are friction, and friction is the point. A frictionless
+   * crutch is the slowest way to move muscle memory.
+   *
+   * Column 0 is XX here, where the original used `__`. The letters are
+   * untouched — ЙЦУКЕН never put one there — but transparent would fall through
+   * to BASE and type Latin `q`/`p` mid-Russian-word, which is the bug the rest
+   * of this file is careful to avoid.
+   *
+   * To remove: delete this block, the L_RU_JCUKEN enum entry, lead_ru_jcuken and
+   * its leader seq, then `make gen-docs` and drop the counts in
+   * tools/test_gen_layer_schemes.py back by one.
+   */
+  [L_RU_JCUKEN] = LAYOUT_split_3x6_3(/* GENERATED scheme — edit the array, then `make gen-docs`.
+       ё  й  ц  у  к  е        н  г  ш  щ  з  х
+       ·  ф  ы  в  а  п        р  о  л  д  ж  э
+       ·  я  ч  с  м  и        т  ь  б  ю  .  ъ
+             __  __  __        __  __  __
+  */
+        RU_YO,  RU_Y,    RU_TS,    RU_U,   RU_K,  RU_E,     RU_N,  RU_G,   RU_SH, RU_SHCH,RU_Z,   RU_H,
+           XX,  RU_F,    RU_YERU,  RU_V,   RU_A,  RU_P,     RU_R,  RU_O,   RU_L,  RU_D,   RU_ZH,  RU_EE,
+           XX,  RU_YA,   RU_CH,    RU_S,   RU_M,  RU_I,     RU_T,  RU_SOFT,RU_B,  RU_YU,  RU_DOT, RU_HARD,
                                      __ ,    __ ,   __ ,       __ ,   __ ,   __
   ),
 
@@ -916,9 +973,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    * - `⌫` backspace (right inner) and `⌦` delete (left inner).
    *
    * Not on SYM (all global, so they work while Russian is active):
-   * - `"`  — the left inner-index top+home combo (v+g). On the Russian layer
-   *          that same chord types `ъ` instead; `"` is no loss there, since
-   *          Russian quotes with `« »`.
+   * - `"`  — the left inner-index top+home combo (v+g). The same two keys are
+   *          ц and й on the Russian layer, where the chord types `ъ` instead;
+   *          `"` is no loss there, since Russian quotes with `« »`.
    * - `« »` — the angle combos via KK_LANGLE / KK_RANGLE. Shift picks between
    *          `< >` and `« »`, and the Russian layer inverts which one shift
    *          costs: unshifted gives `«` `»` there, `<` `>` on the Latin layers.

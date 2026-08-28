@@ -66,7 +66,7 @@ def test_unknown_keycode_fatal():
 def test_real_keymap_fully_covered():
     src = g.KEYMAP.read_text(encoding="utf-8")
     layers = g.extract_layers(src)
-    assert len(layers) == 6
+    assert len(layers) == 7
     for name, toks in layers:
         for t in toks:
             g.glyph(t)  # SystemExit here = missing glyph for a real keycode
@@ -124,7 +124,7 @@ def test_regen_keymap_idempotent():
 
 def test_regen_keymap_marks_every_layer():
     once = g.regen_keymap(g.KEYMAP.read_text(encoding="utf-8"))
-    assert once.count("GENERATED scheme") == 6
+    assert once.count("GENERATED scheme") == 7
 
 def test_extract_combos_real():
     combos = g.extract_combos(g.KEYMAP.read_text(encoding="utf-8"))
@@ -152,10 +152,10 @@ def test_extract_leader_seqs_real():
     # bare leader,s — so the set stays a prefix code (lint-leader enforces it).
     assert (["KC_S", "KC_D"], "lead_stats_dump", "typing stats — dump counters to the console") in seqs
     assert (["KC_S", "KC_C"], "lead_stats_clear", "typing stats — clear counters") in seqs
-    assert len(seqs) == 17
+    assert len(seqs) == 18
     # Mirror pairs share an action; grouping collapses the 17 rows to 16 entries.
     groups = g.group_leader_seqs(seqs)
-    assert len(groups) == 16
+    assert len(groups) == 17
     by_seqs = {tuple(map(tuple, ks)): doc for ks, doc in groups}
     assert by_seqs[(("KC_M",), ("KC_DOT",))] == "mouse layer, polar mode"
 

@@ -334,6 +334,20 @@ def optimize(unigrams, bigrams, seed=0, iters=200000, restarts=1, letters=ALPHAB
     return best_layout
 
 
+def combo_keys(layout):
+    """The two letters the chord physically sits under, on this layout.
+
+    Calling it the `v+g` combo is only meaningful on the Latin layers. Someone
+    typing Russian sees the letters at those positions, so name it by those."""
+    at = {slot: ch for ch, slot in layout.items()}
+    return at.get((0, 5)), at.get((1, 5))
+
+
+def combo_name(layout):
+    a, b = combo_keys(layout)
+    return f"{a}+{b}" if a and b else "v+g"
+
+
 def render(layout, dot=True):
     """3 rows of 12 tokens; `·` marks an unused key. The combo letter is not on
     the grid, so it trails on its own line."""
@@ -348,7 +362,7 @@ def render(layout, dot=True):
         grid[DOT_SLOT[0]][DOT_SLOT[1]] = "."
     out = "\n".join(" ".join(row) for row in grid)
     if combo is not None:
-        out += f"\nv+g combo: {combo}"
+        out += f"\n{combo_name(layout)} combo: {combo}"
     return out
 
 
@@ -434,7 +448,8 @@ def emit_keymap(layout):
     grid[DOT_SLOT[0]][DOT_SLOT[1]] = "RU_DOT"
     body = "\n".join("           " + ", ".join(f"{k:<8}" for k in row) + "," for row in grid)
     if combo is not None:
-        body += f"\n           /* v+g combo -> {RU_KEYCODE[combo]}  ({combo}) */"
+        body += (f"\n           /* {combo_name(layout)} combo (v+g on Latin) -> "
+                 f"{RU_KEYCODE[combo]}  ({combo}) */")
     return body
 
 

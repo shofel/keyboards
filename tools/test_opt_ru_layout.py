@@ -245,6 +245,31 @@ def test_optimize_uses_the_right_inner_column_top_and_bottom():
     assert (2, 6) in lay.values()
 
 
+def test_legacy_jcuken_layer_matches_the_reference():
+    """The adaptation-period layer must be ЙЦУКЕН *exactly*.
+
+    A transcription slip would quietly train the wrong muscle memory during the
+    one period the user is leaning on this layer — the worst possible time to be
+    subtly wrong, and invisible without a check like this."""
+    import os
+    here = os.path.dirname(os.path.abspath(__file__))
+    src = os.path.join(here, "..", "layouts", "split_3x6_3", "shofel", "keymap.c")
+    with open(src, encoding="utf-8") as fh:
+        text = fh.read()
+    assert "[L_RU_JCUKEN]" in text, "no ЙЦУКЕН adaptation layer in keymap.c"
+    block = text.split("[L_RU_JCUKEN] = LAYOUT", 1)[1].split("*/", 1)[0]
+    rows = [t for t in (ln.split() for ln in block.splitlines())
+            if len(t) == 12 and all(len(x) == 1 for x in t)]
+    assert len(rows) == 3, f"expected 3 rows of 12 glyphs, got {len(rows)}"
+    got = {tok: (r, c)
+           for r, row in enumerate(rows)
+           for c, tok in enumerate(row)
+           if tok not in ("·", ".")}
+    assert got == m.JCUKEN, (
+        "adaptation layer differs from ЙЦУКЕН at: "
+        f"{sorted(set(got.items()) ^ set(m.JCUKEN.items()))}")
+
+
 def test_comfort_map_matches_keymap_c():
     """The comfort map is duplicated in keymap.c (canonical) and here. The two
     drifting apart is silent and steers the whole search wrong, so pin it."""
