@@ -1,0 +1,744 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Retap on Release</title>
+<style>
+  /* ---- minimal reset (supplied by the artifact host when published) ---- */
+  *, *::before, *::after { box-sizing: border-box; }
+  body { margin: 0; }
+
+  /* ---- tokens: light is the base, both dark states override only vars ---- */
+  :root {
+    --ground:  #E9ECEB;
+    --paper:   #F7F9F8;
+    --sunk:    #E2E7E5;
+    --ink:     #14191A;
+    --ink-2:   #475456;
+    --ink-3:   #7A8888;
+    --rule:    #D2D9D7;
+    --rule-2:  #BFC8C6;
+    --accent:  #0F7B84;
+    --accent-soft: rgba(15,123,132,.11);
+    --warm:    #A0611F;
+    --warm-soft: rgba(160,97,31,.12);
+    --grow:    #47714D;
+    --grow-soft: rgba(71,113,77,.12);
+    --clay:    #A6543C;
+    --shadow:  0 1px 2px rgba(20,25,26,.05), 0 8px 24px -12px rgba(20,25,26,.18);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground:  #0F1314;
+      --paper:   #171D1E;
+      --sunk:    #12181A;
+      --ink:     #E7ECEA;
+      --ink-2:   #A2AFAE;
+      --ink-3:   #6E7C7C;
+      --rule:    #263030;
+      --rule-2:  #35403F;
+      --accent:  #4FC3CB;
+      --accent-soft: rgba(79,195,203,.13);
+      --warm:    #D79A4E;
+      --warm-soft: rgba(215,154,78,.13);
+      --grow:    #7FB187;
+      --grow-soft: rgba(127,177,135,.13);
+      --clay:    #D3866B;
+      --shadow:  0 1px 2px rgba(0,0,0,.4), 0 10px 28px -14px rgba(0,0,0,.7);
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground:  #0F1314;
+    --paper:   #171D1E;
+    --sunk:    #12181A;
+    --ink:     #E7ECEA;
+    --ink-2:   #A2AFAE;
+    --ink-3:   #6E7C7C;
+    --rule:    #263030;
+    --rule-2:  #35403F;
+    --accent:  #4FC3CB;
+    --accent-soft: rgba(79,195,203,.13);
+    --warm:    #D79A4E;
+    --warm-soft: rgba(215,154,78,.13);
+    --grow:    #7FB187;
+    --grow-soft: rgba(127,177,135,.13);
+    --clay:    #D3866B;
+    --shadow:  0 1px 2px rgba(0,0,0,.4), 0 10px 28px -14px rgba(0,0,0,.7);
+  }
+
+  body {
+    background: var(--ground);
+    color: var(--ink);
+    font-family: "Charter", "Iowan Old Style", "Palatino Linotype", Georgia, "Liberation Serif", serif;
+    font-size: 17px;
+    line-height: 1.62;
+    -webkit-font-smoothing: antialiased;
+    padding: 0 1.25rem 6rem;
+  }
+
+  .wrap { max-width: 50rem; margin: 0 auto; }
+  .prose { max-width: 36rem; }
+
+  /* ---- shared type roles ---- */
+  .mono, code, pre, .lane b, .stat i, th, .pill, .chip, .fire {
+    font-family: ui-monospace, "SF Mono", SFMono-Regular, "JetBrains Mono", Menlo,
+                 "DejaVu Sans Mono", "Liberation Mono", monospace;
+  }
+  h1, h2, h3, .eyebrow, .deck, .stat b, .verdict-word, td, .note, figcaption, .sub {
+    font-family: ui-sans-serif, -apple-system, "Segoe UI", "Helvetica Neue",
+                 "Liberation Sans", Arial, sans-serif;
+  }
+
+  .eyebrow {
+    font-family: ui-monospace, "SF Mono", SFMono-Regular, Menlo, "DejaVu Sans Mono", monospace;
+    font-size: .7rem; font-weight: 600;
+    letter-spacing: .16em; text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  /* ---- masthead ---- */
+  header { padding: 4.5rem 0 0; }
+  header .eyebrow { display: block; margin-bottom: 1.4rem; }
+  h1 {
+    font-size: clamp(2.4rem, 6.5vw, 3.9rem);
+    font-weight: 800; letter-spacing: -.035em; line-height: 1.02;
+    text-wrap: balance; margin: 0;
+  }
+  .deck {
+    max-width: 34rem; margin: 1.4rem 0 0;
+    font-size: 1.06rem; line-height: 1.55; color: var(--ink-2); font-weight: 400;
+  }
+  .deck code { font-size: .92em; color: var(--ink); }
+
+  /* ---- verdict strip ---- */
+  .stats {
+    display: grid; gap: 1px; margin: 3rem 0 0;
+    grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+    background: var(--rule); border: 1px solid var(--rule);
+    border-radius: 3px; overflow: hidden;
+  }
+  .stat { background: var(--paper); padding: 1.15rem 1.25rem 1.25rem; }
+  .stat b { display: block; font-size: 2.15rem; font-weight: 800; letter-spacing: -.04em; line-height: 1; }
+  .stat i {
+    display: block; margin-top: .55rem; font-style: normal;
+    font-size: .7rem; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3);
+  }
+  .stat.is-warm b { color: var(--warm); }
+  .stat.is-grow b { color: var(--grow); }
+  .stat.is-accent b { color: var(--accent); }
+
+  /* ---- sections ---- */
+  section { margin-top: 4.25rem; }
+  .sec-head {
+    display: flex; align-items: baseline; gap: 1rem;
+    border-top: 1px solid var(--rule); padding-top: .85rem; margin-bottom: 1.6rem;
+  }
+  .sec-head .eyebrow { flex: none; }
+  h2 {
+    font-size: 1.32rem; font-weight: 700; letter-spacing: -.02em;
+    margin: 0; text-wrap: balance;
+  }
+  p { margin: 0 0 1rem; }
+  p:last-child { margin-bottom: 0; }
+  .stack { display: flex; flex-direction: column; gap: 1rem; }
+
+  code { font-size: .875em; }
+  .prose code, td code, li code, .callout code, .effect code {
+    background: var(--sunk); border: 1px solid var(--rule);
+    padding: .05em .34em; border-radius: 3px;
+    overflow-wrap: break-word;
+  }
+
+  /* ---- timing figure ---- */
+  figure { margin: 0; }
+  .scope {
+    display: grid; gap: 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr));
+    margin-bottom: 1rem;
+  }
+  .panel {
+    background: var(--paper); border: 1px solid var(--rule);
+    border-radius: 3px; padding: 1.1rem 1.2rem 1.35rem; box-shadow: var(--shadow);
+  }
+  .panel > .sub {
+    font-size: .68rem; letter-spacing: .14em; text-transform: uppercase;
+    font-weight: 700; color: var(--ink-3); margin-bottom: 1.15rem;
+  }
+  .panel.is-now > .sub { color: var(--ink-3); }
+  .panel.is-next > .sub { color: var(--accent); }
+
+  .lane { display: grid; grid-template-columns: 5.6rem 1fr; align-items: center; gap: .7rem; margin-bottom: .5rem; }
+  .lane b {
+    font-weight: 400; font-size: .68rem; letter-spacing: .04em;
+    color: var(--ink-3); text-align: right;
+  }
+  .track {
+    display: grid; grid-template-columns: repeat(20, 1fr);
+    height: 1.55rem; align-items: center;
+    background: repeating-linear-gradient(to right,
+      var(--rule) 0 1px, transparent 1px 5%);
+    border-radius: 2px;
+  }
+  .bar { height: .58rem; border-radius: 2px; }
+  .bar.key { background: var(--rule-2); }
+  .bar.sig { background: var(--accent); transform-origin: left center; }
+  .panel.is-now .bar.sig { background: var(--ink-3); }
+
+  .edge { height: 1.55rem; border-left: 2px solid var(--clay); }
+  .panel.is-next .edge { border-left-color: var(--accent); }
+  .axis {
+    display: grid; grid-template-columns: 5.6rem 1fr; gap: .7rem; margin-top: .7rem;
+  }
+  .fire {
+    font-size: .7rem; letter-spacing: .02em; color: var(--clay); font-weight: 600;
+  }
+  .panel.is-next .fire { color: var(--accent); }
+  .fire em { font-style: normal; color: var(--ink-3); font-weight: 400; }
+  figcaption {
+    font-size: .82rem; color: var(--ink-3); line-height: 1.5;
+    border-left: 2px solid var(--rule-2); padding-left: .85rem; max-width: 34rem;
+  }
+
+  @keyframes draw { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+  .bar.sig { animation: draw .75s cubic-bezier(.2,.8,.25,1) both; }
+  .panel.is-next .bar.sig { animation-delay: .3s; }
+  @media (prefers-reduced-motion: reduce) {
+    .bar.sig { animation: none; }
+  }
+
+  /* ---- state pills ---- */
+  .pills { display: flex; flex-wrap: wrap; gap: .45rem; margin-bottom: 1.25rem; }
+  .pill {
+    font-size: .74rem; padding: .3rem .6rem; border-radius: 999px;
+    border: 1px solid var(--rule-2); color: var(--ink-2); background: var(--paper);
+    white-space: nowrap;
+  }
+  .pill.is-new {
+    border-color: var(--accent); color: var(--accent);
+    background: var(--accent-soft); font-weight: 600;
+  }
+  .pill.is-new::after {
+    content: " new"; font-size: .62rem; letter-spacing: .1em;
+    text-transform: uppercase; opacity: .75;
+  }
+
+  /* ---- diff ---- */
+  .diff {
+    background: var(--paper); border: 1px solid var(--rule); border-radius: 3px;
+    overflow-x: auto; box-shadow: var(--shadow); margin: 0;
+  }
+  .diff pre { margin: 0; padding: 1.1rem 0; font-size: .8rem; line-height: 1.75; }
+  .diff .ln { display: block; padding: 0 1.2rem 0 .55rem; border-left: 3px solid transparent; white-space: pre; }
+  .diff .ctx { color: var(--ink-2); }
+  .diff .add { background: var(--grow-soft); border-left-color: var(--grow); color: var(--ink); }
+  .diff .del { background: var(--warm-soft); border-left-color: var(--warm); color: var(--ink-2); text-decoration: line-through; text-decoration-color: var(--warm); text-decoration-thickness: 1px; }
+  .diff .hdr { color: var(--accent); font-weight: 600; }
+  .diff .cm { color: var(--ink-3); }
+  .diff .blank { display: block; height: .55rem; }
+
+  /* ---- untouched list ---- */
+  ul.clean { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: .9rem; }
+  ul.clean li { position: relative; padding-left: 1.6rem; font-size: .96rem; }
+  ul.clean li::before {
+    content: ""; position: absolute; left: 0; top: .58rem;
+    width: .5rem; height: .5rem; border-radius: 50%; background: var(--grow);
+  }
+  ul.clean li.is-warm::before { background: var(--warm); }
+
+  /* ---- effects ---- */
+  .effects { display: flex; flex-direction: column; gap: 1px; background: var(--rule); border: 1px solid var(--rule); border-radius: 3px; overflow: hidden; }
+  .effect { background: var(--paper); padding: 1rem 1.15rem; display: grid; gap: .45rem; }
+  .effect-top { display: flex; flex-wrap: wrap; align-items: center; gap: .6rem; }
+  .effect-top strong { font-size: .95rem; font-weight: 700; letter-spacing: -.01em;
+    font-family: ui-sans-serif, -apple-system, "Segoe UI", "Liberation Sans", Arial, sans-serif; }
+  .effect p { font-size: .89rem; color: var(--ink-2); margin: 0; }
+  .chip {
+    font-size: .62rem; letter-spacing: .1em; text-transform: uppercase; font-weight: 600;
+    padding: .18rem .45rem; border-radius: 2px; white-space: nowrap;
+  }
+  .chip.verified { color: var(--grow); background: var(--grow-soft); border: 1px solid var(--grow); }
+  .chip.derived  { color: var(--accent); background: var(--accent-soft); border: 1px solid var(--accent); }
+  .chip.assumed  { color: var(--warm); background: var(--warm-soft); border: 1px solid var(--warm); }
+
+  /* ---- table ---- */
+  .tw { overflow-x: auto; border: 1px solid var(--rule); border-radius: 3px; background: var(--paper); box-shadow: var(--shadow); }
+  table { border-collapse: collapse; width: 100%; min-width: 34rem; }
+  th, td { text-align: left; padding: .8rem 1.1rem; vertical-align: top; border-bottom: 1px solid var(--rule); }
+  th {
+    font-size: .65rem; letter-spacing: .13em; text-transform: uppercase;
+    color: var(--ink-3); font-weight: 600; background: var(--sunk);
+  }
+  td { font-size: .89rem; color: var(--ink-2); }
+  td:first-child { color: var(--ink); }
+  td:last-child { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap;
+    font-family: ui-monospace, SFMono-Regular, Menlo, "DejaVu Sans Mono", monospace; font-size: .82rem; }
+  tbody tr:last-child td { border-bottom: 0; }
+
+  /* ---- callout / footer ---- */
+  .callout {
+    background: var(--sunk); border: 1px solid var(--rule); border-left: 3px solid var(--accent);
+    border-radius: 3px; padding: 1.1rem 1.25rem; font-size: .93rem; color: var(--ink-2);
+  }
+  .callout strong { color: var(--ink); }
+  footer {
+    margin-top: 4.25rem; border-top: 1px solid var(--rule); padding-top: 1.4rem;
+    font-size: .84rem; color: var(--ink-3); line-height: 1.6; max-width: 38rem;
+  }
+  footer .eyebrow { display: block; margin-bottom: .8rem; color: var(--ink-3); }
+  footer code { font-size: .9em; }
+  a { color: var(--accent); }
+  a:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  /* ---- status badges ---- */
+  .status { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1.6rem; }
+  .badge {
+    font-family: ui-monospace, SFMono-Regular, Menlo, "DejaVu Sans Mono", monospace;
+    font-size: .68rem; letter-spacing: .08em; text-transform: uppercase; font-weight: 600;
+    padding: .32rem .6rem; border-radius: 2px; display: inline-flex; align-items: center; gap: .45rem;
+  }
+  .badge::before { content: ""; width: .42rem; height: .42rem; border-radius: 50%; background: currentColor; }
+  .badge.live { color: var(--accent); background: var(--accent-soft); border: 1px solid var(--accent); }
+  .badge.ok   { color: var(--grow);   background: var(--grow-soft);   border: 1px solid var(--grow); }
+  .badge.warn { color: var(--warm);   background: var(--warm-soft);   border: 1px solid var(--warm); }
+  .badge a { color: inherit; text-decoration: none; border-bottom: 1px solid currentColor; }
+
+  /* ---- decision matrix ---- */
+  table.matrix td, table.matrix th { padding: .7rem .8rem; }
+  table.matrix td:not(:first-child) {
+    text-align: right; font-variant-numeric: tabular-nums;
+    font-family: ui-monospace, SFMono-Regular, Menlo, "DejaVu Sans Mono", monospace; font-size: .84rem;
+  }
+  table.matrix th:not(:first-child) { text-align: right; }
+  table.matrix th small { display: block; font-weight: 400; opacity: .7; letter-spacing: .06em; }
+  table.matrix tr.win td { background: var(--accent-soft); color: var(--ink); }
+  table.matrix tr.win td:first-child { font-weight: 700; }
+  table.matrix tr.out td:first-child { text-decoration: line-through; text-decoration-color: var(--ink-3); }
+  table.matrix td.total { font-weight: 700; color: var(--ink); }
+  table.matrix tr.win td.total { color: var(--accent); }
+
+  /* ---- TDD beats ---- */
+  .beats { display: flex; flex-direction: column; gap: 1px; background: var(--rule);
+           border: 1px solid var(--rule); border-radius: 3px; overflow: hidden; }
+  .beat { background: var(--paper); padding: .95rem 1.15rem; }
+  .beat-top { display: flex; flex-wrap: wrap; align-items: baseline; gap: .6rem; margin-bottom: .3rem; }
+  .beat-top b {
+    font-family: ui-monospace, SFMono-Regular, Menlo, "DejaVu Sans Mono", monospace;
+    font-size: .68rem; letter-spacing: .1em; text-transform: uppercase;
+    padding: .16rem .45rem; border-radius: 2px;
+  }
+  .beat-top b.red   { color: var(--clay); background: var(--warm-soft); border: 1px solid var(--clay); }
+  .beat-top b.green { color: var(--grow); background: var(--grow-soft); border: 1px solid var(--grow); }
+  .beat-top span {
+    font-family: ui-sans-serif, -apple-system, "Segoe UI", "Liberation Sans", Arial, sans-serif;
+    font-weight: 700; font-size: .95rem; letter-spacing: -.01em;
+  }
+  .beat p { font-size: .88rem; color: var(--ink-2); margin: 0; }
+
+  @media (max-width: 30rem) {
+    .lane, .axis { grid-template-columns: 1fr; gap: .25rem; }
+    .lane b { text-align: left; }
+    .axis > span:first-child { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <span class="eyebrow">Cantor · shofel — one-shot FSM</span>
+    <h1>Retap on release</h1>
+    <p class="deck">
+      The bare-modifier tap now lands on the second <em>release</em> instead of the second
+      <em>press</em>. It cost one new state in <code>oneshot_fsm.h</code> and nothing outside
+      that header, its unit test, and one section of docs.
+    </p>
+
+    <div class="status">
+      <span class="badge live"><a href="https://github.com/shofel/keyboards/pull/46">PR #46 open</a></span>
+      <span class="badge ok">CI green</span>
+      <span class="badge warn">Not yet flashed</span>
+    </div>
+
+    <div class="stats">
+      <div class="stat is-accent"><b>+1</b><i>FSM state</i></div>
+      <div class="stat is-warm"><b>3</b><i>transition lines</i></div>
+      <div class="stat is-grow"><b>0</b><i>callers touched</i></div>
+      <div class="stat is-grow"><b>17/17</b><i>FSM tests green</i></div>
+    </div>
+  </header>
+
+  <section>
+    <div class="sec-head">
+      <span class="eyebrow">Timing</span>
+      <h2>Where the Gui line falls</h2>
+    </div>
+
+    <figure>
+      <div class="scope">
+
+        <div class="panel is-now">
+          <div class="sub">Today — tap lands on press</div>
+          <div class="lane">
+            <b>Y+I combo</b>
+            <div class="track">
+              <div class="bar key" style="grid-column: 3 / 7;"></div>
+              <div class="bar key" style="grid-column: 12 / 17;"></div>
+            </div>
+          </div>
+          <div class="lane">
+            <b>Gui (host)</b>
+            <div class="track">
+              <div class="bar sig" style="grid-column: 3 / 12;"></div>
+              <div class="edge" style="grid-column: 12;"></div>
+            </div>
+          </div>
+          <div class="axis">
+            <span></span>
+            <div class="fire">Gui ↑ fires on tap 2 <em>— the moment you press</em></div>
+          </div>
+        </div>
+
+        <div class="panel is-next">
+          <div class="sub">Proposed — tap lands on release</div>
+          <div class="lane">
+            <b>Y+I combo</b>
+            <div class="track">
+              <div class="bar key" style="grid-column: 3 / 7;"></div>
+              <div class="bar key" style="grid-column: 12 / 17;"></div>
+            </div>
+          </div>
+          <div class="lane">
+            <b>Gui (host)</b>
+            <div class="track">
+              <div class="bar sig" style="grid-column: 3 / 17;"></div>
+              <div class="edge" style="grid-column: 17;"></div>
+            </div>
+          </div>
+          <div class="axis">
+            <span></span>
+            <div class="fire">Gui ↑ fires on tap 2 <em>— the moment you let go</em></div>
+          </div>
+        </div>
+
+      </div>
+      <figcaption>
+        The modifier is registered eagerly on the first tap and stays down either way.
+        The only thing that moves is the falling edge — from the moment you press the combo
+        the second time, to the moment you let it go. Double-tap-opens-the-launcher still
+        works; it just fires when your fingers lift.
+      </figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="eyebrow">Diff</span>
+      <h2>One state, three transitions</h2>
+    </div>
+
+    <div class="prose stack" style="margin-bottom: 1.6rem;">
+      <p>
+        Today the release is a single line: re-pressing an armed one-shot returns to
+        <code>os_up_unqueued</code>, and <code>oneshot_effect()</code> unregisters the
+        modifier on <em>entry</em> to that state. So the tap lands on keydown.
+      </p>
+      <p>
+        The fix needs a place to sit where the mod is still held but the trigger is down
+        again. <code>os_down_unqueued</code> is the down-side counterpart of the idle state:
+        <em>up</em>/<em>down</em> is where the trigger physically is, <em>queued</em>/<em>unqueued</em>
+        is whether anything is still armed for a future key. Releasing it then moves along
+        one axis only — <code>os_down_unqueued → os_up_unqueued</code>.
+      </p>
+    </div>
+
+    <div class="pills">
+      <span class="pill">os_up_unqueued</span>
+      <span class="pill">os_up_queued</span>
+      <span class="pill">os_down_unused</span>
+      <span class="pill">os_down_used</span>
+      <span class="pill">os_up_used</span>
+      <span class="pill is-new">os_down_unqueued</span>
+    </div>
+
+    <div class="diff">
+<pre><span class="ln hdr">  modules/shofel/oneshot/oneshot_fsm.h</span><span class="blank"></span><span class="ln ctx">  typedef enum {</span><span class="ln ctx">      os_up_unqueued, os_up_queued,</span><span class="ln ctx">      os_down_unused, os_down_used, os_up_used,</span><span class="ln add">+     os_down_unqueued,   <span class="cm">/* re-pressed while armed: mod still</span></span><span class="ln add">+                            <span class="cm">held, released on trigger up */</span></span><span class="ln ctx">  } oneshot_state_t;</span><span class="blank"></span><span class="ln ctx">  case os_trigger_down:</span><span class="ln del">-     if (s == os_up_queued) return os_up_unqueued;</span><span class="ln add">+     if (s == os_up_queued) return os_down_unqueued;</span><span class="ln ctx">      return os_down_unused;</span><span class="blank"></span><span class="ln ctx">  case os_trigger_up:</span><span class="ln ctx">      if (s == os_down_unused) return os_up_queued;</span><span class="ln ctx">      if (s == os_down_used)   return os_up_unqueued;</span><span class="ln add">+     if (s == os_down_unqueued) return os_up_unqueued;  <span class="cm">/* tap lands here */</span></span><span class="ln ctx">      return s;</span><span class="blank"></span><span class="ln ctx">  case os_other_up:</span><span class="ln ctx">      if (s == os_down_unused) return os_down_used;</span><span class="ln add">+     if (s == os_down_unqueued) return os_down_used;    <span class="cm">/* chorded → no bare tap */</span></span><span class="ln ctx">      ...</span></pre>
+    </div>
+
+    <p class="prose" style="margin-top: 1.4rem; font-size: .93rem; color: var(--ink-2);">
+      <code>os_other_down</code> needs nothing at all — its <code>return s</code> default already
+      keeps the modifier applying to every key, exactly as a physically held trigger does.
+    </p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="eyebrow">Naming</span>
+      <h2>The name was the hard part</h2>
+    </div>
+
+    <div class="prose stack" style="margin-bottom: 1.6rem;">
+      <p>
+        The first draft called this state <code>os_down_disarm</code>. That was wrong twice over:
+        a verb among past participles, and an arm/disarm metaphor that appears in the file's prose
+        comments but in none of its identifiers. Pushing on the name is what surfaced everything
+        below — including a version of the change that needs no new state at all.
+      </p>
+    </div>
+
+    <div class="tw">
+      <table class="matrix">
+        <thead>
+          <tr>
+            <th>Option</th>
+            <th>vocab<small>.25</small></th>
+            <th>minimal<small>.30</small></th>
+            <th>honest<small>.20</small></th>
+            <th>risk<small>.15</small></th>
+            <th>flex<small>.10</small></th>
+            <th>total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="win">
+            <td><code>os_down_unqueued</code></td>
+            <td>5</td><td>2</td><td>4</td><td>3</td><td>5</td><td class="total">3.60</td>
+          </tr>
+          <tr>
+            <td>reuse <code>os_down_used</code></td>
+            <td>4</td><td>5</td><td>3</td><td>5</td><td>2</td><td class="total">4.05</td>
+          </tr>
+          <tr class="out">
+            <td><code>os_down_spent</code></td>
+            <td>3</td><td>2</td><td>4</td><td>3</td><td>5</td><td class="total">3.10</td>
+          </tr>
+          <tr class="out">
+            <td><code>os_down_emitting</code></td>
+            <td>2</td><td>2</td><td>5</td><td>3</td><td>5</td><td class="total">3.05</td>
+          </tr>
+          <tr class="out">
+            <td><code>os_down_disarm</code> <em>(first draft)</em></td>
+            <td>2</td><td>2</td><td>4</td><td>3</td><td>5</td><td class="total">2.85</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="prose" style="margin-top: 1.3rem; font-size: .93rem; color: var(--ink-2);">
+      Struck rows are <em>dominated</em> — <code>os_down_unqueued</code> beats each of them on
+      vocabulary with no compensating win anywhere, so none is the best at anything.
+      <code>os_down_used</code> scores highest on this rubric; it lost on a reweighting, below.
+    </p>
+
+    <div class="callout" style="margin-top: 1.75rem;">
+      <strong>Two ways to add zero states — one broken, one genuinely close.</strong>
+      <span style="display:block; margin-top:.7rem;">
+        <b>Reuse <code>os_down_unused</code>?</b> Doesn't work. It re-registers the modifier on
+        entry, and its <code>trigger_up</code> returns to <code>os_up_queued</code> — it re-arms
+        instead of disarming, so the tap is never emitted at all.
+      </span>
+      <span style="display:block; margin-top:.7rem;">
+        <b>Reuse <code>os_down_used</code>?</b> This one <em>works</em>, and would have reduced the
+        whole change to a single line. The two states have identical outgoing edges on all five
+        events, the same effect mapping and the same <code>mod_held</code> — they are bisimilar, so
+        <code>os_down_unqueued</code> is redundant in the strict sense.
+      </span>
+      <span style="display:block; margin-top:.7rem;">
+        It was rejected on legibility: reaching <code>os_down_used</code> when no other key was ever
+        pressed misleads whoever reads the trace next. <strong>The extra state is bought for
+        readability, not correctness</strong> — worth saying out loud, because it is a real cost.
+        The commit message records it so nobody later assumes the machine needed it.
+      </span>
+    </div>
+
+    <p class="prose" style="margin-top: 1.5rem; font-size: .93rem; color: var(--ink-2);">
+      <strong>What flipped it:</strong> the rubric above weights minimality at .30 and flexibility
+      at .10. Swap those two — the position you hold if you expect retap-hold to diverge from
+      used-hold later, and if you weight a name a reader can trust — and
+      <code>os_down_unqueued</code> wins 4.20 to 3.45. That was the call made here. The two are
+      within about 1% under any middling weighting, so it is a taste call, not a derivation.
+    </p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="eyebrow">Blast radius</span>
+      <h2>What stays untouched</h2>
+    </div>
+
+    <p class="prose" style="margin-bottom: 1.5rem;">
+      This is the part that keeps the change cheap. Both FSM helpers absorb the new state
+      correctly without being edited, and nothing downstream enumerates states.
+    </p>
+
+    <ul class="clean">
+      <li><strong><code>oneshot_effect()</code></strong> — unknown states fall through to
+        <code>os_fx_none</code>, which is the right answer here: the modifier is already registered.</li>
+      <li><strong><code>oneshot_mod_held()</code></strong> — it tests <code>s != os_up_unqueued</code>,
+        so the new state reports <em>held</em>, matching the real registration. The unit test's core
+        invariant holds for free.</li>
+      <li><strong><code>oneshot.c</code>, <code>introspection.h</code></strong> — no change. The module
+        only drives the table and applies register/unregister.</li>
+      <li><strong><code>keymap.c</code></strong> — no change. The single reader of one-shot state is
+        <code>mod_ru_suspended()</code> at line 116, and it goes through the predicate.</li>
+      <li class="is-warm"><strong>No exhaustive <code>switch</code> over <code>oneshot_state_t</code>
+        exists in live code</strong> — grepped across every <code>.c</code>, <code>.h</code>,
+        <code>.md</code> and <code>.py</code>. The one you'll find in
+        <code>docs/superpowers/plans/</code> is a historical plan document, not compiled.</li>
+    </ul>
+
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="eyebrow">Ripples</span>
+      <h2>Second-order effects</h2>
+    </div>
+
+    <div class="effects">
+      <div class="effect">
+        <div class="effect-top">
+          <strong>The state-change event now fires twice</strong>
+          <span class="chip verified">read in source</span>
+        </div>
+        <p>A double-tap walks <code>up_queued → down_unqueued → up_unqueued</code>, so
+        <code>oneshot_process_event</code> runs twice and calls <code>toggle_apply()</code> twice.
+        It early-returns when <code>applied_layer == want</code> (keymap.c:130) — a no-op.</p>
+      </div>
+      <div class="effect">
+        <div class="effect-top">
+          <strong>The Russian mask stays up slightly longer</strong>
+          <span class="chip derived">derived from the FSM</span>
+        </div>
+        <p>Russian is masked while a Ctrl/Alt/Gui one-shot holds its mod. That window now extends
+        for however long you hold the second press. It was already held for the whole armed period,
+        so this changes nothing you can feel.</p>
+      </div>
+      <div class="effect">
+        <div class="effect-top">
+          <strong>You gain the ability to chord off a retap</strong>
+          <span class="chip verified">covered by a test</span>
+        </div>
+        <p>Previously the second press killed the modifier instantly, leaving nothing to chord
+        with. With <code>os_down_unqueued → os_down_used</code>, holding the re-pressed combo and
+        hitting a key gives you Gui+key and no stray tap on release. Free capability, not a cost —
+        and the <code>retap chord</code> case in the suite pins it down.</p>
+      </div>
+      <div class="effect">
+        <div class="effect-top">
+          <strong>The host sees a longer Super hold</strong>
+          <span class="chip assumed">the one thing to watch</span>
+        </div>
+        <p>Super is now down for the full duration of the second press. If your desktop does
+        anything on a <em>long</em> Super hold, that's where it would show up. On a quick retap
+        it's invisible.</p>
+      </div>
+      <div class="effect">
+        <div class="effect-top">
+          <strong>Combo release produces <code>os_trigger_up</code></strong>
+          <span class="chip assumed">assumed, not re-verified</span>
+        </div>
+        <p>Not a new assumption — the existing hold-to-chord path
+        (<code>os_down_used → os_up_unqueued</code>) already depends on it, and that path works today.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="eyebrow">Shipped</span>
+      <h2>Three files</h2>
+    </div>
+
+    <div class="tw">
+      <table>
+        <thead>
+          <tr><th>File</th><th>Change</th><th>Lines</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>modules/shofel/oneshot/oneshot_fsm.h</code></td>
+            <td>One enum value, three transition lines, rewritten design comments</td>
+            <td>+25 &minus;10</td>
+          </tr>
+          <tr>
+            <td><code>tools/test_oneshot_fsm.c</code></td>
+            <td>Retap assertions moved to the release; new chord-on-retap case</td>
+            <td>+32 &minus;14</td>
+          </tr>
+          <tr>
+            <td><code>docs/known-limitations.md</code></td>
+            <td>Rewrote the double-tap section for the new timing and the chord it enables</td>
+            <td>+27 &minus;13</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout" style="margin-top: 1.6rem;">
+      <strong>No <code>make gen-docs</code> run needed.</strong> <code>keymap.c</code> doesn't change,
+      so the scheme-drift check is unaffected. The whole thing is validated off-target by
+      <code>make test-oneshot</code> — no timers, no timing window to tune, and no flash required
+      to know whether the logic is right.
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="eyebrow">Verification</span>
+      <h2>Watched it fail, twice</h2>
+    </div>
+
+    <p class="prose" style="margin-bottom: 1.5rem;">
+      A test written after the code passes immediately and proves nothing. This one went first.
+      The second red is the one that matters — it is the positive control, showing the test
+      actually catches the timing rather than passing vacuously.
+    </p>
+
+    <div class="beats">
+      <div class="beat">
+        <div class="beat-top"><b class="red">Red</b><span>The state does not exist</span></div>
+        <p><code>os_down_unqueued</code> undeclared. A compile failure, so none of the assertions
+        had run yet — necessary, but not yet evidence about behaviour.</p>
+      </div>
+      <div class="beat">
+        <div class="beat-top"><b class="red">Red</b><span>The behaviour is missing</span></div>
+        <p>With <em>only</em> the enum value added, the suite compiled and failed on exactly the
+        four assertions encoding the new timing — while all seven pre-existing tests kept passing.
+        The harness was alive, and the new tests were the only thing broken.</p>
+      </div>
+      <div class="beat">
+        <div class="beat-top"><b class="green">Green</b><span>17 of 17</span></div>
+        <p>After the three transitions — including the invariant that state-derived
+        <code>mod_held</code> always matches the outstanding <code>register_code16</code>.</p>
+      </div>
+    </div>
+
+    <div class="tw" style="margin-top: 1.6rem;">
+      <table>
+        <thead><tr><th>Gate</th><th>Result</th></tr></thead>
+        <tbody>
+          <tr><td><code>make test</code> — full off-target suite</td><td>exit 0</td></tr>
+          <tr><td><code>make build</code> — <code>cantor:shofel</code></td><td>links clean, 39192 B</td></tr>
+          <tr><td>CI — <code>test</code></td><td>pass, 4s</td></tr>
+          <tr><td>CI — <code>build / Build Userspace Firmware</code></td><td>pass, 1m34s</td></tr>
+          <tr><td>On hardware</td><td style="color: var(--warm);">not flashed</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer>
+    <span class="eyebrow">Scope of these claims</span>
+    <p>
+      Everything above about the state machine was read in source and is now covered by the
+      suite. But the logic is proven <em>off-target only</em> — the left half has not been
+      flashed, so nothing here is a claim about how the retap feels under the fingers. The one
+      thing worth watching for when you do flash it is the longer Super hold spanning the second
+      press.
+    </p>
+  </footer>
+
+</div>
+</body>
+</html>

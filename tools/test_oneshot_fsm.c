@@ -103,23 +103,41 @@ int main(void) {
     CHECK(held_k1 == 1 && held_k2 == 1, "held trigger: both keys shifted");
     CHECK(m.state == os_up_unqueued && m.mod_held == 0, "held trigger: settles released");
 
-    /* --- Second press releases: re-pressing an armed (queued) one-shot drops
-     * the modifier instead of re-arming it. The mod was held eagerly since the
-     * first tap, so releasing it now — with no key in between — is a bare
-     * modifier tap to the host (double-tapping the Gui combo opens the
-     * launcher). State-derived Russian suspension must clear, no leak. --- */
+    /* --- Retap releases on the second RELEASE, not on its press. The mod is
+     * held eagerly from the first tap; re-pressing the trigger parks in
+     * os_down_unqueued (still physically held, no longer armed for a next key)
+     * and it is the *release* that drops the mod — a bare modifier tap to the
+     * host, timed to the key-up rather than the key-down (double-tapping the
+     * Gui combo opens the launcher when your fingers lift). State-derived
+     * Russian suspension must clear afterwards, no leak. --- */
     sim_reset(&m);
     sim_ev(&m, os_trigger_down);
-    sim_ev(&m, os_trigger_up);   int sp_armed = m.mod_held;    /* tap 1: armed, held  */
-    sim_ev(&m, os_trigger_down); int sp_after = m.mod_held;    /* tap 2 down: released */
-    sim_ev(&m, os_trigger_up);                                 /* tap 2 up: no change  */
-    CHECK(sp_armed == 1, "second-press: first tap arms (mod held)");
-    CHECK(sp_after == 0, "second-press: second press releases the mod (bare tap)");
-    CHECK(m.state == os_up_unqueued && m.mod_held == 0, "second-press: settles released");
-    CHECK(oneshot_mod_held(m.state) == 0, "second-press: RU suspension clears (no leak)");
-    sim_ev(&m, os_other_down);   int sp_later = m.mod_held;    /* later key unmodified */
+    sim_ev(&m, os_trigger_up);   int rt_armed = m.mod_held;    /* tap 1: armed, held  */
+    sim_ev(&m, os_trigger_down); int rt_press = m.mod_held;    /* tap 2 down: STILL held */
+    CHECK(rt_armed == 1, "retap: first tap arms (mod held)");
+    CHECK(rt_press == 1, "retap: the second PRESS keeps the mod held");
+    CHECK(m.state == os_down_unqueued, "retap: second press parks in os_down_unqueued");
+    sim_ev(&m, os_trigger_up);   int rt_rel = m.mod_held;      /* tap 2 up: released  */
+    CHECK(rt_rel == 0, "retap: the second RELEASE drops the mod (bare tap)");
+    CHECK(m.state == os_up_unqueued, "retap: settles released");
+    CHECK(oneshot_mod_held(m.state) == 0, "retap: RU suspension clears (no leak)");
+    sim_ev(&m, os_other_down);   int rt_later = m.mod_held;    /* later key unmodified */
     sim_ev(&m, os_other_up);
-    CHECK(sp_later == 0, "second-press: a later key is unmodified");
+    CHECK(rt_later == 0, "retap: a later key is unmodified");
+
+    /* --- Chording off a retap: hold the re-pressed trigger and hit a key. The
+     * mod must apply to that key, and the eventual trigger release must NOT
+     * also emit a bare tap — the one-shot was spent on the chord. --- */
+    sim_reset(&m);
+    sim_ev(&m, os_trigger_down);
+    sim_ev(&m, os_trigger_up);                                 /* tap 1: armed        */
+    sim_ev(&m, os_trigger_down);                               /* tap 2: held         */
+    sim_ev(&m, os_other_down);   int rc_key = m.mod_held;      /* k down: modified    */
+    sim_ev(&m, os_other_up);                                   /* k up                */
+    CHECK(rc_key == 1, "retap chord: the key is modified");
+    CHECK(m.state == os_down_used, "retap chord: a used key moves to os_down_used");
+    sim_ev(&m, os_trigger_up);
+    CHECK(m.state == os_up_unqueued && m.mod_held == 0, "retap chord: settles released");
 
     if (failures) {
         printf("\n%d FAILURE(S)\n", failures);

@@ -29,6 +29,13 @@ typedef enum {
     os_up_used,      /* tapped and already applied to one key; modifier still held,
                         released on the next key event (down of the next key OR up
                         of the applied key, whichever comes first)                */
+    os_down_unqueued,/* re-pressed while armed: trigger physically held again and
+                        no longer queued for a next key. The modifier is still held
+                        (registered by the first tap); its release is what emits the
+                        bare modifier tap. The down-side counterpart of
+                        os_up_unqueued — up/down is where the trigger physically is,
+                        queued/unqueued is whether anything is armed for a next key,
+                        so the release moves along one axis only.                 */
 } oneshot_state_t;
 
 typedef enum {
@@ -49,18 +56,23 @@ typedef enum {
 static inline oneshot_state_t oneshot_next_state(oneshot_state_t s, oneshot_event_t e) {
     switch (e) {
         case os_trigger_down:
-            /* Second press of an already-queued one-shot releases it: the mod
-             * has been held (eager) since the first tap, so dropping it now —
-             * with no key in between — emits a bare modifier tap to the host
-             * (e.g. double-tapping the Gui combo opens the launcher) and
-             * disarms. A first press (from os_up_unqueued) still arms. Purely
-             * state-driven, no timer — consistent with the no-timeout design. */
-            if (s == os_up_queued) return os_up_unqueued;
+            /* Second press of an already-queued one-shot spends it: the mod has
+             * been held (eager) since the first tap, so dropping it — with no
+             * key in between — emits a bare modifier tap to the host (e.g.
+             * double-tapping the Gui combo opens the launcher). The drop is
+             * deferred to the *release* (os_down_unqueued -> os_up_unqueued
+             * below), so the tap is timed to the key-up, matching every other
+             * key on the board, and the re-pressed trigger stays available to
+             * chord with. A first press (from os_up_unqueued) still arms.
+             * Purely state-driven, no timer — consistent with no-timeout. */
+            if (s == os_up_queued) return os_down_unqueued;
             return os_down_unused;
 
         case os_trigger_up:
-            if (s == os_down_unused) return os_up_queued;
-            if (s == os_down_used)   return os_up_unqueued;
+            if (s == os_down_unused)   return os_up_queued;
+            if (s == os_down_used)     return os_up_unqueued;
+            if (s == os_down_unqueued) return os_up_unqueued; /* the bare tap lands
+                                                                 here, on the up   */
             return s;
 
         case os_other_down:
@@ -72,7 +84,10 @@ static inline oneshot_state_t oneshot_next_state(oneshot_state_t s, oneshot_even
             return s;
 
         case os_other_up:
-            if (s == os_down_unused) return os_down_used;
+            if (s == os_down_unused)   return os_down_used;
+            if (s == os_down_unqueued) return os_down_used; /* chorded off the retap:
+                                                               spent on the key, so the
+                                                               release emits no bare tap */
             if (s == os_up_queued)   return os_up_unqueued; /* slow tap: key released
                                                                before any roll        */
             if (s == os_up_used)     return os_up_unqueued; /* applied key released    */

@@ -59,21 +59,40 @@ Why: the custom module (`modules/shofel/oneshot`) is a pure, event-driven FSM
 (`oneshot_fsm.h`) with no timer or matrix-scan hook — that is what keeps it
 unit-testable off-target. QMK's `ONESHOT_TIMEOUT` does not apply here (this is a
 custom `register_code16` module, not QMK's built-in OSM). To release without
-typing a key, press the same one-shot again — a second press drops the mod (see
+typing a key, retap the same one-shot — the retap's *release* drops the mod (see
 below) — or call `oneshot_cancel()`.
 
-## Double-tapping a one-shot sends the bare modifier (second press releases)
+## Double-tapping a one-shot sends the bare modifier (on the retap's release)
 
-Pressing an already-armed one-shot a second time releases it instead of
-re-arming. Because the mod is held eagerly from the first tap, releasing it with
-no key in between is a bare modifier tap to the host: **double-tapping the Gui
-combo (`A`+`'` or `I`+`Y`) sends a lone Gui press — e.g. it opens the launcher /
-Start menu.** This is uniform across all four one-shots, so double-tapping `OS_ALT`
-sends a bare Alt (focuses the menu bar on some apps), etc. — expected, not a bug.
-A single tap still arms for the next key as before; only a *second* press of the
-same trigger, while still armed, releases. Implemented purely in the FSM
-(`oneshot_fsm.h`, `os_trigger_down`); no timer, so there is no double-tap window
-to tune.
+Retapping an already-armed one-shot spends it instead of re-arming. Because the
+mod is held eagerly from the first tap, dropping it with no key in between is a
+bare modifier tap to the host: **double-tapping the Gui combo (`A`+`'` or
+`I`+`Y`) sends a lone Gui press — e.g. it opens the launcher / Start menu.** This
+is uniform across all four one-shots, so double-tapping `OS_ALT` sends a bare Alt
+(focuses the menu bar on some apps), etc. — expected, not a bug. A single tap
+still arms for the next key as before.
+
+The tap lands on the **release** of the second press, not on its keydown. The
+retap parks in `os_down_unqueued` — trigger physically held again, no longer
+armed, mod still held — and the trigger release is what unregisters. Two
+consequences:
+
+- The bare tap is timed to the key-up, like every other key on the board, so the
+  launcher opens when your fingers lift rather than as they land.
+- The re-pressed trigger is still live, so you can chord off it: hold the retap
+  and hit a key to get Gui+key, and the release then emits no stray bare tap
+  (`os_down_unqueued` → `os_down_used` on the key's release).
+
+Implemented purely in the FSM (`oneshot_fsm.h`, `os_trigger_down` /
+`os_trigger_up`); no timer, so there is no double-tap window to tune. Note that
+the host now sees the modifier held for the full duration of the second press —
+if a desktop binds anything to a *long* Super hold, that is where it would show
+up.
+
+[`retap-on-release.html`](retap-on-release.html) is the design write-up for this
+change: a timing diagram of where the Gui line falls before and after, why the
+state is named `os_down_unqueued`, and the two zero-state alternatives that were
+rejected (one broken, one that works and was turned down on legibility).
 
 ## A fast roll after a one-shot Shift can still shift the second key (`CA`)
 
