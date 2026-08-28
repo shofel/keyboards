@@ -355,9 +355,9 @@
     </p>
 
     <div class="status">
-      <span class="badge live"><a href="https://github.com/shofel/keyboards/pull/46">PR #46 open</a></span>
+      <span class="badge live"><a href="https://github.com/shofel/keyboards/pull/46">Merged — PR #46</a></span>
       <span class="badge ok">CI green</span>
-      <span class="badge warn">Not yet flashed</span>
+      <span class="badge ok">Flashed — left half</span>
     </div>
 
     <div class="stats">
@@ -719,10 +719,11 @@
         <thead><tr><th>Gate</th><th>Result</th></tr></thead>
         <tbody>
           <tr><td><code>make test</code> — full off-target suite</td><td>exit 0</td></tr>
-          <tr><td><code>make build</code> — <code>cantor:shofel</code></td><td>links clean, 39192 B</td></tr>
-          <tr><td>CI — <code>test</code></td><td>pass, 4s</td></tr>
-          <tr><td>CI — <code>build / Build Userspace Firmware</code></td><td>pass, 1m34s</td></tr>
-          <tr><td>On hardware</td><td style="color: var(--warm);">not flashed</td></tr>
+          <tr><td><code>make build</code> — <code>cantor:shofel</code></td><td>links clean, 71496 B</td></tr>
+          <tr><td>CI on the PR — <code>test</code> / <code>build</code></td><td>pass, 4s / 1m52s</td></tr>
+          <tr><td>Merged to <code>main</code></td><td>5af8665, CI green</td></tr>
+          <tr><td>Flashed — left half</td><td>71480 B written, rebooted</td></tr>
+          <tr><td>Typed on</td><td style="color: var(--warm);">not yet</td></tr>
         </tbody>
       </table>
     </div>
@@ -731,11 +732,11 @@
   <footer>
     <span class="eyebrow">Scope of these claims</span>
     <p>
-      Everything above about the state machine was read in source and is now covered by the
-      suite. But the logic is proven <em>off-target only</em> — the left half has not been
-      flashed, so nothing here is a claim about how the retap feels under the fingers. The one
-      thing worth watching for when you do flash it is the longer Super hold spanning the second
-      press.
+      Everything above about the state machine was read in source, is covered by the suite, and
+      is now merged and flashed to the left half — the bootloader took 71480 bytes and rebooted
+      cleanly. What is <em>not</em> yet established is how it feels: nobody has typed on it. The
+      thing to notice first is the launcher opening as your fingers lift rather than as they
+      land, and the Super hold now spanning the full second press.
     </p>
   </footer>
 
