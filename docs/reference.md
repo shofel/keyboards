@@ -32,13 +32,13 @@ Base layer — the [BOO layout](https://ballerboo.github.io/boolayout/): Dvorak 
 
 ## Russian <sub>`L_RUSSIAN`</sub>
 
-Russian layer.
+Russian layer — optimised, not inherited.
 
 ```
-ё   й  ц  у  к  е        н  г  ш  щ  з  х
-__  ф  ы  в  а  п        р  о  л  д  ж  э
-__  я  ч  с  м  и        т  ь  б  ю  .  ъ
-       __  __  __        __  __  __
+ш  з  к  р  г  щ        ·  у  и  ь  д  ч
+х  с  в  н  т  й        я  о  а  е  п  б
+ъ  ф  ж  л  м  ц        ·  ы  ё  ю  .  э
+      __  __  __        __  __  __
 ```
 
 ## Symbols <sub>`L_SYMBOLS`</sub>

@@ -10,7 +10,7 @@ endif
 QMK_FIRMWARE_ROOT = $(shell qmk config -ro user.qmk_home 2>/dev/null | cut -d= -f2 | sed -e 's@^None$$@@g')
 
 # Convenience targets — build and flash the Cantor keymap.
-.PHONY: build flash test test-oneshot test-leader-fsm test-compose test-schemes test-schemes-unit test-leader-prefix test-typing-corpus test-keylog lint-leader gen-docs corpus corpus-ru
+.PHONY: build flash test test-oneshot test-leader-fsm test-compose test-schemes test-schemes-unit test-leader-prefix test-typing-corpus test-keylog test-ru-layout lint-leader gen-docs corpus corpus-ru
 
 build:
 	qmk compile -kb cantor -km shofel
@@ -48,7 +48,7 @@ flash: build
 	exit 1
 
 # All off-target host tests (pure logic; no QMK, no hardware).
-test: test-oneshot test-leader-fsm test-compose test-schemes test-schemes-unit test-leader-prefix test-typing-corpus test-keylog lint-leader
+test: test-oneshot test-leader-fsm test-compose test-schemes test-schemes-unit test-leader-prefix test-typing-corpus test-keylog test-ru-layout lint-leader
 
 # Off-target unit test for oneshot_fsm.h (the eager one-shot state machine).
 test-oneshot:
@@ -81,6 +81,11 @@ test-leader-prefix:
 # transcript records -- reads no real transcripts, so it is safe in CI.
 test-typing-corpus:
 	python3 tools/test_typing_corpus.py
+
+# Unit tests for the Russian-layout optimiser (pure logic; synthetic frequencies,
+# reads no corpus, so it is safe in CI).
+test-ru-layout:
+	python3 tools/test_opt_ru_layout.py
 
 # Frequency report over the real transcripts (local only -- CI has none).
 # Counts only; no prompt text is written anywhere. See tools/typing_corpus.py.

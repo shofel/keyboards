@@ -13,57 +13,21 @@ Procedure: score the four factors per task, take the weighted sum, round to 2 de
 descending; on ties the earlier-listed task stays first. Re-rank whenever a task is added or an
 estimate changes. Bugs tend to top the list because Impact carries the most weight on a daily driver.
 
-## Ranked — 2026-08-27
+## Ranked — 2026-08-28
 
 | # | Score | Task | Where |
 |---|-------|------|-------|
-| 1 | 2.55 | Optimal Russian layout — `L_RUSSIAN` is stock ЙЦУКЕН, the one undesigned layer | Layout |
-| 2 | 2.30 | Numbers and their punctuation — re-derive punctuation on a real corpus | Layout |
+| 1 | 2.30 | Numbers and their punctuation — re-derive punctuation on a real corpus | Layout |
 
-Scores are estimates; the Layout items entered on 2026-08-26 as `Russian I=3 E=2 L=2 C=3` and
-`numbers I=2 E=3 L=2 C=2`. **Both measurement items shipped this cycle** (PRs #43, #44) and moved to
-Done, so the two consumers are now the table.
+The Russian layout shipped 2026-08-28 (PR #45) and moved to Done, leaving one open item.
 
-**#1 is unblocked and #2 is not.** The Cyrillic corpus exists (531 prompts, 78,902 characters), which
-is all the Russian layout needs. The number/punctuation redesign additionally needs *key-level* facts
-— combo-misfire risk and pinned-hand reach — so it stays blocked until the keylogger has actually
-been **flashed and run**: it compiles and is merged, but it has never recorded a keystroke. **One QA
-gap carries forward:** the `windows` RU backend is UNVERIFIED — it needs a Windows host +
+**#1 is still blocked, and on the one thing that has not happened yet.** It needs *key-level* facts —
+combo-misfire risk and pinned-hand reach — which only the keylogger measures. The keylogger is merged
+and compiles but has **never been flashed**, so it has recorded nothing. Merged is not measured.
+**One QA gap carries forward:** the `windows` RU backend is UNVERIFIED — it needs a Windows host +
 `EnableHexNumpad=1` (un-QA-able on NixOS); compose and vim are QA'd on-device.
 
 ## Layout
-
-- **Optimal Russian layout.** `L_RUSSIAN` is stock **ЙЦУКЕН** — the only layer on this board nobody
-  designed. The base is BOO (Dvorak-derived, rollover-tuned); Russian inherited GOST 6431-52 (1953),
-  a standard whose actual constraint was keeping typewriter typebars from jamming. It shows:
-  `какие` is `к`(index-top) `а`(index-home) `к`(index-top) `и`(inner-bottom) `е`(inner-top) —
-  **five presses, all left index**, 4/4 same-finger bigrams on one of the commonest words in the
-  language. `никаких` 4/6, `теперь` 3/5, `который` 3/6 are the same shape.
-
-  Prior art is mature and the tooling is off-the-shelf: **oxeylyzer-2** (Rust, `.dof` layouts, ships
-  a Russian corpus config and a Russian layout), **genkey**, **klavarog/OPT** (simulated annealing,
-  Pareto multi-corpus). Published scores, genkey / oxeylyzer: **Вестник** 49.60 / −0.247,
-  **Kharlamak** 52.00 / −0.492, Зубачёв 75.12 / −0.792, Диктор 95.82 / −1.676, **ЙЦУКЕН 268.36 /
-  −7.044** — stock is ~5.4× worse than the best, a far bigger gap than QWERTY→Colemak for English.
-  Those are one author's numbers, but an independent carpalx run agrees on direction (Диктор 2.550 <
-  ЙЦУКЕН 3.000 < Rulemak 3.230 < Яверты 4.122). Вестник-vs-Kharlamak is ~5% apart — inside corpus
-  noise, treat as tied. Note the two transfer layouts, Rulemak and Яверты, score *worse* than
-  ЙЦУКЕН: mapping Cyrillic onto Latin positions optimises for the other alphabet's muscle memory,
-  not for Russian.
-
-  **Вестник is natively 3×10**, i.e. already split-shaped, and collapses the three rarest letters
-  into derived forms (`щ→ш`, `ъ→ь`, `ё→е`) — a mechanism the compose backend already implements.
-  Adopting that shape frees the outer pinky column now holding `ё х ъ э`.
-
-  The historical reason nobody leaves ЙЦУКЕН — OS config, hardware, stickers — **does not apply
-  here**: Russian is emitted from firmware (compose/vim/windows backends), not an OS layout, so this
-  is a `keymap.c` edit plus `make gen-docs`. The only real cost is retraining, and it cannot
-  interfere with BOO because it is a separate layer.
-
-  **Unblocked** (the corpus shipped 2026-08-27, PR #43): `make corpus-ru` gives 531 prompts /
-  78,902 Cyrillic characters. Do not adopt Вестник off the shelf — use it as the baseline to beat, running
-  the optimiser against a *Russian* corpus of hand-typed text with the Cantor's own geometry and BOO
-  pinned as constraints.
 
 - **Numbers and their punctuation.** Reopens the punctuation half of **Findings — number entry**.
   The digit half is closed and should stay closed: adjacent digits carry only 0.235 bits of mutual
@@ -155,6 +119,23 @@ transcript premise was itself wrong by ~5×, and only 21.1% of raw user-message 
 
 ## Done
 
+- **2026-08-28** — optimal Russian layout (was ranked #1; PR #45): `L_RUSSIAN` is no longer stock
+  ЙЦУКЕН. Placed by `tools/opt_ru_layout.py` (simulated annealing, seed 20260827, deterministic)
+  against two board-specific inputs — the comfort map already published in `keymap.c`, and real
+  Cyrillic frequencies from this keyboard's own typing (79,032 letters via `make corpus-ru`). Scored
+  on that corpus and that comfort map, lower better: **ЙЦУКЕН 15.656 (SFB 20.47%)**, Вестник 3.711
+  (2.10%), Kharlamak 3.874 (2.70%), **this 3.078 (SFB 1.51%)**. The published layouts are baselines,
+  not answers — they are optimised for a different corpus on a different board, and the comparison
+  *flatters* them, since they place 30 letters and derive щ/ъ/ё so their missing letters are skipped
+  rather than charged. All 33 letters stay directly typeable here. Every test word drops to **0**
+  same-finger bigrams (`какие` was 4/4, `никаких` 4/6, `теперь` 3/5). The modelling crux: the index
+  column and the inner column are the SAME finger — a model that misses that reproduces the bug it
+  was built to fix. Two keys are deliberately `XX`: the optimiser left the right-inner column's top
+  and bottom empty because anything there collides on the index finger with `о` (10.6% of letters),
+  and `XX` rather than `__` because transparent would fall through to BASE and type Latin `q`/`p`
+  mid-word. No `~/.XCompose` change — the `RU_*` keycodes are unchanged, only their positions.
+  **NOT flashed and NOT retrained**: `make test` and `make build` pass, but this is a keymap on disk,
+  not muscle memory. Expect to be slow in Russian until it is learned.
 - **2026-08-27** — QMK keylogger (was ranked #2; PR #44): key-level instrument as
   `modules/shofel/keylog` — per-key presses, per-layer usage, an exact combo-firing total, and the
   per-key **type-then-correct rate** (presses undone by an immediate backspace), which no text
