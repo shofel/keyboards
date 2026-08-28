@@ -89,6 +89,11 @@ the host now sees the modifier held for the full duration of the second press â€
 if a desktop binds anything to a *long* Super hold, that is where it would show
 up.
 
+[`retap-on-release.html`](retap-on-release.html) is the design write-up for this
+change: a timing diagram of where the Gui line falls before and after, why the
+state is named `os_down_unqueued`, and the two zero-state alternatives that were
+rejected (one broken, one that works and was turned down on legibility).
+
 ## A fast roll after a one-shot Shift can still shift the second key (`CA`)
 
 Tap the one-shot Shift and then roll two letters fast â€” `Shift` then `c a` with
