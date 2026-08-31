@@ -37,7 +37,7 @@ import sys
 COMFORT = [
     [1, 4, 6, 8, 6, 2,   2, 6, 8, 6, 4, 3],
     [0, 5, 7, 9, 9, 3,   3, 9, 9, 7, 5, 3],
-    [0, 1, 4, 5, 6, 3,   3, 6, 5, 4, 1, 1],
+    [0, 1, 4, 5, 8, 3,   3, 8, 5, 4, 1, 1],
 ]
 
 ROWS, COLS = 3, 12
@@ -53,7 +53,35 @@ ALPHABET = "абвгдеёжзийклмнопрстуфхцчшщъыьэюя"
 
 # `.` keeps its current home; only the letters are optimised.
 DOT_SLOT = (2, 10)
-SLOTS = [(r, c) for r in range(ROWS) for c in range(COLS) if (r, c) != DOT_SLOT]
+
+# Column 0 — the leftmost column of the left half — is never pressed. ЙЦУКЕН,
+# the layout actually typed on this board for years, puts no letter on (1,0) or
+# (2,0), and the user has confirmed the whole column is out. v1 ignored this:
+# the comfort map scored those keys only 1/0/0, a soft penalty the annealer was
+# happy to pay to park ш/х/ъ there. A score cannot express "never"; an exclusion
+# can.
+DEAD_COLS = {0}
+
+# The 33rd slot is not a key. It is the v+g vertical combo — left inner column,
+# top+home — which types `"` on the Latin layers and a Russian letter while
+# L_RUSSIAN is live. Row 3 is a sentinel (there is no fourth physical row);
+# column 5 keeps it on the correct finger, so it forms same-finger bigrams with
+# the index and inner columns exactly as the two real keys under it do.
+COMBO_SLOT = (3, 5)
+# Scored below every real key on purpose. A chord is not a key: it costs a
+# COMBO_TERM window before it resolves and it cannot be rolled into or out of,
+# neither of which the single-key comfort map can express. Scoring it by its
+# keys' comfort (2) made it *better* than the pinky-bottom keys, so the annealer
+# rewarded it with `э` — the letter in это/этот/эти. The combo is here only
+# because the alphabet is one letter longer than the grid, so it is the last
+# resort and must take the letter that is almost never typed.
+COMBO_COMFORT = 0
+
+# 36 keys − 3 dead (column 0) − 1 for `.` = 32, plus the combo = 33: exactly the
+# 33 letters of the alphabet. An exact fit means no key the user does press is
+# left empty, which is how (0,6)/(2,6) — ЙЦУКЕН's н and т — come back into use.
+SLOTS = [(r, c) for r in range(ROWS) for c in range(COLS)
+         if (r, c) != DOT_SLOT and c not in DEAD_COLS] + [COMBO_SLOT]
 
 # ЙЦУКЕН exactly as it sits in keymap.c today — the control to beat.
 JCUKEN = {}
@@ -82,6 +110,8 @@ def hand_of(col):
 
 
 def comfort_of(slot):
+    if slot == COMBO_SLOT:
+        return COMBO_COMFORT
     return COMFORT[slot[0]][slot[1]]
 
 
@@ -105,8 +135,15 @@ def is_sfb(a, b):
     return finger_of(a[1]) == finger_of(b[1])
 
 
+def _sfb_row(slot):
+    """Row charged for SFB row-jump distance. The combo has no row of its own —
+    it is chorded across rows 0+1 — so charge it as the home row it rests on
+    rather than letting the row-3 sentinel invent a three-row leap."""
+    return 1 if slot == COMBO_SLOT else slot[0]
+
+
 def _sfb_weight(a, b):
-    return 1.0 + SFB_ROW_JUMP * abs(a[0] - b[0])
+    return 1.0 + SFB_ROW_JUMP * abs(_sfb_row(a) - _sfb_row(b))
 
 
 def effort(layout, unigrams):
@@ -198,11 +235,31 @@ def _entries_cost(entries, ids, layout):
     return total
 
 
-def optimize(unigrams, bigrams, seed=0, iters=200000, restarts=1, letters=ALPHABET):
+def rarest_letter(unigrams, letters=ALPHABET):
+    """The letter that goes on the chord. Ties break on alphabet order so a
+    published layout stays reproducible."""
+    return min(letters, key=lambda ch: (unigrams.get(ch, 0), ch))
+
+
+def optimize(unigrams, bigrams, seed=0, iters=200000, restarts=1, letters=ALPHABET,
+             pinned=None):
     """Simulated annealing over letter->slot assignments.
 
     Deterministic for a given seed so a published layout can be reproduced.
-    Scoring is incremental — see `_bigram_index`."""
+    Scoring is incremental — see `_bigram_index`.
+
+    The chord slot is pinned rather than optimised: WHICH letter lives on it is
+    a constraint, not something to discover. A chord costs a COMBO_TERM window
+    before it resolves and cannot be rolled into or out of — costs the per-key
+    comfort map has no way to express — so letting the annealer trade it against
+    ordinary keys is trading with a broken price. Left free it parked `ю` (487
+    in the corpus, and every `любой`/`юг`) on the chord to buy back 0.06pp of
+    same-finger rate. By default the rarest letter is pinned there; pass
+    `pinned={}` to let the annealer have it back."""
+    if pinned is None:
+        pinned = {rarest_letter(unigrams, letters): COMBO_SLOT}
+    pinned_slots = set(pinned.values())
+    movable = [ch for ch in letters if ch not in pinned]
     rng = random.Random(seed)
     entries, index = _bigram_index(bigrams, letters)
     uni_total = sum(unigrams.get(ch, 0) for ch in letters) or 1
@@ -212,11 +269,13 @@ def optimize(unigrams, bigrams, seed=0, iters=200000, restarts=1, letters=ALPHAB
     best_layout, best_cost = None, float("inf")
 
     for _restart in range(restarts):
-        slots = list(SLOTS)
+        slots = [s for s in SLOTS if s not in pinned_slots]
         rng.shuffle(slots)
-        layout = {ch: slots[i] for i, ch in enumerate(letters)}
-        free = slots[len(letters):]
-        chars = list(layout)
+        layout = {ch: slots[i] for i, ch in enumerate(movable)}
+        layout.update(pinned)
+        free = slots[len(movable):]
+        # Pinned letters are never picked as swap partners, so they stay put.
+        chars = list(movable)
         cur = score(layout, unigrams, bigrams)
 
         for i in range(iters):
@@ -275,14 +334,36 @@ def optimize(unigrams, bigrams, seed=0, iters=200000, restarts=1, letters=ALPHAB
     return best_layout
 
 
+def combo_keys(layout):
+    """The two letters the chord physically sits under, on this layout.
+
+    Calling it the `v+g` combo is only meaningful on the Latin layers. Someone
+    typing Russian sees the letters at those positions, so name it by those."""
+    at = {slot: ch for ch, slot in layout.items()}
+    return at.get((0, 5)), at.get((1, 5))
+
+
+def combo_name(layout):
+    a, b = combo_keys(layout)
+    return f"{a}+{b}" if a and b else "v+g"
+
+
 def render(layout, dot=True):
-    """3 rows of 12 tokens; `·` marks an unused key."""
+    """3 rows of 12 tokens; `·` marks an unused key. The combo letter is not on
+    the grid, so it trails on its own line."""
     grid = [["·"] * COLS for _ in range(ROWS)]
-    for ch, (r, c) in layout.items():
-        grid[r][c] = ch
+    combo = None
+    for ch, slot in layout.items():
+        if slot == COMBO_SLOT:
+            combo = ch
+            continue
+        grid[slot[0]][slot[1]] = ch
     if dot:
         grid[DOT_SLOT[0]][DOT_SLOT[1]] = "."
-    return "\n".join(" ".join(row) for row in grid)
+    out = "\n".join(" ".join(row) for row in grid)
+    if combo is not None:
+        out += f"\n{combo_name(layout)} combo: {combo}"
+    return out
 
 
 def load_freqs(path):
@@ -358,10 +439,18 @@ def emit_keymap(layout):
     BASE layer, so an unused slot at (0,6)/(2,6) would type Latin `q`/`p` in the
     middle of Russian text — a silent, maddening bug."""
     grid = [["XX"] * COLS for _ in range(ROWS)]
-    for ch, (r, c) in layout.items():
-        grid[r][c] = RU_KEYCODE[ch]
+    combo = None
+    for ch, slot in layout.items():
+        if slot == COMBO_SLOT:
+            combo = ch
+            continue
+        grid[slot[0]][slot[1]] = RU_KEYCODE[ch]
     grid[DOT_SLOT[0]][DOT_SLOT[1]] = "RU_DOT"
-    return "\n".join("           " + ", ".join(f"{k:<8}" for k in row) + "," for row in grid)
+    body = "\n".join("           " + ", ".join(f"{k:<8}" for k in row) + "," for row in grid)
+    if combo is not None:
+        body += (f"\n           /* {combo_name(layout)} combo (v+g on Latin) -> "
+                 f"{RU_KEYCODE[combo]}  ({combo}) */")
+    return body
 
 
 def word_report(layout, words):

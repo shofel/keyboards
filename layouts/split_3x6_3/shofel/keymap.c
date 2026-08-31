@@ -9,6 +9,7 @@
 #include "modules/shofel/unicode_ru/introspection.h"
 #include "modules/getreuer/orbital_mouse/introspection.h"
 #include "modules/shofel/leader/leader_fsm.h"
+#include "modules/shofel/angle/angle_case.h"
 #include "modules/shofel/keylog/keylog.h"
 
 /*
@@ -37,8 +38,11 @@ enum my_keycodes {
   KK_FAT_RIGHT_ARROW,           // emits "=>"
   KK_FAT_LEFT_ARROW,            // emits "<="
   KK_LEFT_ARROW,                // emits "<-"
-  KK_LANGLE,  // « when shifted, < otherwise
-  KK_RANGLE,  // » when shifted, > otherwise
+  /* `<` `>` vs `« »`. Shift picks between them, but which one shift costs is
+   * inverted while the Russian layer is live — Russian quotes with « », Latin
+   * code is full of < >. See modules/shofel/angle/angle_case.h. */
+  KK_LANGLE,
+  KK_RANGLE,
 
   /* Combo outputs for RU backend select, captured by the armed leader only (see
    * combo_should_trigger): leader,(r+v) -> vim, leader,(r+w) -> Windows. Never
@@ -118,6 +122,16 @@ static bool mod_ru_suspended(void) {
         }
     }
     return false;
+}
+
+/* Is Russian physically live right now? Decides which of `< >` / `« »` the
+ * angle combos treat as the rare, shifted glyph.
+ *
+ * Reads the LIVE layer rather than active_toggle on purpose — a held
+ * Ctrl/Alt/Gui suspends Russian so Latin shortcuts keep working, and an angle
+ * typed in that state is a Latin one. */
+static bool typing_russian(void) {
+    return layer_state_is(L_RUSSIAN);
 }
 
 static void toggle_apply(void) {
@@ -635,13 +649,31 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
       if (record->event.pressed) {
         /* One-shot shift is in use, so plain get_mods() would miss it — OR in
          * the pending one-shot mods too. */
-        uint8_t mods = get_mods() | get_oneshot_mods();
-        if (mods & MOD_MASK_SHIFT) {
-          /* Shifted: emit the guillemet via the active backend (it strips shift
-           * itself). Compose uses the private code; vim emits the codepoint. */
+        uint8_t mods    = get_mods() | get_oneshot_mods();
+        bool    shifted = (mods & MOD_MASK_SHIFT) != 0;
+        /* Shift picks between `< >` and `« »`, but WHICH of them costs the extra
+         * press flips with the script: Russian prose quotes with « » and hardly
+         * ever writes `<`, Latin code is the other way round. So the choice is a
+         * XOR, not a plain shift test — see modules/shofel/angle/angle_case.h.
+         *
+         * layer_state_is (rather than active_toggle) is deliberate: holding
+         * Ctrl/Alt/GUI suspends L_RUSSIAN so Latin shortcuts keep working, and
+         * an angle typed in that state is a Latin one. Shift does NOT suspend
+         * the layer (mod_ru_suspended ignores it), which is precisely what makes
+         * the shifted-Russian case reachable at all. */
+        if (angle_emits_guillemet(shifted, typing_russian())) {
+          /* Emit the guillemet via the active backend (it strips shift itself).
+           * Compose uses the private code; vim emits the codepoint. */
           ru_emit_glyph(keycode == KK_LANGLE ? "q[" : "q]",
                         keycode == KK_LANGLE ? 0x00AB : 0x00BB); // « »
         } else {
+          /* Russian + shift now reaches here, which the old code never did. The
+           * shift was consumed choosing the glyph, so clear the one-shot rather
+           * than let it capitalise the next letter; KC_LABK/KC_RABK carry their
+           * own shift, so the tap still emits `<`/`>` either way. */
+          if (shifted) {
+            clear_oneshot_mods();
+          }
           tap_code16(keycode == KK_LANGLE ? KC_LABK : KC_RABK); // < >
         }
       }
@@ -758,7 +790,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
  *    pinky2 pinky  ring   mid  index  inner | inner  index   mid   ring  pinky pinky2
  *       1     4     6      8     6      2   |   2      6      8      6     4     3
  *       0     5     7      9     9      3   |   3      9      9      7     5     3
- *       0     1     4      5     6      3   |   3      6      5      4     1     1
+ *       0     1     4      5     8      3   |   3      8      5      4     1     1
  *                    · reserved for layer/mod keys, not symbol slots ·
  * ```
  * @design-end
@@ -782,46 +814,41 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   ),
 
   /**
-   * Russian layer — optimised, not inherited.
+   * Russian layer — stock ЙЦУКЕН.
    *
-   * Was stock ЙЦУКЕН: the only layer on this board nobody designed, carrying
-   * GOST 6431-52 (1953), whose real constraint was stopping typewriter typebars
-   * from jamming. On this geometry it put 20.5% of bigram mass on a single
-   * finger, because the index column and the inner column are the SAME finger —
-   * `какие` was five keystrokes and all five were the left index.
+   * GOST 6431-52 (1953), whose original constraint was stopping typewriter
+   * typebars from jamming. On this geometry it is genuinely bad: 20.5% of bigram
+   * mass lands on a single finger, because the index column and the inner column
+   * are the SAME finger — `какие` is five keystrokes and all five are the left
+   * index. `tools/opt_ru_layout.py` scores it 15.554 against 2.923 for the
+   * layout it finds, and that verdict is not in dispute.
    *
-   * Placed by `tools/opt_ru_layout.py` (simulated annealing, seed 20260827)
-   * against two board-specific inputs: the comfort map published above, and
-   * real Cyrillic letter/bigram frequencies from this keyboard's own typing
-   * (`make corpus-ru` — 79,032 letters). Scored on that corpus and this comfort
-   * map, lower better:
+   * It is here anyway, on purpose. A better layout you have to relearn is worth
+   * less than a worse one you already type without thinking, and the optimised
+   * layout was never flashed — so its advantage was only ever a number, while
+   * the retraining cost would have been real. The optimiser, its tests and the
+   * corpus tooling all stay; only the board reverts. To reconsider, the measured
+   * alternative is in this branch's history (PR #47).
    *
-   *     ЙЦУКЕН     15.656   effort 3.698   SFB 20.47%
-   *     Вестник     3.711   effort 2.427   SFB  2.10%
-   *     Kharlamak   3.874   effort 2.293   SFB  2.70%
-   *     this        3.078   effort 2.229   SFB  1.51%
+   * (1,0) and (2,0) are XX, where the original layer used `__`. No letter moved
+   * — ЙЦУКЕН puts none there — but transparent falls through to BASE and would
+   * type Latin `q`/`p` mid-Russian-word.
    *
-   * Вестник and Kharlamak are excellent layouts optimised for a different corpus
-   * on a different board; they are baselines here, and the comparison flatters
-   * them (they place 30 letters, deriving щ/ъ/ё, so their missing letters are
-   * skipped rather than charged). All 33 letters are directly typeable here.
-   *
-   * The two XX keys are deliberate. The optimiser left the right-inner column's
-   * top and bottom empty because anything there collides on the index finger
-   * with `о` (10.6% of all letters). They are XX rather than `__` because
-   * transparent would fall through to BASE and type Latin `q`/`p` mid-word.
+   * Note `ё` sits on (0,0), in the column this board's owner does not use. That
+   * is how ЙЦУКЕН is; it is left alone rather than quietly redesigned, and `ё` is
+   * rare enough (228 in 79,201) to be the cheapest possible place to be wrong.
    *
    * Activate and deactivate with leader seqs.
    */
   [L_RUSSIAN] = LAYOUT_split_3x6_3(/* GENERATED scheme — edit the array, then `make gen-docs`.
-       ш  з  к  р  г  щ        ·  у  и  ь  д  ч
-       х  с  в  н  т  й        я  о  а  е  п  б
-       ъ  ф  ж  л  м  ц        ·  ы  ё  ю  .  э
+       ё  й  ц  у  к  е        н  г  ш  щ  з  х
+       ·  ф  ы  в  а  п        р  о  л  д  ж  э
+       ·  я  ч  с  м  и        т  ь  б  ю  .  ъ
              __  __  __        __  __  __
   */
-       RU_SH,  RU_Z,    RU_K,     RU_R,   RU_G,  RU_SHCH,   XX ,   RU_U,   RU_I,  RU_SOFT,RU_D,   RU_CH,
-         RU_H,  RU_S,    RU_V,     RU_N,   RU_T,  RU_Y,     RU_YA, RU_O,   RU_A,  RU_E,   RU_P,   RU_B,
-      RU_HARD,  RU_F,    RU_ZH,    RU_L,   RU_M,  RU_TS,     XX ,  RU_YERU,RU_YO, RU_YU,  RU_DOT, RU_EE,
+        RU_YO,  RU_Y,    RU_TS,    RU_U,   RU_K,  RU_E,     RU_N,  RU_G,   RU_SH, RU_SHCH,RU_Z,   RU_H,
+           XX,  RU_F,    RU_YERU,  RU_V,   RU_A,  RU_P,     RU_R,  RU_O,   RU_L,  RU_D,   RU_ZH,  RU_EE,
+           XX,  RU_YA,   RU_CH,    RU_S,   RU_M,  RU_I,     RU_T,  RU_SOFT,RU_B,  RU_YU,  RU_DOT, RU_HARD,
                                      __ ,    __ ,   __ ,       __ ,   __ ,   __
   ),
 
@@ -854,8 +881,12 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    * - `⌫` backspace (right inner) and `⌦` delete (left inner).
    *
    * Not on SYM (all global, so they work while Russian is active):
-   * - `"`  — the left inner-index top+home combo (KC_DQUO).
-   * - `« »` — the angle combos via KK_LANGLE / KK_RANGLE (unshifted = `<` `>`).
+   * - `"`  — the left inner-index top+home combo (v+g). The same two keys are
+   *          ц and й on the Russian layer, where the chord types `ъ` instead;
+   *          `"` is no loss there, since Russian quotes with `« »`.
+   * - `« »` — the angle combos via KK_LANGLE / KK_RANGLE. Shift picks between
+   *          `< >` and `« »`, and the Russian layer inverts which one shift
+   *          costs: unshifted gives `«` `»` there, `<` `>` on the Latin layers.
    * - `?` is suppressed from base Shift+/, so SYM is its one canonical home.
    *
    * Other combos still work here: `=>` `->`, brackets, mods.
