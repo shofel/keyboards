@@ -127,7 +127,6 @@ GLYPHS = {
 LAYER_TITLES = {
     "L_BOO": "Base (BOO)",
     "L_RUSSIAN": "Russian",
-    "L_RU_JCUKEN": "Russian — ЙЦУКЕН (temporary adaptation layer)",
     "L_SYMBOLS": "Symbols",
     "L_NUM_NAV": "Numbers & Navigation",
     "L_FKEYS_SYS": "F-keys & System",
@@ -188,7 +187,6 @@ COMBO_OUT = {  # combo outputs that aren't plain layer glyphs
     "OS_CTL": "one-shot Ctrl", "OS_ALT": "one-shot Alt", "OS_GUI": "one-shot Gui",
     "OSL(L_NUM_NAV)": "one-shot NUM_NAV", "OSL(L_FKEYS_SYS)": "one-shot FKEYS_SYS",
     "KC_DQUO": '"',
-    "KK_DQUO_RU": '" — on the Russian layer this chord is ц + й and types ъ',
 }
 
 # Short labels for the combo board — each must fit a border cell (<= CW-2 chars).
@@ -198,7 +196,7 @@ COMBO_SHORT = {
     "OSL(L_NUM_NAV)": "Nav", "OSL(L_FKEYS_SYS)": "Fky",
     "KC_LBRC": "[", "KC_RBRC": "]", "KC_LPRN": "(", "KC_RPRN": ")",
     "KC_LCBR": "{", "KC_RCBR": "}",
-    "KK_LANGLE": "<", "KK_RANGLE": ">", "KC_DQUO": '"', "KK_DQUO_RU": '"ъ',
+    "KK_LANGLE": "<", "KK_RANGLE": ">", "KC_DQUO": '"',
     "KK_RIGHT_ARROW": "->", "KK_FAT_RIGHT_ARROW": "=>",
     "KK_FAT_LEFT_ARROW": "<=", "KK_LEFT_ARROW": "<-",
     "KK_RU_VIM": "RUv", "KK_RU_WIN": "RUw",
@@ -585,27 +583,6 @@ def gen_doc(src):
                    "unshifted there, since Russian prose quotes with them, and "
                    "`<` `>` take the Shift.")
         out.append("")
-    dquo = [(ks, o) for ks, o in combos if o == "KK_DQUO_RU"]
-    if dquo:
-        # Name the chord by the letters of the layer it is used on: `v + g` is
-        # meaningless to someone typing Russian. Read them off L_RUSSIAN rather
-        # than hardcoding, so a re-optimised layout cannot leave this stale, and
-        # order both pairs top-to-bottom so they line up with each other.
-        ru = dict(extract_layers(src)).get("L_RUSSIAN")
-        pos = _grid_positions(base)
-        keys = sorted(dquo[0][0], key=lambda k: pos.get(k, (9, 9)))
-        latin = " + ".join(glyph(k) for k in keys)
-        ru_keys = [glyph(ru[p[0] * 12 + p[1]]) for k in keys
-                   for p in [pos.get(k)] if p and ru]
-        if len(ru_keys) == 2:
-            out.append(
-                f"The {latin} chord is dual-script. On the Latin layers it types "
-                f"`\"`. On the Russian layer those same two keys are "
-                f"**{ru_keys[0]} + {ru_keys[1]}**, and the chord types `ъ` — the one "
-                "letter with no key of its own, because column 0 is never pressed "
-                "and 33 letters do not fit in 32 keys. `\"` is no loss in Russian, "
-                "which quotes with `« »`.")
-            out.append("")
     nonadj = nonadjacent_combos(base, combos)
     if nonadj:
         out.append("The rest fire on keys that aren't vertically adjacent — thumbs, "

@@ -245,19 +245,24 @@ def test_optimize_uses_the_right_inner_column_top_and_bottom():
     assert (2, 6) in lay.values()
 
 
-def test_legacy_jcuken_layer_matches_the_reference():
-    """The adaptation-period layer must be ЙЦУКЕН *exactly*.
+def test_shipped_russian_layer_is_jcuken():
+    """The shipped L_RUSSIAN is stock ЙЦУКЕН, by explicit choice.
 
-    A transcription slip would quietly train the wrong muscle memory during the
-    one period the user is leaning on this layer — the worst possible time to be
-    subtly wrong, and invisible without a check like this."""
+    The optimiser in this module scores ЙЦУКЕН far worse than the layouts it
+    finds, and that verdict still stands — see test_optimize_beats_jcuken_by_a_
+    clear_margin. It was traded away deliberately: a better layout you have to
+    relearn is worth less than a worse one you already type without thinking.
+    The tool stays; the board keeps the familiar keys.
+
+    Pinned position-by-position because a transcription slip in a layout typed
+    from muscle memory is close to invisible — you would feel it as your own
+    error long before you suspected the keymap."""
     import os
     here = os.path.dirname(os.path.abspath(__file__))
     src = os.path.join(here, "..", "layouts", "split_3x6_3", "shofel", "keymap.c")
     with open(src, encoding="utf-8") as fh:
         text = fh.read()
-    assert "[L_RU_JCUKEN]" in text, "no ЙЦУКЕН adaptation layer in keymap.c"
-    block = text.split("[L_RU_JCUKEN] = LAYOUT", 1)[1].split("*/", 1)[0]
+    block = text.split("[L_RUSSIAN] = LAYOUT", 1)[1].split("*/", 1)[0]
     rows = [t for t in (ln.split() for ln in block.splitlines())
             if len(t) == 12 and all(len(x) == 1 for x in t)]
     assert len(rows) == 3, f"expected 3 rows of 12 glyphs, got {len(rows)}"
@@ -266,8 +271,20 @@ def test_legacy_jcuken_layer_matches_the_reference():
            for c, tok in enumerate(row)
            if tok not in ("·", ".")}
     assert got == m.JCUKEN, (
-        "adaptation layer differs from ЙЦУКЕН at: "
+        "L_RUSSIAN differs from ЙЦУКЕН at: "
         f"{sorted(set(got.items()) ^ set(m.JCUKEN.items()))}")
+
+
+def test_no_leftover_adaptation_layer():
+    """The reverted board carries one Russian layer, not two. A stray second
+    layer is a live surface on a keyboard about to be flashed."""
+    import os
+    here = os.path.dirname(os.path.abspath(__file__))
+    src = os.path.join(here, "..", "layouts", "split_3x6_3", "shofel", "keymap.c")
+    with open(src, encoding="utf-8") as fh:
+        text = fh.read()
+    assert "L_RU_JCUKEN" not in text
+    assert "KK_DQUO_RU" not in text
 
 
 def test_comfort_map_matches_keymap_c():

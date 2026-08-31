@@ -9,7 +9,6 @@ Source of truth: `layouts/split_3x6_3/shofel/keymap.c`.
 
 - [Base (BOO)](#base-boo-l_boo)
 - [Russian](#russian-l_russian)
-- [Russian — ЙЦУКЕН (temporary adaptation layer)](#russian--йцукен-temporary-adaptation-layer-l_ru_jcuken)
 - [Symbols](#symbols-l_symbols)
 - [Numbers & Navigation](#numbers--navigation-l_num_nav)
 - [F-keys & System](#f-keys--system-l_fkeys_sys)
@@ -33,18 +32,7 @@ Base layer — the [BOO layout](https://ballerboo.github.io/boolayout/): Dvorak 
 
 ## Russian <sub>`L_RUSSIAN`</sub>
 
-Russian layer — optimised, not inherited.
-
-```
-·  з  у  а  г  ц        щ  л  ь  п  д  ю
-·  с  и  о  т  й        э  н  е  в  к  б
-·  ш  ё  ы  м  ж        х  р  я  ч  .  ф
-      __  __  __        __  __  __
-```
-
-## Russian — ЙЦУКЕН (temporary adaptation layer) <sub>`L_RU_JCUKEN`</sub>
-
-ЙЦУКЕН — TEMPORARY adaptation layer. Delete once the new layout is learned.
+Russian layer — stock ЙЦУКЕН.
 
 ```
 ё  й  ц  у  к  е        н  г  ш  щ  з  х
@@ -106,7 +94,7 @@ Why the same-column pairs are the safe ones — the column stagger — is explai
 ```
 ┌─────┬─────┬─────┬─────┬─────┬─────┐    ┌─────┬─────┬─────┬─────┬─────┬─────┐
 │     │     │     │     │     │     │    │     │     │     │     │     │     │
-├─────┼─Gui─┼─Alt─┼─Nav─┼─Ctl─┼─ "ъ─┤    ├─Esc─┼─Ctl─┼─Nav─┼─Alt─┼─Gui─┼─Fky─┤
+├─────┼─Gui─┼─Alt─┼─Nav─┼─Ctl─┼─ " ─┤    ├─Esc─┼─Ctl─┼─Nav─┼─Alt─┼─Gui─┼─Fky─┤
 │     │  a  │  o  │  e  │  s  │     │    │     │  n  │  t  │  r  │  i  │     │
 ├─────┼─────┼─ { ─┼─ ( ─┼─ [ ─┼─ < ─┤    ├─ > ─┼─ ] ─┼─ ) ─┼─ } ─┼─────┼─────┤
 │     │     │     │     │     │     │    │     │     │     │     │     │     │
@@ -114,8 +102,6 @@ Why the same-column pairs are the safe ones — the column stagger — is explai
 ```
 
 The angle combos are shift-aware — g + z → `<` / `«`; b + p → `>` / `»`. A held (or one-shot) Shift picks the second glyph of each pair, so the Latin layers give `<` `>` unshifted and the guillemets shifted. The Russian layer inverts that: `«` `»` come unshifted there, since Russian prose quotes with them, and `<` `>` take the Shift.
-
-The v + g chord is dual-script. On the Latin layers it types `"`. On the Russian layer those same two keys are **ц + й**, and the chord types `ъ` — the one letter with no key of its own, because column 0 is never pressed and 33 letters do not fit in 32 keys. `"` is no loss in Russian, which quotes with `« »`.
 
 The rest fire on keys that aren't vertically adjacent — thumbs, bottom-row rolls, and the outer corners. Each diagram marks the two trigger positions:
 
@@ -228,15 +214,6 @@ Tap `LEAD`, then the keys in order. Mirror pairs (either hand) share one entry; 
 · · · · · ·       · · · · · ·
 · · · · · ·       · · · 1 · ·
 · · · · · ·       · · · · · ·
-        0 · ·   · · 0
-```
-
-`LEAD, j` — Russian — old ЙЦУКЕН positions (TEMPORARY: adaptation crutch)
-
-```
-· · · · · ·       · · · · · ·
-· · · · · ·       · · · · · ·
-· · · · · ·       · · · · 1 ·
         0 · ·   · · 0
 ```
 

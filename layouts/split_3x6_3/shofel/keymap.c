@@ -44,15 +44,6 @@ enum my_keycodes {
   KK_LANGLE,
   KK_RANGLE,
 
-  /* The left inner column's top+home vertical combo does double duty: `"`
-   * on the Latin layers, and the one Russian letter that does not fit the grid
-   * while L_RUSSIAN is live. The alphabet is 33 letters but column 0 is never
-   * pressed, which leaves only 32 keys once `.` keeps its home — so exactly one
-   * letter has to live on a chord, and it is the rarest one. `"` is no loss in
-   * Russian: prose there quotes with « », which the angle combos now give
-   * unshifted. */
-  KK_DQUO_RU,
-
   /* Combo outputs for RU backend select, captured by the armed leader only (see
    * combo_should_trigger): leader,(r+v) -> vim, leader,(r+w) -> Windows. Never
    * typed on their own. */
@@ -80,11 +71,6 @@ enum my_keycodes {
 enum my_layer_names {
   L_BOO,
   L_RUSSIAN,
-  /* TEMPORARY — adaptation scaffolding. The old ЙЦУКЕН layout, kept reachable
-   * (leader,j) while the optimised L_RUSSIAN is being learned. Delete this whole
-   * layer once the muscle memory has moved: drop the enum entry, the array, the
-   * lead_ru_jcuken seq, and bump the counts in test_gen_layer_schemes.py. */
-  L_RU_JCUKEN,
   L_SYMBOLS,
   L_NUM_NAV,
   L_FKEYS_SYS,
@@ -138,23 +124,21 @@ static bool mod_ru_suspended(void) {
     return false;
 }
 
-/* Is a Russian layer physically live right now? Both L_RUSSIAN and the
- * temporary ЙЦУКЕН adaptation layer count: the script is what decides whether
- * `«` or `<` is the rare glyph, not which key positions are in use.
+/* Is Russian physically live right now? Decides which of `< >` / `« »` the
+ * angle combos treat as the rare, shifted glyph.
  *
  * Reads the LIVE layer rather than active_toggle on purpose — a held
  * Ctrl/Alt/Gui suspends Russian so Latin shortcuts keep working, and an angle
  * typed in that state is a Latin one. */
 static bool typing_russian(void) {
-    return layer_state_is(L_RUSSIAN) || layer_state_is(L_RU_JCUKEN);
+    return layer_state_is(L_RUSSIAN);
 }
 
 static void toggle_apply(void) {
     uint8_t want = active_toggle;
     if (leader_active) {
         want = TOGGLE_NONE;
-    } else if ((active_toggle == L_RUSSIAN || active_toggle == L_RU_JCUKEN) &&
-               mod_ru_suspended()) {
+    } else if (active_toggle == L_RUSSIAN && mod_ru_suspended()) {
         want = TOGGLE_NONE;
     }
     if (applied_layer == want) {
@@ -367,7 +351,7 @@ combo_t key_combos[] = {
   [CMB_RALT]       = COMBO(ralt_combo, OS_ALT),
   [CMB_RGUI]       = COMBO(rgui_combo, OS_GUI),
 
-  [CMB_DQUO]       = COMBO(dquo_combo, KK_DQUO_RU),
+  [CMB_DQUO]       = COMBO(dquo_combo, KC_DQUO),
   [CMB_FSYS]       = COMBO(fkeys_combo, OSL(L_FKEYS_SYS)),
 
   [CMB_RU_VIM]     = COMBO(ru_vim_combo, KK_RU_VIM),
@@ -433,8 +417,6 @@ typedef struct {
 
 /* Ru compose is the default backend; see the unicode_ru module. */
 static void lead_ru(void)       { ru_backend = RU_BACKEND_COMPOSE; toggle_enable(L_RUSSIAN); }
-/* TEMPORARY — see L_RU_JCUKEN. Same compose backend, old key positions. */
-static void lead_ru_jcuken(void){ ru_backend = RU_BACKEND_COMPOSE; toggle_enable(L_RU_JCUKEN); }
 static void lead_vim(void)      { ru_backend = RU_BACKEND_VIM; toggle_enable(L_RUSSIAN); }
 static void lead_win(void)      { ru_backend = RU_BACKEND_WINDOWS; toggle_enable(L_RUSSIAN); }
 static void lead_en(void)       { ru_backend = RU_BACKEND_COMPOSE; toggle_disable(); }
@@ -463,7 +445,6 @@ static const leader_seq_t leader_seqs[] = {
    * Those two are handled in process_record_user's capture intercept, not here,
    * since their tokens (KK_RU_VIM/KK_RU_WIN) aren't physical keys. */
   {KC_R,     KC_NO, lead_ru,       "Russian — compose backend (default; rolling-safe, host-wide)"},
-  {KC_J,     KC_NO, lead_ru_jcuken,"Russian — old ЙЦУКЕН positions (TEMPORARY: adaptation crutch)"},
   {KC_E,     KC_NO, lead_en,       "back to English (drop the toggle layer)"},
   {KC_SPACE, KC_NO, lead_reset,    "disable any toggle layer, cancel one-shots"},
   {KC_F,     KC_NO, lead_fkeys,    "F-keys / system layer (sticky)"},
@@ -663,28 +644,6 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
       /* Combo tokens for RU select; the press is consumed by the leader capture.
        * A stray release (combo key-up after the sequence completed) is a no-op. */
       return false;
-    /* This chord does double duty. On the Latin layers it is v+g and types `"`;
-     * on the Russian layer the same two keys are ц and й, and it types ъ —
-     * always name it by the letters of the layer you are actually on.
-     *
-     * `ъ` is the one letter the Russian layer has no key
-     * for: column 0 is never pressed, so 33 letters compete for 32 keys once
-     * `.` keeps its home, and the chord takes the loser. `ъ` is that letter by
-     * measurement — 18 occurrences in a 79k-letter corpus, twenty times rarer
-     * than the next one — so the chord is paid for at most once a page.
-     * RU_HARD is a unicodemap PAIR keycode, so it cannot be tap_code16'd; it
-     * goes through the same userspace backend as every other Russian letter,
-     * which is also what makes it follow shift/caps into `Ъ`. */
-    case KK_DQUO_RU:
-      if (record->event.pressed) {
-        if (layer_state_is(L_RUSSIAN)) {
-          ru_unicode_process(RU_HARD, record);
-        } else {
-          tap_code16(KC_DQUO);
-        }
-      }
-      return false;
-
     case KK_LANGLE:
     case KK_RANGLE:
       if (record->event.pressed) {
@@ -855,84 +814,33 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   ),
 
   /**
-   * Russian layer — optimised, not inherited.
+   * Russian layer — stock ЙЦУКЕН.
    *
-   * Was stock ЙЦУКЕН: the only layer on this board nobody designed, carrying
-   * GOST 6431-52 (1953), whose real constraint was stopping typewriter typebars
-   * from jamming. On this geometry it put 20.5% of bigram mass on a single
-   * finger, because the index column and the inner column are the SAME finger —
-   * `какие` was five keystrokes and all five were the left index.
+   * GOST 6431-52 (1953), whose original constraint was stopping typewriter
+   * typebars from jamming. On this geometry it is genuinely bad: 20.5% of bigram
+   * mass lands on a single finger, because the index column and the inner column
+   * are the SAME finger — `какие` is five keystrokes and all five are the left
+   * index. `tools/opt_ru_layout.py` scores it 15.554 against 2.923 for the
+   * layout it finds, and that verdict is not in dispute.
    *
-   * Placed by `tools/opt_ru_layout.py` (simulated annealing, seed 20260827)
-   * against two board-specific inputs: the comfort map published above, and
-   * real Cyrillic letter/bigram frequencies from this keyboard's own typing
-   * (`make corpus-ru` — 79,201 letters). Scored on that corpus and this comfort
-   * map, lower better:
+   * It is here anyway, on purpose. A better layout you have to relearn is worth
+   * less than a worse one you already type without thinking, and the optimised
+   * layout was never flashed — so its advantage was only ever a number, while
+   * the retraining cost would have been real. The optimiser, its tests and the
+   * corpus tooling all stay; only the board reverts. To reconsider, the measured
+   * alternative is in this branch's history (PR #47).
    *
-   *     ЙЦУКЕН     15.554   effort 3.591   SFB 20.48%
-   *     Вестник     3.617   effort 2.333   SFB  2.10%
-   *     Kharlamak   3.824   effort 2.245   SFB  2.70%
-   *     this        2.923   effort 2.034   SFB  1.55%
+   * (1,0) and (2,0) are XX, where the original layer used `__`. No letter moved
+   * — ЙЦУКЕН puts none there — but transparent falls through to BASE and would
+   * type Latin `q`/`p` mid-Russian-word.
    *
-   * Вестник and Kharlamak are excellent layouts optimised for a different corpus
-   * on a different board; they are baselines here, and the comparison flatters
-   * them (they place 30 letters, deriving щ/ъ/ё, so their missing letters are
-   * skipped rather than charged). All 33 letters are typeable here.
-   *
-   * Column 0 is empty because it is never pressed — ЙЦУКЕН put no letter on
-   * (1,0)/(2,0) either, and it is the reference for what this board's owner
-   * actually reaches. The first cut of this layer ignored that: the comfort map
-   * only scored those keys 1/0/0, a soft penalty the annealer was happy to pay
-   * to park ш/х/ъ there, while it *freed* (0,6)/(2,6) — the keys ЙЦУКЕН uses for
-   * н and т. A score cannot say "never"; the optimiser now excludes the column.
-   *
-   * That leaves 32 keys for 33 letters once `.` keeps its home, so exactly one
-   * letter lives on a chord: `ъ`, on the ц + й combo (see KK_DQUO_RU). It is the
-   * rarest letter by measurement — 18 occurrences in 79,201 — so the chord is
-   * paid at most once a page. Which letter goes there is pinned, not optimised:
-   * a chord costs a COMBO_TERM window and cannot be rolled, and the per-key
-   * comfort map cannot express either, so left free the annealer priced the
-   * chord as an ordinary key and parked `ю` on it.
-   *
-   * Empty keys are XX rather than `__` because transparent would fall through to
-   * BASE and type a Latin letter mid-Russian-word.
+   * Note `ё` sits on (0,0), in the column this board's owner does not use. That
+   * is how ЙЦУКЕН is; it is left alone rather than quietly redesigned, and `ё` is
+   * rare enough (228 in 79,201) to be the cheapest possible place to be wrong.
    *
    * Activate and deactivate with leader seqs.
    */
   [L_RUSSIAN] = LAYOUT_split_3x6_3(/* GENERATED scheme — edit the array, then `make gen-docs`.
-       ·  з  у  а  г  ц        щ  л  ь  п  д  ю
-       ·  с  и  о  т  й        э  н  е  в  к  б
-       ·  ш  ё  ы  м  ж        х  р  я  ч  .  ф
-             __  __  __        __  __  __
-  */
-           XX, RU_Z,    RU_U,     RU_A,   RU_G,  RU_TS,    RU_SHCH,RU_L,   RU_SOFT,RU_P,   RU_D,   RU_YU,
-           XX, RU_S,    RU_I,     RU_O,   RU_T,  RU_Y,     RU_EE,  RU_N,   RU_E,   RU_V,   RU_K,   RU_B,
-           XX, RU_SH,   RU_YO,    RU_YERU,RU_M,  RU_ZH,    RU_H,   RU_R,   RU_YA,  RU_CH,  RU_DOT, RU_F,
-                                     __ ,    __ ,   __ ,       __ ,   __ ,   __
-  ),
-
-  /**
-   * ЙЦУКЕН — TEMPORARY adaptation layer. Delete once the new layout is learned.
-   *
-   * The layout that was here before, kept reachable on `leader,j` (й, for
-   * ЙЦУКЕН) so there is somewhere to fall back to mid-sentence while the
-   * optimised L_RUSSIAN is still unfamiliar. Same compose backend and the same
-   * RU_* keycodes — only the positions differ.
-   *
-   * Deliberately a separate leader sequence rather than a one-chord flip: the
-   * two keystrokes are friction, and friction is the point. A frictionless
-   * crutch is the slowest way to move muscle memory.
-   *
-   * Column 0 is XX here, where the original used `__`. The letters are
-   * untouched — ЙЦУКЕН never put one there — but transparent would fall through
-   * to BASE and type Latin `q`/`p` mid-Russian-word, which is the bug the rest
-   * of this file is careful to avoid.
-   *
-   * To remove: delete this block, the L_RU_JCUKEN enum entry, lead_ru_jcuken and
-   * its leader seq, then `make gen-docs` and drop the counts in
-   * tools/test_gen_layer_schemes.py back by one.
-   */
-  [L_RU_JCUKEN] = LAYOUT_split_3x6_3(/* GENERATED scheme — edit the array, then `make gen-docs`.
        ё  й  ц  у  к  е        н  г  ш  щ  з  х
        ·  ф  ы  в  а  п        р  о  л  д  ж  э
        ·  я  ч  с  м  и        т  ь  б  ю  .  ъ
