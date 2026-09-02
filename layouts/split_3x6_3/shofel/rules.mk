@@ -8,6 +8,7 @@ MAGIC_ENABLE = no
 
 MOUSEKEY_ENABLE = no       # stock mousekeys replaced by getreuer/orbital_mouse (polar)
 EXTRAKEY_ENABLE = yes      # Audio control and System control
+PROGRAMMABLE_BUTTON_ENABLE = yes # PB_1 -> XF86Macro1 on the host (focus audio)
 
 COMBO_ENABLE = yes
 LEADER_ENABLE = no         # custom timeoutless leader (modules/shofel/leader), not QMK's timeout leader

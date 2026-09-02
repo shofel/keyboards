@@ -68,9 +68,9 @@ Layer for numbers and navigation.
 Layer for F keys and multimedia buttons.
 
 ```
-·     F12  F7  F8  F9  ·        ·  br↑  vl↑  ·     DBG  ·
-·     F11  F4  F5  F6  ·        ·  ·    ·    ·     ·    __
-boot  F10  F1  F2  F3  ·        ·  br↓  vl↓  mute  ·    boot
+·     F12  F7  F8  F9  ·        ·  br↑   vl↑   ·  DBG  ·
+·     F11  F4  F5  F6  ·        ·  nois  mute  ·  ·    __
+boot  F10  F1  F2  F3  ·        ·  br↓   vl↓   ·  ·    boot
               __  __  __        __  __  __
 ```
 
@@ -488,6 +488,7 @@ score, then match highest-to-highest.
 - `vl↑` — volume up
 - `vl↓` — volume down
 - `mute` — mute
+- `nois` — toggle focus audio (brown noise) — programmable button 1
 - `DBG` — toggle debug logging
 - `boot` — bootloader (for flashing)
 
