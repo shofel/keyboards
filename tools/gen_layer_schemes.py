@@ -132,6 +132,7 @@ LAYER_TITLES = {
     "L_NUM_NAV": "Numbers & Navigation",
     "L_FKEYS_SYS": "F-keys & System",
     "L_MOUSE": "Mouse — Polar",
+    "L_RU_OPT": "Russian — balanced (leader,(r+n))",
 }
 
 
@@ -183,6 +184,7 @@ COMBO_OUT = {  # combo outputs that aren't plain layer glyphs
     "KK_FAT_LEFT_ARROW": "<=", "KK_LEFT_ARROW": "<-",
     "KK_RU_VIM": "Russian — vim backend (leader-armed only)",
     "KK_RU_WIN": "Russian — Windows backend (leader-armed only)",
+    "KK_RU_OPT": "Russian — balanced layout (leader-armed only)",
     "KC_LBRC": "[", "KC_RBRC": "]", "KC_LPRN": "(", "KC_RPRN": ")",
     "KC_LCBR": "{", "KC_RCBR": "}",
     "KK_LANGLE": "`<` / `«`", "KK_RANGLE": "`>` / `»`",
@@ -201,7 +203,7 @@ COMBO_SHORT = {
     "KK_LANGLE": "<", "KK_RANGLE": ">", "KC_DQUO": '"',
     "KK_RIGHT_ARROW": "->", "KK_FAT_RIGHT_ARROW": "=>",
     "KK_FAT_LEFT_ARROW": "<=", "KK_LEFT_ARROW": "<-",
-    "KK_RU_VIM": "RUv", "KK_RU_WIN": "RUw",
+    "KK_RU_VIM": "RUv", "KK_RU_WIN": "RUw", "KK_RU_OPT": "RUo",
 }
 CW = 5  # combo-board cell width
 

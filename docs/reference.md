@@ -13,6 +13,7 @@ Source of truth: `layouts/split_3x6_3/shofel/keymap.c`.
 - [Numbers & Navigation](#numbers--navigation-l_num_nav)
 - [F-keys & System](#f-keys--system-l_fkeys_sys)
 - [Mouse — Polar](#mouse--polar-l_mouse)
+- [Russian — balanced (leader,(r+n))](#russian--balanced-leaderrn-l_ru_opt)
 - [Combos](#combos)
 - [Leader sequences](#leader-sequences)
 - [Emoji](#emoji)
@@ -83,6 +84,17 @@ Mouse layer — POLAR mode (Orbital Mouse, getreuer/orbital_mouse). DEFAULT.
 ·  ·  slo  ·  fst  ·        ·  ←   b1   →   b2  __
 ·  ·  ·    ·  ·    ·        ·  b3  bwd  ·   ·   ·
           __  __  __        __  __  __
+```
+
+## Russian — balanced (leader,(r+n)) <sub>`L_RU_OPT`</sub>
+
+Balanced Russian layer — the optimised alternative to ЙЦУКЕН, reached by leader,(r+n) (compose backend). It coexists with L_RUSSIAN, so the familiar ЙЦУКЕН and the balanced layout are each one leader-chord away. Last in the array so no existing layer's index moves.
+
+```
+·  у  п  я  л  э        ё  д  а  м  ч  ж
+ъ  и  в  е  н  ц        ш  к  о  т  с  з
+·  ы  г  ю  р  щ        ф  б  ь  й  .  х
+      __  __  __        __  __  __
 ```
 
 ## Combos
@@ -201,6 +213,15 @@ r + w → Russian — Windows backend (leader-armed only)
 · · · · · ·       · · · · · ·
 · · · · · ·       · · · ● · ·
 · · · · ● ·       · · · · · ·
+        · · ·   · · ·
+```
+
+r + n → Russian — balanced layout (leader-armed only)
+
+```
+· · · · · ·       · · · · · ·
+· · · · · ·       · ● · ● · ·
+· · · · · ·       · · · · · ·
         · · ·   · · ·
 ```
 

@@ -66,7 +66,7 @@ def test_unknown_keycode_fatal():
 def test_real_keymap_fully_covered():
     src = g.KEYMAP.read_text(encoding="utf-8")
     layers = g.extract_layers(src)
-    assert len(layers) == 6
+    assert len(layers) == 7   # BOO, RUSSIAN, SYMBOLS, NUM_NAV, FKEYS_SYS, MOUSE, RU_OPT
     for name, toks in layers:
         for t in toks:
             g.glyph(t)  # SystemExit here = missing glyph for a real keycode
@@ -124,7 +124,7 @@ def test_regen_keymap_idempotent():
 
 def test_regen_keymap_marks_every_layer():
     once = g.regen_keymap(g.KEYMAP.read_text(encoding="utf-8"))
-    assert once.count("GENERATED scheme") == 6
+    assert once.count("GENERATED scheme") == 7
 
 def test_extract_combos_real():
     combos = g.extract_combos(g.KEYMAP.read_text(encoding="utf-8"))
@@ -140,7 +140,7 @@ def test_extract_combos_real():
     # (gated to the armed leader by combo_should_trigger).
     assert by_keys[("KC_R", "KC_V")] == "KK_RU_VIM"
     assert by_keys[("KC_R", "KC_W")] == "KK_RU_WIN"
-    assert len(combos) == 30
+    assert len(combos) == 31   # +1: ru_opt_combo (r+n -> KK_RU_OPT)
 
 def test_extract_leader_seqs_real():
     seqs = g.extract_leader_seqs(g.KEYMAP.read_text(encoding="utf-8"))
@@ -294,10 +294,10 @@ def test_combo_board_real():
     # non-adjacent combos are no longer captioned on the board — they move out
     assert "Other combos" not in board
     nonadj = g.nonadjacent_combos(base, g.extract_combos(src))
-    assert len(nonadj) == 11
+    assert len(nonadj) == 12
     assert {"KC_ESC", "QK_BOOT", "QK_REBOOT",
             "KK_RIGHT_ARROW", "KK_FAT_RIGHT_ARROW", "KK_FAT_LEFT_ARROW",
-            "KK_LEFT_ARROW", "KK_RU_VIM", "KK_RU_WIN"} == {o for _k, o in nonadj}
+            "KK_LEFT_ARROW", "KK_RU_VIM", "KK_RU_WIN", "KK_RU_OPT"} == {o for _k, o in nonadj}
 
 def test_combo_board_only_home_anchors():
     src = g.KEYMAP.read_text(encoding="utf-8")
