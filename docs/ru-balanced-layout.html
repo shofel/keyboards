@@ -1,0 +1,245 @@
+<title>Balanced Russian Layout</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root {
+    --bg: #eef0f4; --surface: #ffffff; --surface-2: #e4e7ee; --border: #d3d8e2;
+    --ink: #1a1d26; --ink-soft: #545b6b; --ink-faint: #8b92a3;
+    --accent: #b07d1e; --accent-ink: #7a5410;
+    --keycap-bg: #f6f7fa; --keycap-ink: #1a1d26;
+    --good: #2f8f5b; --good-bg: #e5f2ea; --bad: #c0503f; --bad-bg: #f7e7e3;
+    --home-ring: rgba(176,125,30,.55);
+    --shadow: 0 1px 0 rgba(20,24,40,.04), 0 6px 20px -12px rgba(20,24,40,.28);
+    --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+  }
+  :root:not([data-theme="light"]) {
+    @media (prefers-color-scheme: dark) {
+      --bg: #14161c; --surface: #1c1f27; --surface-2: #23272f; --border: #333844;
+      --ink: #eceef3; --ink-soft: #a9b1c1; --ink-faint: #6c7486;
+      --accent: #e0a844; --accent-ink: #f0c67e;
+      --keycap-bg: #21252e; --keycap-ink: #eceef3;
+      --good: #63c48c; --good-bg: #1a2a20; --bad: #e08475; --bad-bg: #2c1d1a;
+      --home-ring: rgba(224,168,68,.5);
+      --shadow: 0 1px 0 rgba(0,0,0,.3), 0 10px 26px -14px rgba(0,0,0,.6);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #14161c; --surface: #1c1f27; --surface-2: #23272f; --border: #333844;
+    --ink: #eceef3; --ink-soft: #a9b1c1; --ink-faint: #6c7486;
+    --accent: #e0a844; --accent-ink: #f0c67e;
+    --keycap-bg: #21252e; --keycap-ink: #eceef3;
+    --good: #63c48c; --good-bg: #1a2a20; --bad: #e08475; --bad-bg: #2c1d1a;
+    --home-ring: rgba(224,168,68,.5);
+    --shadow: 0 1px 0 rgba(0,0,0,.3), 0 10px 26px -14px rgba(0,0,0,.6);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font-sans); line-height: 1.6; -webkit-font-smoothing: antialiased; }
+  .wrap { max-width: 880px; margin: 0 auto; padding: clamp(1.5rem, 4vw, 3.5rem) clamp(1rem, 4vw, 2rem) 5rem; }
+  .eyebrow { font-family: var(--font-mono); font-size: .72rem; letter-spacing: .16em; text-transform: uppercase; color: var(--accent-ink); margin: 0 0 .9rem; }
+  h1 { font-size: clamp(2rem, 5.5vw, 3rem); line-height: 1.04; letter-spacing: -.025em; font-weight: 820; margin: 0 0 .7rem; text-wrap: balance; }
+  .lede { font-size: clamp(1.02rem, 2.2vw, 1.18rem); color: var(--ink-soft); max-width: 60ch; margin: 0; }
+  .lede b { color: var(--ink); font-weight: 650; }
+  section { margin-top: clamp(2.4rem, 6vw, 3.6rem); }
+  h2 { font-size: 1.02rem; letter-spacing: .02em; font-weight: 720; margin: 0 0 .3rem; display: flex; align-items: baseline; gap: .6rem; }
+  h2 .n { font-family: var(--font-mono); font-size: .74rem; color: var(--accent-ink); letter-spacing: .1em; }
+  .sub { color: var(--ink-soft); margin: 0 0 1.2rem; font-size: .95rem; max-width: 62ch; }
+  .board { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: clamp(1rem, 3.5vw, 1.8rem); box-shadow: var(--shadow); overflow-x: auto; }
+  .halves { display: flex; gap: clamp(1rem, 5vw, 2.6rem); justify-content: center; min-width: min-content; }
+  .fingers, .grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
+  .fingers { margin-bottom: 8px; }
+  .fingers span { font-family: var(--font-mono); font-size: .58rem; text-transform: uppercase; letter-spacing: .04em; text-align: center; color: var(--ink-faint); }
+  .half { min-width: 246px; }
+  .key { position: relative; aspect-ratio: 1 / 1; border-radius: 9px; background: var(--keycap-bg); border: 1px solid var(--border); border-bottom-width: 3px; display: grid; place-items: center; font-family: var(--font-mono); font-size: 1.32rem; color: var(--keycap-ink); user-select: none; }
+  .key.home { box-shadow: inset 0 0 0 2px var(--home-ring); }
+  .key.dead { background: transparent; border-style: dashed; border-bottom-width: 1px; color: var(--ink-faint); font-size: .9rem; }
+  .key.punct { color: var(--ink-faint); }
+  .key.hard { border-style: dashed; border-color: var(--accent); }
+  .key .fq { position: absolute; top: 3px; right: 5px; font-size: .5rem; color: var(--ink-faint); letter-spacing: -.03em; }
+  .thumbs { display: flex; gap: 6px; justify-content: center; margin-top: 10px; }
+  .thumb { font-family: var(--font-mono); font-size: .56rem; letter-spacing: .04em; color: var(--ink-faint); text-transform: uppercase; border: 1px dashed var(--border); border-radius: 8px; padding: .5rem .8rem; }
+  .legend { display: flex; flex-wrap: wrap; gap: 1.2rem 1.6rem; margin-top: 1.3rem; align-items: center; }
+  .legend .grp { display: flex; align-items: center; gap: .5rem; font-size: .8rem; color: var(--ink-soft); }
+  .ramp { display: flex; height: 12px; border-radius: 3px; overflow: hidden; width: 108px; border: 1px solid var(--border); }
+  .ramp i { flex: 1; }
+  .fdot { width: 11px; height: 11px; border-radius: 3px; }
+  .fingerkey { display: flex; gap: .7rem; flex-wrap: wrap; }
+  .tablecard { border: 1px solid var(--border); border-radius: 14px; overflow: hidden; box-shadow: var(--shadow); }
+  .tscroll { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; min-width: 560px; background: var(--surface); }
+  thead th { font-family: var(--font-mono); font-size: .66rem; text-transform: uppercase; letter-spacing: .07em; color: var(--ink-faint); font-weight: 600; text-align: right; padding: .85rem 1rem; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  thead th:first-child { text-align: left; }
+  thead th .dir { display: block; font-size: .58rem; letter-spacing: .02em; text-transform: none; color: var(--ink-faint); font-weight: 400; }
+  tbody td { padding: .7rem 1rem; text-align: right; font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: .9rem; border-bottom: 1px solid var(--border); }
+  tbody td:first-child { text-align: left; font-family: var(--font-sans); font-weight: 600; }
+  tbody tr:last-child td { border-bottom: 0; }
+  tbody tr.win td { background: color-mix(in srgb, var(--accent) 12%, var(--surface)); }
+  tbody tr.win td:first-child { box-shadow: inset 3px 0 0 var(--accent); }
+  .barcell { display: flex; align-items: center; justify-content: flex-end; gap: .55rem; }
+  .bar { height: 7px; border-radius: 999px; background: var(--surface-2); position: relative; width: 66px; overflow: hidden; flex: none; }
+  .bar > i { position: absolute; inset: 0 auto 0 0; border-radius: 999px; }
+  .bar.good > i { background: var(--good); }
+  .bar.warn > i { background: var(--accent); }
+  .num { min-width: 3.6ch; display: inline-block; }
+  .tag { font-family: var(--font-sans); font-weight: 400; font-size: .72rem; color: var(--ink-faint); display: block; }
+  .words { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: .7rem; }
+  .word { border: 1px solid var(--border); border-radius: 11px; background: var(--surface); padding: .75rem .85rem; display: flex; flex-direction: column; gap: .35rem; }
+  .word .w { font-family: var(--font-mono); font-size: 1.05rem; letter-spacing: .01em; }
+  .word .cmp { display: flex; align-items: center; gap: .5rem; font-size: .78rem; font-family: var(--font-mono); }
+  .pill { padding: .05rem .5rem; border-radius: 999px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .pill.bad { background: var(--bad-bg); color: var(--bad); }
+  .pill.good { background: var(--good-bg); color: var(--good); }
+  .arrow { color: var(--ink-faint); }
+  .notes { display: grid; gap: .8rem; }
+  .note { display: flex; gap: .8rem; align-items: flex-start; background: var(--surface); border: 1px solid var(--border); border-radius: 11px; padding: .95rem 1.1rem; }
+  .note .k { font-family: var(--font-mono); font-size: .68rem; text-transform: uppercase; letter-spacing: .08em; color: var(--accent-ink); padding-top: .18rem; white-space: nowrap; }
+  .note .v { color: var(--ink-soft); font-size: .93rem; }
+  .note .v b { color: var(--ink); font-weight: 650; }
+  pre { margin: 1rem 0 0; background: var(--surface-2); border: 1px solid var(--border); border-radius: 11px; padding: 1rem 1.1rem; overflow-x: auto; font-family: var(--font-mono); font-size: .78rem; line-height: 1.7; color: var(--ink-soft); }
+  pre b { color: var(--ink); font-weight: 600; }
+  footer { margin-top: 3.5rem; padding-top: 1.4rem; border-top: 1px solid var(--border); color: var(--ink-faint); font-size: .8rem; font-family: var(--font-mono); }
+  .reveal { animation: up .5s cubic-bezier(.2,.7,.3,1) both; }
+  @keyframes up { from { opacity: 0; transform: translateY(10px); } }
+  @media (prefers-reduced-motion: reduce) { .reveal { animation: none; } }
+</style>
+
+<div class="wrap">
+  <header class="reveal">
+    <p class="eyebrow">Cantor · L_RU_OPT · leader → (r+n)</p>
+    <h1>A balanced ЙЦУКЕН alternative</h1>
+    <p class="lede">A second Russian layer for the Cantor, placed by simulated annealing against <b>this keyboard's own typing</b> — 82,357 Cyrillic letters — and its published effort model. The goal was BOO's roll-feel <b>without its annoying (досадные) SFB</b>. It reaches the highest roll rate and the lowest same-finger rate of any candidate at once, and lives alongside stock ЙЦУКЕН — each a leader-chord away.</p>
+  </header>
+
+  <section>
+    <h2><span class="n">01</span> The layout</h2>
+    <p class="sub">Keycaps are tinted by the board's comfort score — darker brass = an easier key — so the frequent letters visibly sit on the strong keys. The finger each column belongs to is the colored underline; the index and inner columns share the index finger, which is the crux of the exercise. ъ (dashed) sits on the reclaimed outer-pinky home key, so every letter is a single press — no combo.</p>
+    <div class="board" id="board" aria-label="Balanced Russian layout on the Cantor split keyboard"></div>
+    <div class="legend">
+      <div class="grp">easier <span class="ramp" id="ramp" aria-hidden="true"></span> harder</div>
+      <div class="grp fingerkey" id="fingerkey"></div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="n">02</span> How it scores</h2>
+    <p class="sub">Every layout scored on the same corpus and comfort map (lower total score is better). The balanced layout beats both published Russian layouts on same-finger rate <em>and</em> rolls simultaneously — and stock ЙЦУКЕН is off the scale.</p>
+    <div class="tablecard"><div class="tscroll"><table>
+      <thead><tr>
+        <th>Layout</th>
+        <th>SFB<span class="dir">lower better</span></th>
+        <th>Rolls<span class="dir">higher better</span></th>
+        <th>Alt</th>
+        <th>Effort<span class="dir">lower</span></th>
+        <th>Score<span class="dir">lower</span></th>
+      </tr></thead>
+      <tbody id="metrics"></tbody>
+    </table></div></div>
+  </section>
+
+  <section>
+    <h2><span class="n">03</span> The same-finger proof</h2>
+    <p class="sub">Same-finger transitions per word — the pain you feel as a stutter. On stock ЙЦУКЕН, <span style="font-family:var(--font-mono)">какие</span> is all five keystrokes on one finger. On the balanced layout every one of these drops to zero.</p>
+    <div class="words" id="words"></div>
+  </section>
+
+  <section>
+    <h2><span class="n">04</span> How it ships</h2>
+    <div class="notes">
+      <div class="note"><span class="k">Coexists</span><span class="v">Shipped as a <b>second layer, L_RU_OPT</b>. Stock ЙЦУКЕН (L_RUSSIAN) is untouched, so muscle memory and the balanced layout are both available — no forced relearning.</span></div>
+      <div class="note"><span class="k">Activate</span><span class="v">Press <b>leader, then the r+n chord</b> — exactly the mechanism the r+v (vim) / r+w (Windows) backend chords already use. A gated combo emits a token the armed leader captures, so it can't misfire on "turn"/"born". Compose backend.</span></div>
+      <div class="note"><span class="k">The trade</span><span class="v">It tilts alternation into rolls (49% vs the baselines' ~70%) — the balanced choice, not roll-first. SFB stays the heaviest penalty, so one same-finger bigram is never traded for a roll; the annoying SFB can't sneak back.</span></div>
+      <div class="note"><span class="k">Status</span><span class="v">Firmware compiles (39,592 B) and <span style="font-family:var(--font-mono);font-size:.85em">make test</span> is green. <b>Not yet flashed</b> — expect to type Russian slowly on it until it's in the fingers.</span></div>
+    </div>
+    <pre><b>[L_RU_OPT]  — leader,(r+n)</b>
+XX,       RU_U,  RU_P,  RU_YA,   RU_L,  RU_EE,    RU_YO, RU_D,  RU_A,    RU_M,  RU_CH,  RU_ZH,
+RU_HARD,  RU_I,  RU_V,  RU_E,    RU_N,  RU_TS,    RU_SH, RU_K,  RU_O,    RU_T,  RU_S,   RU_Z,
+XX,       RU_YERU,RU_G, RU_YU,   RU_R,  RU_SHCH,  RU_F,  RU_B,  RU_SOFT, RU_Y,  RU_DOT, RU_H,
+<b>ъ (RU_HARD) is a real key at the outer-pinky home — no combo</b></pre>
+  </section>
+
+  <footer>opt_ru_layout.py · balanced objective (SFB · rolls · lateral stretch · scissors) · seed 20260827 · make test green</footer>
+</div>
+
+<script>
+  const FINGERS = ["pinky","pinky","ring","mid","index","index","index","index","mid","ring","pinky","pinky"];
+  const FCOLOR = { pinky:"#7488b5", ring:"#3f9a8f", mid:"#8a72c0", index:"#c0705f" };
+  const letters = [
+    ["·","у","п","я","л","э","ё","д","а","м","ч","ж"],
+    ["ъ","и","в","е","н","ц","ш","к","о","т","с","з"],
+    ["·","ы","г","ю","р","щ","ф","б","ь","й",".","х"],
+  ];
+  const comfort = [
+    [1,4,6,8,6,2, 2,6,8,6,4,3],
+    [0,5,7,9,9,3, 3,9,9,7,5,3],
+    [0,1,4,5,8,3, 3,8,5,4,1,1],
+  ];
+  const freq = { "о":10.6,"а":8.4,"е":8.2,"т":8.1,"и":7.2,"н":6.7,"с":5.5 };
+
+  function keyEl(r, c) {
+    const ch = letters[r][c];
+    const el = document.createElement("div");
+    el.className = "key";
+    if (ch === "·") { el.classList.add("dead"); el.textContent = "·"; return el; }
+    if (ch === ".") el.classList.add("punct");
+    if (ch === "ъ") el.classList.add("hard");   // the reclaimed outer-pinky key
+    if (r === 1) el.classList.add("home");
+    const cf = comfort[r][c];
+    const pct = Math.round((cf/9)*34);
+    el.style.background = `color-mix(in srgb, var(--accent) ${pct}%, var(--keycap-bg))`;
+    el.style.borderBottomColor = FCOLOR[FINGERS[c]];
+    el.textContent = ch;
+    if (freq[ch]) { const f = document.createElement("span"); f.className="fq"; f.textContent = freq[ch]+"%"; el.appendChild(f); }
+    return el;
+  }
+  function buildHalf(cols) {
+    const half = document.createElement("div"); half.className = "half";
+    const fh = document.createElement("div"); fh.className = "fingers";
+    cols.forEach(c => { const s = document.createElement("span"); s.textContent = FINGERS[c]; fh.appendChild(s); });
+    half.appendChild(fh);
+    const g = document.createElement("div"); g.className = "grid";
+    for (let r=0;r<3;r++) for (const c of cols) g.appendChild(keyEl(r,c));
+    half.appendChild(g);
+    const th = document.createElement("div"); th.className = "thumbs";
+    const labels = cols[0] >= 6 ? ["ret","spc","lead"] : ["lead","shift","sym"];
+    labels.forEach(t=>{ const d=document.createElement("div"); d.className="thumb"; d.textContent=t; th.appendChild(d); });
+    half.appendChild(th);
+    return half;
+  }
+  const board = document.getElementById("board");
+  const halves = document.createElement("div"); halves.className = "halves reveal";
+  halves.appendChild(buildHalf([0,1,2,3,4,5]));
+  halves.appendChild(buildHalf([6,7,8,9,10,11]));
+  board.appendChild(halves);
+
+  const ramp = document.getElementById("ramp");
+  for (let c=1;c<=9;c++){ const i=document.createElement("i"); i.style.background=`color-mix(in srgb, var(--accent) ${Math.round((c/9)*34)+8}%, var(--keycap-bg))`; ramp.appendChild(i); }
+  const fk = document.getElementById("fingerkey");
+  Object.entries(FCOLOR).forEach(([n,col])=>{ const g=document.createElement("span"); g.className="grp"; g.innerHTML=`<span class="fdot" style="background:${col}"></span>${n}`; fk.appendChild(g); });
+
+  const rows = [
+    { name:"ЙЦУКЕН", tag:"stock GOST 1953", sfb:20.42, roll:13.7, alt:53.0, eff:3.591, score:15.94 },
+    { name:"Вестник", tag:"Koz 2024", sfb:2.11, roll:16.2, alt:68.9, eff:2.334, score:3.45 },
+    { name:"Kharlamak", tag:"Kharlee", sfb:2.73, roll:11.3, alt:71.1, eff:2.246, score:3.76 },
+    { name:"Balanced", tag:"L_RU_OPT", sfb:1.58, roll:29.9, alt:49.2, eff:2.268, score:2.63, win:true },
+  ];
+  const maxSfb = 20.42, maxRoll = 29.9;
+  const mb = document.getElementById("metrics");
+  rows.forEach(r=>{
+    const tr = document.createElement("tr"); if (r.win) tr.className="win";
+    tr.innerHTML = `
+      <td>${r.name}<span class="tag">${r.tag}</span></td>
+      <td><span class="barcell"><span class="num">${r.sfb.toFixed(2)}%</span><span class="bar ${r.win?'good':'warn'}"><i style="width:${(r.sfb/maxSfb*100).toFixed(0)}%"></i></span></span></td>
+      <td><span class="barcell"><span class="num">${r.roll.toFixed(1)}%</span><span class="bar ${r.win?'good':'warn'}"><i style="width:${(r.roll/maxRoll*100).toFixed(0)}%"></i></span></span></td>
+      <td>${r.alt.toFixed(1)}%</td>
+      <td>${r.eff.toFixed(2)}</td>
+      <td><b>${r.score.toFixed(2)}</b></td>`;
+    mb.appendChild(tr);
+  });
+
+  const words = [["какие",4],["никаких",4],["который",3],["человек",1],["теперь",3],["сегодня",1],["потому",2]];
+  const wc = document.getElementById("words");
+  words.forEach(([w,a])=>{
+    const d = document.createElement("div"); d.className="word";
+    d.innerHTML = `<span class="w">${w}</span><span class="cmp"><span class="pill bad">${a} SFB</span><span class="arrow">→</span><span class="pill good">0 SFB</span></span>`;
+    wc.appendChild(d);
+  });
+</script>
