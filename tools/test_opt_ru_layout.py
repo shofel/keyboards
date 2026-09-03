@@ -306,6 +306,71 @@ def test_comfort_map_matches_keymap_c():
     assert rows == m.COMFORT, f"keymap.c {rows} != optimiser {m.COMFORT}"
 
 
+# --- balanced objective: rolls, lateral stretch, scissors ---------------------
+#
+# The old score() was a pure effort model (effort + SFB). "Balanced" adds the
+# terms that separate a layout that FEELS good from one that merely has low SFB:
+# rolls are rewarded, lateral stretches and scissors are penalised. Every term is
+# bigram-level, so one net-cost function serves both the full score and the
+# incremental annealing delta — which is exactly what keeps the drift guard
+# honest. These tests pin the QUALITATIVE ordering (SFB >> stretch/scissor > 0 >
+# roll, and one SFB is never worth one roll), so the weights stay free to tune.
+
+def test_cross_hand_bigram_is_neutral():
+    # L-mid -> R-mid: alternation, neither rolled nor same-finger.
+    assert m.bigram_cost((1, 3), (1, 8)) == 0.0
+
+
+def test_same_key_repeat_costs_nothing():
+    assert m.bigram_cost((1, 3), (1, 3)) == 0.0
+
+
+def test_sfb_is_penalized():
+    # both left index, different keys -- the thing we most want to avoid.
+    assert m.bigram_cost((0, 4), (1, 5)) > 0
+
+
+def test_clean_roll_is_rewarded():
+    # adjacent fingers, same hand, same row, adjacent columns: a clean roll.
+    assert m.bigram_cost((1, 2), (1, 3)) < 0      # L-ring -> L-mid
+
+
+def test_inroll_is_at_least_as_good_as_outroll():
+    inroll = m.bigram_cost((1, 2), (1, 3))        # ring -> mid, toward the index
+    outroll = m.bigram_cost((1, 3), (1, 2))       # mid -> ring, toward the pinky
+    assert inroll <= outroll
+
+
+def test_lateral_stretch_costs_more_than_a_clean_roll():
+    clean = m.bigram_cost((1, 2), (1, 3))         # L-ring -> L-mid, columns 2,3
+    stretch = m.bigram_cost((1, 3), (1, 5))       # L-mid -> L-index inner, columns 3,5
+    assert stretch > clean
+
+
+def test_scissor_costs_more_than_a_clean_roll():
+    clean = m.bigram_cost((1, 2), (1, 3))         # same row
+    scissor = m.bigram_cost((0, 2), (2, 3))       # ring top -> mid bottom, two rows apart
+    assert scissor > clean
+
+
+def test_one_sfb_is_never_worth_one_roll():
+    # The whole point of "balanced": the annealer must never accept a same-finger
+    # bigram to buy back a roll. So |SFB penalty| must exceed |roll reward|.
+    assert m.bigram_cost((0, 4), (1, 5)) + m.bigram_cost((1, 2), (1, 3)) > 0
+
+
+def test_roll_rate_counts_adjacent_same_hand_bigrams():
+    lay = {"а": (1, 2), "б": (1, 3), "в": (1, 8)}
+    assert m.roll_rate(lay, {"аб": 10}) == 1.0    # L-ring -> L-mid
+    assert m.roll_rate(lay, {"ав": 10}) == 0.0    # crosses hands
+
+
+def test_alternation_rate_counts_cross_hand_bigrams():
+    lay = {"а": (1, 3), "б": (1, 8)}
+    assert m.alt_rate(lay, {"аб": 10}) == 1.0
+    assert m.alt_rate(lay, {"аб": 10, "ба": 0}) == 1.0
+
+
 def _run():
     tests = [v for k, v in sorted(globals().items()) if k.startswith("test_")]
     for t in tests:
