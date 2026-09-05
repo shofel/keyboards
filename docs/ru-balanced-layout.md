@@ -28,6 +28,27 @@ typing** (`make corpus-ru`). The goal was BOO's roll-feel *without* its annoying
 - `(0,0)` / `(2,0)` are `XX`, like L_RUSSIAN's — transparent would fall through
   to the base layer and type Latin mid-word.
 
+## Mnemonics — why it's learnable
+
+An optimised layout has no built-in order to lean on, but optimising purely for
+finger mechanics happened to cluster whole **phonetic classes onto single
+fingers** here, which gives the memory plenty to grab:
+
+- **The home row spells `СОВЕТНИК`** (adviser). Its eight resting keys — `и в е н`
+  on the left, `к о т с` on the right — are exactly the letters of советник. And
+  the right hand reads **`КОТ`** straight across (к-о-т on index / middle / ring).
+- **Left hand, by finger:**
+  - pinky `у-и-ы` — the closed vowels;
+  - middle `я-е-ю` — the iotated (soft) vowels;
+  - index `л-н-р` — the sonorants.
+
+  So: *vowels on pinky & middle, liquids on the index.*
+- **Right index `д-к-б`** — the stops (mnemonic: *ДиКоБраз* holds д-к-б).
+- **ъ** sits alone on the reclaimed outer-pinky home key.
+
+This is why B was chosen over a more conservative arrangement: a layout you have
+to learn from scratch is worth learning when its structure tells a story.
+
 ## How it scores
 
 On this corpus and comfort map (lower total score is better):

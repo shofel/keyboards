@@ -1004,6 +1004,16 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    * reclaimed key, so every letter is a single press and no combo is needed.
    * (0,0)/(2,0) are XX for the same reason L_RUSSIAN's are — transparent would
    * fall through to BASE and type Latin mid-Russian-word.
+   *
+   * Mnemonics — the anneal clustered phonetic classes onto single fingers, which
+   * is what makes an otherwise structureless optimised layout learnable:
+   *   - the home row is an anagram of СОВЕТНИК (adviser): its eight resting keys
+   *     `и в е н | к о т с` are exactly that word's letters, and the right hand
+   *     reads КОТ straight across (к-о-т on index/mid/ring);
+   *   - left hand by finger: pinky у-и-ы (closed vowels), middle я-е-ю (iotated
+   *     vowels), index л-н-р (sonorants) — vowels on pinky & middle, liquids on
+   *     the index;
+   *   - right index д-к-б are the stops (ДиКоБраз).
    */
   [L_RU_OPT] = LAYOUT_split_3x6_3(/* GENERATED scheme — edit the array, then `make gen-docs`.
        ·  у  п  я  л  э        ё  д  а  м  ч  ж

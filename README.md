@@ -94,6 +94,8 @@ Russian is typed on a firmware layer and emitted as keystrokes. Backends, by lea
   `— № §`) is emitted as one X Compose sequence (`Compose` + a private code),
   which is robust to rolling/overlapping keystrokes.
 - `leader,v` — vim mode (vim-native unicode); `leader,e` — back to English.
+- `leader,(r+n)` — the **balanced Russian layout** `L_RU_OPT` (compose backend), an
+  optimised alternative to ЙЦУКЕН; see [the balanced layer](#the-balanced-russian-layer-l_ru_opt) below.
 - `leader,a,<sel>` / `leader,i,<sel>` — **emoji** (host-wide, via the same Compose
   backend). `a`/`i` are a home-row mirror pair, so either hand works:
   `t`🌷 `r`🌹 `c`🌸 `h`🌺 `s`🌻 `d`🌼 · `u`👍 `o`👌 `k`🤔 `m`🧐 `n`🤝.
@@ -136,6 +138,33 @@ ibus restart                                  # reload ~/.XCompose (or re-login)
 
 Symptom of a stale table: pressing an unmapped sequence (e.g. a new emoji) leaves
 a pending Compose indicator "stuck" — the glyph isn't in the table the IM loaded.
+
+## The balanced Russian layer (`L_RU_OPT`)
+
+Stock ЙЦУКЕН stays the default Russian layer. Alongside it, **`leader,(r+n)`**
+activates `L_RU_OPT` — an optimised layout placed by `tools/opt_ru_layout.py`
+against this board's comfort map and 82,357 letters of real typing (SFB 1.58%,
+rolls 29.9%, beating Вестник and Kharlamak on both). Full write-up:
+[docs/ru-balanced-layout.md](docs/ru-balanced-layout.md).
+
+```
+· у п я л э      ё д а м ч ж
+ъ и в е н ц      ш к о т с з
+· ы г ю р щ      ф б ь й . х
+```
+
+It is built to be **learnable** — optimising purely for finger mechanics happened
+to cluster whole phonetic classes onto single fingers:
+
+- **The home row spells `СОВЕТНИК`** (adviser): its eight resting keys `и в е н`
+  (left) and `к о т с` (right) are exactly that word's letters — and the right
+  hand reads **`КОТ`** straight across (к-о-т on index/middle/ring).
+- **Left hand, by finger:** pinky `у-и-ы` (closed vowels), middle `я-е-ю`
+  (iotated vowels), index `л-н-р` (sonorants) — vowels on pinky & middle, liquids
+  on the index.
+- **Right index `д-к-б`** are the stops (mnemonic: *ДиКоБраз*).
+- **ъ** (the rarest letter) sits alone on the outer-pinky home key, so every one
+  of the 33 letters is a single keypress.
 
 ## Development
 
