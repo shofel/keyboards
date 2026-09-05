@@ -89,6 +89,16 @@
   .pill.bad { background: var(--bad-bg); color: var(--bad); }
   .pill.good { background: var(--good-bg); color: var(--good); }
   .arrow { color: var(--ink-faint); }
+  .mnem { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: .7rem; }
+  .mcard { border: 1px solid var(--border); border-radius: 11px; background: var(--surface); padding: .9rem 1rem; display: flex; flex-direction: column; gap: .4rem; }
+  .mcard-wide { grid-column: 1 / -1; }
+  .mlabel { font-family: var(--font-mono); font-size: .64rem; text-transform: uppercase; letter-spacing: .09em; color: var(--accent-ink); }
+  .mbody { font-size: .9rem; color: var(--ink-soft); }
+  .mbody b { color: var(--ink); font-family: var(--font-mono); font-weight: 600; }
+  .mbody i { color: var(--ink); }
+  .mbody .kot { color: var(--accent-ink); font-weight: 700; letter-spacing: .08em; }
+  .stack { font-family: var(--font-mono); font-size: 1.4rem; letter-spacing: .3em; color: var(--keycap-ink); }
+  .mnote { font-size: .78rem; color: var(--ink-faint); }
   .notes { display: grid; gap: .8rem; }
   .note { display: flex; gap: .8rem; align-items: flex-start; background: var(--surface); border: 1px solid var(--border); border-radius: 11px; padding: .95rem 1.1rem; }
   .note .k { font-family: var(--font-mono); font-size: .68rem; text-transform: uppercase; letter-spacing: .08em; color: var(--accent-ink); padding-top: .18rem; white-space: nowrap; }
@@ -120,7 +130,22 @@
   </section>
 
   <section>
-    <h2><span class="n">02</span> How it scores</h2>
+    <h2><span class="n">02</span> Why it's learnable</h2>
+    <p class="sub">Optimising purely for finger mechanics happened to cluster whole phonetic classes onto single fingers — so the board tells a story instead of 33 arbitrary placements.</p>
+    <div class="mnem">
+      <div class="mcard mcard-wide">
+        <div class="mlabel">Home row = СОВЕТНИК</div>
+        <div class="mbody">The eight resting keys <b>и в е н</b> · <b>к о т с</b> are exactly the letters of <i>советник</i> (adviser) — and the right hand reads <span class="kot">КОТ</span> straight across (к-о-т on index / middle / ring).</div>
+      </div>
+      <div class="mcard"><div class="mlabel">Left pinky</div><div class="stack">у и ы</div><div class="mnote">closed vowels</div></div>
+      <div class="mcard"><div class="mlabel">Left middle</div><div class="stack">я е ю</div><div class="mnote">iotated vowels</div></div>
+      <div class="mcard"><div class="mlabel">Left index</div><div class="stack">л н р</div><div class="mnote">sonorants</div></div>
+      <div class="mcard"><div class="mlabel">Right index</div><div class="stack">д к б</div><div class="mnote">stops · ДиКоБраз</div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="n">03</span> How it scores</h2>
     <p class="sub">Every layout scored on the same corpus and comfort map (lower total score is better). The balanced layout beats both published Russian layouts on same-finger rate <em>and</em> rolls simultaneously — and stock ЙЦУКЕН is off the scale.</p>
     <div class="tablecard"><div class="tscroll"><table>
       <thead><tr>
@@ -136,13 +161,13 @@
   </section>
 
   <section>
-    <h2><span class="n">03</span> The same-finger proof</h2>
+    <h2><span class="n">04</span> The same-finger proof</h2>
     <p class="sub">Same-finger transitions per word — the pain you feel as a stutter. On stock ЙЦУКЕН, <span style="font-family:var(--font-mono)">какие</span> is all five keystrokes on one finger. On the balanced layout every one of these drops to zero.</p>
     <div class="words" id="words"></div>
   </section>
 
   <section>
-    <h2><span class="n">04</span> How it ships</h2>
+    <h2><span class="n">05</span> How it ships</h2>
     <div class="notes">
       <div class="note"><span class="k">Coexists</span><span class="v">Shipped as a <b>second layer, L_RU_OPT</b>. Stock ЙЦУКЕН (L_RUSSIAN) is untouched, so muscle memory and the balanced layout are both available — no forced relearning.</span></div>
       <div class="note"><span class="k">Activate</span><span class="v">Press <b>leader, then the r+n chord</b> — exactly the mechanism the r+v (vim) / r+w (Windows) backend chords already use. A gated combo emits a token the armed leader captures, so it can't misfire on "turn"/"born". Compose backend.</span></div>
