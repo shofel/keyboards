@@ -169,15 +169,25 @@ def test_render_produces_three_rows_of_twelve():
         assert len(r.split()) == 12
 
 
-# --- slot set: ЙЦУКЕН's occupied keys are the reference -----------------------
+# --- slot set: the outer-pinky home key carries ъ ----------------------------
 #
-# v1 shipped letters onto column 0 — keys that carry no letter even in ЙЦУКЕН,
-# which is the empirical record of what this user actually presses. The comfort
-# map scored them 1/0/0, a soft penalty the annealer was happy to pay. Column 0
-# is now a hard exclusion, and the 33rd slot is the v+g vertical combo.
+# The left outer-pinky column (col 0) is scored 1/0/0 top-to-bottom. The two 0s
+# mean "don't use", but the HOME key (1,0) is a reachable home-row key whose 0 is
+# an exclusion marker, not real cost. The rarest letter ъ is pinned there so all
+# 33 letters get a real key — which retires the old v+g vertical combo (a chord
+# that cost a resolve window and could not be rolled) entirely.
 
-def test_column_zero_is_never_a_slot():
-    assert all(c != 0 for (_r, c) in m.SLOTS)
+def test_hard_slot_is_the_outer_pinky_home():
+    assert m.HARD_SLOT == (1, 0)
+
+
+def test_dead_slots_are_the_outer_pinky_top_and_bottom():
+    assert (0, 0) not in m.SLOTS
+    assert (2, 0) not in m.SLOTS
+
+
+def test_outer_pinky_home_is_reclaimed_as_a_slot():
+    assert (1, 0) in m.SLOTS
 
 
 def test_dot_keeps_its_home_and_is_not_a_letter_slot():
@@ -186,41 +196,28 @@ def test_dot_keeps_its_home_and_is_not_a_letter_slot():
 
 
 def test_slot_count_exactly_fits_the_alphabet():
-    """33 letters, 33 slots: 32 grid keys (36 − 3 dead − 1 dot) + the v+g combo.
-    An exact fit means every allowed key gets a letter, so no key the user does
-    press is left empty."""
+    """33 letters on 33 real keys: 36 grid − 2 dead (outer-pinky top/bottom) − 1
+    dot. An exact fit of REAL keys means no combo is needed — every letter is a
+    single keypress."""
     assert len(m.ALPHABET) == 33
     assert len(m.SLOTS) == 33
 
 
-def test_vg_combo_is_a_slot_on_the_left_index_finger():
-    assert m.COMBO_SLOT in m.SLOTS
-    assert m.finger_of(m.COMBO_SLOT[1]) == "L-index"
-    assert m.hand_of(m.COMBO_SLOT[1]) == "L"
+def test_no_combo_slot_remains():
+    """The v+g combo modelling is gone; ъ sits on a real key now."""
+    assert not hasattr(m, "COMBO_SLOT")
 
 
-def test_vg_combo_has_its_own_comfort_score():
-    assert m.comfort_of(m.COMBO_SLOT) == m.COMBO_COMFORT
-
-
-def test_combo_carries_the_rarest_letter():
-    """A chord is a last resort, not a good key: it costs a COMBO_TERM window
-    and cannot be rolled, neither of which the single-key comfort map can say.
-    The combo exists only because the alphabet is one slot longer than the
-    grid, so whatever lands on it must be a letter that is almost never typed.
-    (Scoring it at 2 put `э` there — and `э` carries это/этот/эти.)"""
+def test_hard_sign_is_pinned_to_the_outer_pinky_home():
+    """ъ — the rarest letter — is deliberately placed on the reclaimed outer-pinky
+    home key (1,0), freeing the design from the un-rollable v+g chord. Uses the
+    real corpus tail (where э outnumbers ъ ~20x) so the pin is what puts ъ there,
+    not a flat synthetic tail."""
     uni, bi = m.synthetic_russian()
-    # The shared synthetic fixture cannot see this bug: its tail is too flat.
-    # Use the REAL corpus tail, where `э` outnumbers `ъ` twentyfold, so the test
-    # actually discriminates — with the combo scored as a merely-mediocre key
-    # the annealer parks `э` on the chord and leaves `ъ` on a real one.
     uni = dict(uni)
     uni.update({"ъ": 18, "ё": 228, "ф": 252, "щ": 280, "ц": 317, "э": 389})
     lay = m.optimize(uni, bi, seed=7, iters=60000, restarts=3)
-    combo_letter = next(ch for ch, s in lay.items() if s == m.COMBO_SLOT)
-    assert combo_letter == "ъ", (
-        f"combo got {combo_letter!r} (freq {uni[combo_letter]}) "
-        f"instead of the rarest letter ъ (freq {uni['ъ']})")
+    assert lay["ъ"] == (1, 0), f"ъ landed on {lay['ъ']}, not the outer-pinky home (1,0)"
 
 
 def test_bottom_row_index_columns_score_eight():
@@ -304,6 +301,71 @@ def test_comfort_map_matches_keymap_c():
             rows.append([int(n) for n in nums])
     assert len(rows) == 3, f"expected 3 comfort rows in keymap.c, got {len(rows)}"
     assert rows == m.COMFORT, f"keymap.c {rows} != optimiser {m.COMFORT}"
+
+
+# --- balanced objective: rolls, lateral stretch, scissors ---------------------
+#
+# The old score() was a pure effort model (effort + SFB). "Balanced" adds the
+# terms that separate a layout that FEELS good from one that merely has low SFB:
+# rolls are rewarded, lateral stretches and scissors are penalised. Every term is
+# bigram-level, so one net-cost function serves both the full score and the
+# incremental annealing delta — which is exactly what keeps the drift guard
+# honest. These tests pin the QUALITATIVE ordering (SFB >> stretch/scissor > 0 >
+# roll, and one SFB is never worth one roll), so the weights stay free to tune.
+
+def test_cross_hand_bigram_is_neutral():
+    # L-mid -> R-mid: alternation, neither rolled nor same-finger.
+    assert m.bigram_cost((1, 3), (1, 8)) == 0.0
+
+
+def test_same_key_repeat_costs_nothing():
+    assert m.bigram_cost((1, 3), (1, 3)) == 0.0
+
+
+def test_sfb_is_penalized():
+    # both left index, different keys -- the thing we most want to avoid.
+    assert m.bigram_cost((0, 4), (1, 5)) > 0
+
+
+def test_clean_roll_is_rewarded():
+    # adjacent fingers, same hand, same row, adjacent columns: a clean roll.
+    assert m.bigram_cost((1, 2), (1, 3)) < 0      # L-ring -> L-mid
+
+
+def test_inroll_is_at_least_as_good_as_outroll():
+    inroll = m.bigram_cost((1, 2), (1, 3))        # ring -> mid, toward the index
+    outroll = m.bigram_cost((1, 3), (1, 2))       # mid -> ring, toward the pinky
+    assert inroll <= outroll
+
+
+def test_lateral_stretch_costs_more_than_a_clean_roll():
+    clean = m.bigram_cost((1, 2), (1, 3))         # L-ring -> L-mid, columns 2,3
+    stretch = m.bigram_cost((1, 3), (1, 5))       # L-mid -> L-index inner, columns 3,5
+    assert stretch > clean
+
+
+def test_scissor_costs_more_than_a_clean_roll():
+    clean = m.bigram_cost((1, 2), (1, 3))         # same row
+    scissor = m.bigram_cost((0, 2), (2, 3))       # ring top -> mid bottom, two rows apart
+    assert scissor > clean
+
+
+def test_one_sfb_is_never_worth_one_roll():
+    # The whole point of "balanced": the annealer must never accept a same-finger
+    # bigram to buy back a roll. So |SFB penalty| must exceed |roll reward|.
+    assert m.bigram_cost((0, 4), (1, 5)) + m.bigram_cost((1, 2), (1, 3)) > 0
+
+
+def test_roll_rate_counts_adjacent_same_hand_bigrams():
+    lay = {"а": (1, 2), "б": (1, 3), "в": (1, 8)}
+    assert m.roll_rate(lay, {"аб": 10}) == 1.0    # L-ring -> L-mid
+    assert m.roll_rate(lay, {"ав": 10}) == 0.0    # crosses hands
+
+
+def test_alternation_rate_counts_cross_hand_bigrams():
+    lay = {"а": (1, 3), "б": (1, 8)}
+    assert m.alt_rate(lay, {"аб": 10}) == 1.0
+    assert m.alt_rate(lay, {"аб": 10, "ба": 0}) == 1.0
 
 
 def _run():

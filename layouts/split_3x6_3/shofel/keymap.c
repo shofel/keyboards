@@ -44,11 +44,12 @@ enum my_keycodes {
   KK_LANGLE,
   KK_RANGLE,
 
-  /* Combo outputs for RU backend select, captured by the armed leader only (see
-   * combo_should_trigger): leader,(r+v) -> vim, leader,(r+w) -> Windows. Never
-   * typed on their own. */
+  /* Combo outputs captured by the armed leader only (see combo_should_trigger):
+   * leader,(r+v) -> vim, leader,(r+w) -> Windows, leader,(r+n) -> the balanced
+   * Russian layout (L_RU_OPT). Never typed on their own. */
   KK_RU_VIM,
   KK_RU_WIN,
+  KK_RU_OPT,
 
   /* The two outer-thumb leader keys. Distinct keycodes (not a single shared
    * QK_LEAD) so the reset chord — both of them at once — is an unambiguous
@@ -75,6 +76,7 @@ enum my_layer_names {
   L_NUM_NAV,
   L_FKEYS_SYS,
   L_MOUSE,
+  L_RU_OPT,   // balanced Russian layout — coexists with ЙЦУКЕН; leader,(r+n)
 };
 
 /* Simple thumb keys. */
@@ -130,15 +132,21 @@ static bool mod_ru_suspended(void) {
  * Reads the LIVE layer rather than active_toggle on purpose — a held
  * Ctrl/Alt/Gui suspends Russian so Latin shortcuts keep working, and an angle
  * typed in that state is a Latin one. */
+/* Both Russian layers (ЙЦУКЕН and the balanced L_RU_OPT) share the angle-glyph
+ * choice and the Ctrl/Alt/Gui mod-suspend that lets Latin shortcuts through. */
+static bool is_ru_layer(uint8_t layer) {
+    return layer == L_RUSSIAN || layer == L_RU_OPT;
+}
+
 static bool typing_russian(void) {
-    return layer_state_is(L_RUSSIAN);
+    return layer_state_is(L_RUSSIAN) || layer_state_is(L_RU_OPT);
 }
 
 static void toggle_apply(void) {
     uint8_t want = active_toggle;
     if (leader_active) {
         want = TOGGLE_NONE;
-    } else if (active_toggle == L_RUSSIAN && mod_ru_suspended()) {
+    } else if (is_ru_layer(active_toggle) && mod_ru_suspended()) {
         want = TOGGLE_NONE;
     }
     if (applied_layer == want) {
@@ -269,12 +277,14 @@ const uint16_t PROGMEM dquo_combo[] = {KC_G, KC_V, COMBO_END};
  * SYM no longer needs this combo: it is reached via the left thumb (KK_SYMBO)
  * and the RET layer-tap (right inner thumb). */
 const uint16_t PROGMEM fkeys_combo[] = {KC_SLASH, KC_MINUS, COMBO_END};
-/* RU backend select under the armed leader: leader,(r+v) -> vim, leader,(r+w) ->
- * Windows. combo_should_trigger gates these to lead_cap.active, so they never
- * fire in ordinary typing ("se[rv]e", "cu[rv]e"); the armed leader captures the
- * combo's output keycode. Compose stays the bare tap, leader,r. */
+/* RU selection under the armed leader: leader,(r+v) -> vim, leader,(r+w) ->
+ * Windows, leader,(r+n) -> the balanced layout L_RU_OPT. combo_should_trigger
+ * gates these to lead_cap.active, so they never fire in ordinary typing
+ * ("se[rv]e", "cu[rv]e", "tu[rn]"); the armed leader captures the combo's output
+ * keycode. Compose ЙЦУКЕН stays the bare tap, leader,r. */
 const uint16_t PROGMEM ru_vim_combo[] = {KC_R, KC_V, COMBO_END};
 const uint16_t PROGMEM ru_win_combo[] = {KC_R, KC_W, COMBO_END};
+const uint16_t PROGMEM ru_opt_combo[] = {KC_R, KC_N, COMBO_END};
 
 /* Indices for all combos (designated initializers) */
 enum combos {
@@ -315,6 +325,7 @@ enum combos {
 
   CMB_RU_VIM,
   CMB_RU_WIN,
+  CMB_RU_OPT,
 };
 
 combo_t key_combos[] = {
@@ -356,6 +367,7 @@ combo_t key_combos[] = {
 
   [CMB_RU_VIM]     = COMBO(ru_vim_combo, KK_RU_VIM),
   [CMB_RU_WIN]     = COMBO(ru_win_combo, KK_RU_WIN),
+  [CMB_RU_OPT]     = COMBO(ru_opt_combo, KK_RU_OPT),
 };
 
 /* Oneshot */
@@ -419,6 +431,7 @@ typedef struct {
 static void lead_ru(void)       { ru_backend = RU_BACKEND_COMPOSE; toggle_enable(L_RUSSIAN); }
 static void lead_vim(void)      { ru_backend = RU_BACKEND_VIM; toggle_enable(L_RUSSIAN); }
 static void lead_win(void)      { ru_backend = RU_BACKEND_WINDOWS; toggle_enable(L_RUSSIAN); }
+static void lead_ru_opt(void)   { ru_backend = RU_BACKEND_COMPOSE; toggle_enable(L_RU_OPT); }
 static void lead_en(void)       { ru_backend = RU_BACKEND_COMPOSE; toggle_disable(); }
 static void lead_reset(void)    { toggle_reset(); }
 static void lead_fkeys(void)    { toggle_enable(L_FKEYS_SYS); }
@@ -577,7 +590,8 @@ static void lead_feed(uint16_t keycode) {
  * lead_cap.active is false, so they're inert — no misfire on "serve"/"curve" —
  * and `r` keeps its usual combo footprint. All other combos are unaffected. */
 bool combo_should_trigger(uint16_t combo_index, combo_t *combo, uint16_t keycode, keyrecord_t *record) {
-  if (combo_index == CMB_RU_VIM || combo_index == CMB_RU_WIN) {
+  if (combo_index == CMB_RU_VIM || combo_index == CMB_RU_WIN ||
+      combo_index == CMB_RU_OPT) {
     return lead_cap.active;
   }
   return true;
@@ -598,10 +612,12 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     /* The RU-select chords resolve to a combo keycode, not a physical key, so
      * they can't live in leader_seqs — complete the sequence directly, mirroring
      * lead_feed's UNIQUE path (clear capture, un-mask layers, then fire). */
-    if (keycode == KK_RU_VIM || keycode == KK_RU_WIN) {
+    if (keycode == KK_RU_VIM || keycode == KK_RU_WIN || keycode == KK_RU_OPT) {
       lead_cap.active = false;
       leader_resume();
-      if (keycode == KK_RU_VIM) { lead_vim(); } else { lead_win(); }
+      if (keycode == KK_RU_VIM)      { lead_vim(); }
+      else if (keycode == KK_RU_WIN) { lead_win(); }
+      else                           { lead_ru_opt(); }
       return false;
     }
     lead_feed(keycode);
@@ -641,6 +657,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
       return false;
     case KK_RU_VIM:
     case KK_RU_WIN:
+    case KK_RU_OPT:
       /* Combo tokens for RU select; the press is consumed by the leader capture.
        * A stray release (combo key-up after the sequence completed) is a no-op. */
       return false;
@@ -969,6 +986,46 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         XX, XX,          XX,      XX,           XX, XX,   XX, OM_BTN3, OM_D   ,      XX,      XX, XX,
 
                                    __ ,    __ ,   __ ,         __ ,  __ ,  __
+  ),
+
+  /**
+   * Balanced Russian layer — the optimised alternative to ЙЦУКЕН, reached by
+   * leader,(r+n) (compose backend). It coexists with L_RUSSIAN, so the familiar
+   * ЙЦУКЕН and the balanced layout are each one leader-chord away. Last in the
+   * array so no existing layer's index moves.
+   *
+   * Placed by tools/opt_ru_layout.py — balanced multi-objective (SFB, rolls,
+   * lateral stretch, scissors) — against this board's comfort map and 82,357
+   * letters of real Cyrillic typing. On that corpus: SFB 1.58%, rolls 29.9%,
+   * beating ЙЦУКЕН (20.42% / 13.7%), Вестник (2.11% / 16.2%) and Kharlamak
+   * (2.73% / 11.3%); every test word drops to 0 same-finger bigrams.
+   *
+   * ъ sits on the outer-pinky home key (1,0): the rarest letter on the weakest
+   * reclaimed key, so every letter is a single press and no combo is needed.
+   * (0,0)/(2,0) are XX for the same reason L_RUSSIAN's are — transparent would
+   * fall through to BASE and type Latin mid-Russian-word.
+   *
+   * Mnemonics — the anneal clustered phonetic classes onto single fingers, which
+   * is what makes an otherwise structureless optimised layout learnable:
+   *   - the home row is an anagram of СОВЕТНИК (adviser): its eight resting keys
+   *     `и в е н | к о т с` are exactly that word's letters, and the right hand
+   *     reads КОТ straight across (к-о-т on index/mid/ring);
+   *   - left hand by finger: pinky у-и-ы (closed vowels), middle я-е-ю (iotated
+   *     vowels), index л-н-р (sonorants) — vowels on pinky & middle, liquids on
+   *     the index;
+   *   - right index д-к-б are the stops (ДиКоБраз).
+   */
+  [L_RU_OPT] = LAYOUT_split_3x6_3(/* GENERATED scheme — edit the array, then `make gen-docs`.
+       ·  у  п  я  л  э        ё  д  а  м  ч  ж
+       ъ  и  в  е  н  ц        ш  к  о  т  с  з
+       ·  ы  г  ю  р  щ        ф  б  ь  й  .  х
+             __  __  __        __  __  __
+  */
+           XX      , RU_U    , RU_P    , RU_YA   , RU_L   , RU_EE   , RU_YO  , RU_D    , RU_A   , RU_M   , RU_CH   , RU_ZH   ,
+           RU_HARD , RU_I    , RU_V    , RU_E    , RU_N   , RU_TS   , RU_SH  , RU_K    , RU_O   , RU_T   , RU_S    , RU_Z    ,
+           XX      , RU_YERU , RU_G    , RU_YU   , RU_R   , RU_SHCH , RU_F   , RU_B    , RU_SOFT, RU_Y   , RU_DOT  , RU_H    ,
+
+                                     __ ,    __ ,   __ ,       __ ,   __ ,   __
   ),
 
 };
