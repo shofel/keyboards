@@ -880,26 +880,10 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    * momentary layers can shadow it — a Russian layer stacked above them would
    * swallow their keys (SYM/NUM appeared dead on-device when this sat last).
    *
-   * Placed by tools/opt_ru_layout.py — balanced multi-objective (SFB, rolls,
-   * lateral stretch, scissors) — against this board's comfort map and 82,357
-   * letters of real Cyrillic typing. On that corpus: SFB 1.58%, rolls 29.9%,
-   * beating ЙЦУКЕН (20.42% / 13.7%), Вестник (2.11% / 16.2%) and Kharlamak
-   * (2.73% / 11.3%); every test word drops to 0 same-finger bigrams.
-   *
-   * ъ sits on the outer-pinky home key (1,0): the rarest letter on the weakest
-   * reclaimed key, so every letter is a single press and no combo is needed.
-   * (0,0)/(2,0) are XX for the same reason L_RUSSIAN's are — transparent would
-   * fall through to BASE and type Latin mid-Russian-word.
-   *
-   * Mnemonics — the anneal clustered phonetic classes onto single fingers, which
-   * is what makes an otherwise structureless optimised layout learnable:
-   *   - the home row is an anagram of СОВЕТНИК (adviser): its eight resting keys
-   *     `и в е н | к о т с` are exactly that word's letters, and the right hand
-   *     reads КОТ straight across (к-о-т on index/mid/ring);
-   *   - left hand by finger: pinky у-и-ы (closed vowels), middle я-е-ю (iotated
-   *     vowels), index л-н-р (sonorants) — vowels on pinky & middle, liquids on
-   *     the index;
-   *   - right index д-к-б are the stops (ДиКоБраз).
+   * Placed by tools/opt_ru_layout.py (a balanced multi-objective anneal). Its
+   * rationale, the score tables and the learnability mnemonics live in
+   * docs/ru-balanced-layout.md — the single home for this layout's narrative;
+   * the generated grid and leader chords are in docs/reference.md.
    */
   [L_RU_OPT] = LAYOUT_split_3x6_3(/* GENERATED scheme — edit the array, then `make gen-docs`.
        ·  у  п  я  л  э        ё  д  а  м  ч  ж
