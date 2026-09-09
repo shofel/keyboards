@@ -272,6 +272,51 @@ def test_shipped_russian_layer_is_jcuken():
         f"{sorted(set(got.items()) ^ set(m.JCUKEN.items()))}")
 
 
+# The balanced L_RU_OPT layout exactly as it ships in keymap.c — the pin that
+# turns a transcription slip in the RU_* array into a red test. `·` marks the two
+# dead outer-pinky keys, `.` the dot slot; both are dropped, leaving the 33
+# letters. Hand-written on purpose: it is the independent truth the array is
+# checked against, so it must not be derived from the array or its comment.
+SHIPPED_RU_OPT = {}
+for _r, _row in enumerate([
+    "·упялэёдамчж",
+    "ъивенцшкотсз",
+    "·ыгюрщфбьй.х",
+]):
+    for _c, _ch in enumerate(_row):
+        if _ch not in ("·", "."):
+            SHIPPED_RU_OPT[_ch] = (_r, _c)
+
+
+def test_shipped_ru_opt_layer_matches_the_balanced_map():
+    """L_RUSSIAN has test_shipped_russian_layer_is_jcuken; the balanced layer
+    needs the same guard. A slip in the RU_* keycode array would otherwise pass
+    every test: the scheme comment above the array is GENERATED from the array
+    (emit_keymap, `make gen-docs`), so it can never disagree with it.
+
+    So this reads the keycodes themselves — not the comment — and compares them to
+    an independently pinned 33-letter map. An array edit that forgets
+    `make gen-docs` is caught here, not only by the scheme drift check."""
+    import os
+    import re
+    here = os.path.dirname(os.path.abspath(__file__))
+    src = os.path.join(here, "..", "layouts", "split_3x6_3", "shofel", "keymap.c")
+    with open(src, encoding="utf-8") as fh:
+        text = fh.read()
+    # After the scheme comment (*/) closes, up to the LAYOUT's closing `),`.
+    block = text.split("[L_RU_OPT] = LAYOUT", 1)[1].split("*/", 1)[1].split("),", 1)[0]
+    tokens = re.findall(r"RU_[A-Z]+|XX", block)
+    assert len(tokens) == 36, f"expected 36 grid keycodes, got {len(tokens)}"
+    inv = {name: ch for ch, name in m.RU_KEYCODE.items()}
+    inv["RU_DOT"] = "."
+    got = {inv[tok]: (i // 12, i % 12)
+           for i, tok in enumerate(tokens)
+           if tok not in ("XX", "RU_DOT")}
+    assert got == SHIPPED_RU_OPT, (
+        "L_RU_OPT array differs from the pinned balanced map at: "
+        f"{sorted(set(got.items()) ^ set(SHIPPED_RU_OPT.items()))}")
+
+
 def test_no_leftover_adaptation_layer():
     """The reverted board carries one Russian layer, not two. A stray second
     layer is a live surface on a keyboard about to be flashed."""
