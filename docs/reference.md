@@ -9,11 +9,11 @@ Source of truth: `layouts/split_3x6_3/shofel/keymap.c`.
 
 - [Base (BOO)](#base-boo-l_boo)
 - [Russian](#russian-l_russian)
+- [Russian — balanced (leader,(r+n))](#russian--balanced-leaderrn-l_ru_opt)
 - [Symbols](#symbols-l_symbols)
 - [Numbers & Navigation](#numbers--navigation-l_num_nav)
 - [F-keys & System](#f-keys--system-l_fkeys_sys)
 - [Mouse — Polar](#mouse--polar-l_mouse)
-- [Russian — balanced (leader,(r+n))](#russian--balanced-leaderrn-l_ru_opt)
 - [Combos](#combos)
 - [Leader sequences](#leader-sequences)
 - [Emoji](#emoji)
@@ -39,6 +39,17 @@ Russian layer — stock ЙЦУКЕН.
 ё  й  ц  у  к  е        н  г  ш  щ  з  х
 ·  ф  ы  в  а  п        р  о  л  д  ж  э
 ·  я  ч  с  м  и        т  ь  б  ю  .  ъ
+      __  __  __        __  __  __
+```
+
+## Russian — balanced (leader,(r+n)) <sub>`L_RU_OPT`</sub>
+
+Balanced Russian layer — the optimised alternative to ЙЦУКЕН, reached by leader,(r+n) (compose backend). It coexists with L_RUSSIAN, so the familiar ЙЦУКЕН and the balanced layout are each one leader-chord away. Placed right after L_RUSSIAN, BELOW the overlay layers (SYM/NUM/FKEYS/MOUSE), so those momentary layers can shadow it — a Russian layer stacked above them would swallow their keys (SYM/NUM appeared dead on-device when this sat last).
+
+```
+·  у  п  я  л  э        ё  д  а  м  ч  ж
+ъ  и  в  е  н  ц        ш  к  о  т  с  з
+·  ы  г  ю  р  щ        ф  б  ь  й  .  х
       __  __  __        __  __  __
 ```
 
@@ -84,17 +95,6 @@ Mouse layer — POLAR mode (Orbital Mouse, getreuer/orbital_mouse). DEFAULT.
 ·  ·  slo  ·  fst  ·        ·  ←   b1   →   b2  __
 ·  ·  ·    ·  ·    ·        ·  b3  bwd  ·   ·   ·
           __  __  __        __  __  __
-```
-
-## Russian — balanced (leader,(r+n)) <sub>`L_RU_OPT`</sub>
-
-Balanced Russian layer — the optimised alternative to ЙЦУКЕН, reached by leader,(r+n) (compose backend). It coexists with L_RUSSIAN, so the familiar ЙЦУКЕН and the balanced layout are each one leader-chord away. Last in the array so no existing layer's index moves.
-
-```
-·  у  п  я  л  э        ё  д  а  м  ч  ж
-ъ  и  в  е  н  ц        ш  к  о  т  с  з
-·  ы  г  ю  р  щ        ф  б  ь  й  .  х
-      __  __  __        __  __  __
 ```
 
 ## Combos

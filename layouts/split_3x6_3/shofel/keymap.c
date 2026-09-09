@@ -72,11 +72,14 @@ enum my_keycodes {
 enum my_layer_names {
   L_BOO,
   L_RUSSIAN,
+  L_RU_OPT,   // balanced Russian layout (leader,(r+n)); coexists with ЙЦУКЕН.
+              // Must sit BELOW the overlays (SYM/NUM/FKEYS/MOUSE): QMK resolves
+              // top-down, so a Russian layer stacked above them would shadow
+              // their keys and they could not be reached while Russian is on.
   L_SYMBOLS,
   L_NUM_NAV,
   L_FKEYS_SYS,
   L_MOUSE,
-  L_RU_OPT,   // balanced Russian layout — coexists with ЙЦУКЕН; leader,(r+n)
 };
 
 /* Simple thumb keys. */
@@ -870,6 +873,48 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   ),
 
   /**
+   * Balanced Russian layer — the optimised alternative to ЙЦУКЕН, reached by
+   * leader,(r+n) (compose backend). It coexists with L_RUSSIAN, so the familiar
+   * ЙЦУКЕН and the balanced layout are each one leader-chord away. Placed right
+   * after L_RUSSIAN, BELOW the overlay layers (SYM/NUM/FKEYS/MOUSE), so those
+   * momentary layers can shadow it — a Russian layer stacked above them would
+   * swallow their keys (SYM/NUM appeared dead on-device when this sat last).
+   *
+   * Placed by tools/opt_ru_layout.py — balanced multi-objective (SFB, rolls,
+   * lateral stretch, scissors) — against this board's comfort map and 82,357
+   * letters of real Cyrillic typing. On that corpus: SFB 1.58%, rolls 29.9%,
+   * beating ЙЦУКЕН (20.42% / 13.7%), Вестник (2.11% / 16.2%) and Kharlamak
+   * (2.73% / 11.3%); every test word drops to 0 same-finger bigrams.
+   *
+   * ъ sits on the outer-pinky home key (1,0): the rarest letter on the weakest
+   * reclaimed key, so every letter is a single press and no combo is needed.
+   * (0,0)/(2,0) are XX for the same reason L_RUSSIAN's are — transparent would
+   * fall through to BASE and type Latin mid-Russian-word.
+   *
+   * Mnemonics — the anneal clustered phonetic classes onto single fingers, which
+   * is what makes an otherwise structureless optimised layout learnable:
+   *   - the home row is an anagram of СОВЕТНИК (adviser): its eight resting keys
+   *     `и в е н | к о т с` are exactly that word's letters, and the right hand
+   *     reads КОТ straight across (к-о-т on index/mid/ring);
+   *   - left hand by finger: pinky у-и-ы (closed vowels), middle я-е-ю (iotated
+   *     vowels), index л-н-р (sonorants) — vowels on pinky & middle, liquids on
+   *     the index;
+   *   - right index д-к-б are the stops (ДиКоБраз).
+   */
+  [L_RU_OPT] = LAYOUT_split_3x6_3(/* GENERATED scheme — edit the array, then `make gen-docs`.
+       ·  у  п  я  л  э        ё  д  а  м  ч  ж
+       ъ  и  в  е  н  ц        ш  к  о  т  с  з
+       ·  ы  г  ю  р  щ        ф  б  ь  й  .  х
+             __  __  __        __  __  __
+  */
+           XX      , RU_U    , RU_P    , RU_YA   , RU_L   , RU_EE   , RU_YO  , RU_D    , RU_A   , RU_M   , RU_CH   , RU_ZH   ,
+           RU_HARD , RU_I    , RU_V    , RU_E    , RU_N   , RU_TS   , RU_SH  , RU_K    , RU_O   , RU_T   , RU_S    , RU_Z    ,
+           XX      , RU_YERU , RU_G    , RU_YU   , RU_R   , RU_SHCH , RU_F   , RU_B    , RU_SOFT, RU_Y   , RU_DOT  , RU_H    ,
+
+                                     __ ,    __ ,   __ ,       __ ,   __ ,   __
+  ),
+
+  /**
    * Symbol layer — frequency-first, punctuation on the RIGHT hand.
    *
    * Reach SYM two ways: KK_SYMBO (left thumb) — tap for a one-shot (next key from
@@ -986,46 +1031,6 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         XX, XX,          XX,      XX,           XX, XX,   XX, OM_BTN3, OM_D   ,      XX,      XX, XX,
 
                                    __ ,    __ ,   __ ,         __ ,  __ ,  __
-  ),
-
-  /**
-   * Balanced Russian layer — the optimised alternative to ЙЦУКЕН, reached by
-   * leader,(r+n) (compose backend). It coexists with L_RUSSIAN, so the familiar
-   * ЙЦУКЕН and the balanced layout are each one leader-chord away. Last in the
-   * array so no existing layer's index moves.
-   *
-   * Placed by tools/opt_ru_layout.py — balanced multi-objective (SFB, rolls,
-   * lateral stretch, scissors) — against this board's comfort map and 82,357
-   * letters of real Cyrillic typing. On that corpus: SFB 1.58%, rolls 29.9%,
-   * beating ЙЦУКЕН (20.42% / 13.7%), Вестник (2.11% / 16.2%) and Kharlamak
-   * (2.73% / 11.3%); every test word drops to 0 same-finger bigrams.
-   *
-   * ъ sits on the outer-pinky home key (1,0): the rarest letter on the weakest
-   * reclaimed key, so every letter is a single press and no combo is needed.
-   * (0,0)/(2,0) are XX for the same reason L_RUSSIAN's are — transparent would
-   * fall through to BASE and type Latin mid-Russian-word.
-   *
-   * Mnemonics — the anneal clustered phonetic classes onto single fingers, which
-   * is what makes an otherwise structureless optimised layout learnable:
-   *   - the home row is an anagram of СОВЕТНИК (adviser): its eight resting keys
-   *     `и в е н | к о т с` are exactly that word's letters, and the right hand
-   *     reads КОТ straight across (к-о-т on index/mid/ring);
-   *   - left hand by finger: pinky у-и-ы (closed vowels), middle я-е-ю (iotated
-   *     vowels), index л-н-р (sonorants) — vowels on pinky & middle, liquids on
-   *     the index;
-   *   - right index д-к-б are the stops (ДиКоБраз).
-   */
-  [L_RU_OPT] = LAYOUT_split_3x6_3(/* GENERATED scheme — edit the array, then `make gen-docs`.
-       ·  у  п  я  л  э        ё  д  а  м  ч  ж
-       ъ  и  в  е  н  ц        ш  к  о  т  с  з
-       ·  ы  г  ю  р  щ        ф  б  ь  й  .  х
-             __  __  __        __  __  __
-  */
-           XX      , RU_U    , RU_P    , RU_YA   , RU_L   , RU_EE   , RU_YO  , RU_D    , RU_A   , RU_M   , RU_CH   , RU_ZH   ,
-           RU_HARD , RU_I    , RU_V    , RU_E    , RU_N   , RU_TS   , RU_SH  , RU_K    , RU_O   , RU_T   , RU_S    , RU_Z    ,
-           XX      , RU_YERU , RU_G    , RU_YU   , RU_R   , RU_SHCH , RU_F   , RU_B    , RU_SOFT, RU_Y   , RU_DOT  , RU_H    ,
-
-                                     __ ,    __ ,   __ ,       __ ,   __ ,   __
   ),
 
 };

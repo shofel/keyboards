@@ -436,9 +436,26 @@ def test_gen_doc_combos_is_board():
     assert "┌" in section and "┼" in section, "combos section is not the boxed board"
     assert "Ctl" in section and "[" in section
 
+def test_ru_layers_sit_below_overlay_layers():
+    """A toggled Russian layer must have a LOWER layer index than the momentary
+    overlays (SYM / NUM / FKEYS / MOUSE). QMK resolves top-down, so a Russian
+    layer stacked ABOVE them shadows their keys — the overlay turns on but every
+    key reads through to the Russian letter, so SYM/NUM look dead on-device.
+    (L_RU_OPT was placed last once, to avoid moving indices; sym/num then would
+    not activate on it.)"""
+    src = g.KEYMAP.read_text(encoding="utf-8")
+    order = g.layer_names(src)
+    idx = {n: i for i, n in enumerate(order)}
+    for ru in ("L_RUSSIAN", "L_RU_OPT"):
+        for overlay in ("L_SYMBOLS", "L_NUM_NAV", "L_FKEYS_SYS", "L_MOUSE"):
+            assert idx[ru] < idx[overlay], (
+                f"{ru} (#{idx[ru]}) must sit below {overlay} (#{idx[overlay]}) "
+                "or the overlay can't be reached while Russian is on")
+
 if __name__ == "__main__":
     test_layer_names(); test_extract_layers(); test_wrong_token_count_fatal()
     test_glyph_rules(); test_unknown_keycode_fatal(); test_real_keymap_fully_covered()
+    test_ru_layers_sit_below_overlay_layers()
     test_render_grid_golden()
     test_doc_paragraph(); test_gen_doc_contains_all_layers()
     test_layer_title_unknown_fatal()
