@@ -90,7 +90,10 @@ to zero:
   use: a `{KC_R, KC_N}` combo emits a `KK_RU_OPT` token that the armed leader
   captures, gated by `combo_should_trigger` to the armed state so it can't
   misfire in ordinary typing ("turn", "born"). Compose backend.
-- **Status:** firmware compiles and `make test` is green; **not yet flashed**.
+- **Status:** compiles clean and `make test` is green. **Flashed to the left
+  half** — the overlays (SYM/NUM), Ctrl and leader work after a layer-order fix;
+  still bedding into muscle memory, and the fast-English `r+n` combo isn't
+  stress-tested yet.
 
 ## Reproduce
 
