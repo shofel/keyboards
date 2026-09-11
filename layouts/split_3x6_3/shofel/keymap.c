@@ -11,6 +11,7 @@
 #include "modules/shofel/leader/leader_fsm.h"
 #include "modules/shofel/angle/angle_case.h"
 #include "modules/shofel/toggle/toggle_select.h"
+#include "modules/shofel/quote/smart_quote.h"
 #include "modules/shofel/keylog/keylog.h"
 
 /*
@@ -43,6 +44,10 @@ enum my_keycodes {
    * modules/shofel/angle/angle_case.h. */
   KK_LANGLE,
   KK_RANGLE,
+
+  /* The g+v quote combo: taps `"` on Latin, a smart guillemet on a Russian layer
+   * (emits « » with the cursor between). See modules/shofel/quote/smart_quote.h. */
+  KK_QUOTE,
 
   /* Combo outputs captured by the armed leader only (see combo_should_trigger):
    * leader,(r+v) -> vim, leader,(r+w) -> Windows, leader,(r+n) -> the balanced
@@ -135,6 +140,14 @@ static bool mod_ru_suspended(void) {
  * stay put (see toggle_apply / mod_ru_suspended). */
 static bool is_ru_layer(uint8_t layer) {
     return layer == L_RUSSIAN || layer == L_RU_OPT;
+}
+
+/* Is a Russian layer physically live right now? Layer-scoped emission (the smart
+ * quote) reads this rather than active_toggle, so a held Ctrl/Alt/Gui — which
+ * suspends Russian so Latin shortcuts work — is respected: a quote typed then is
+ * a Latin one. */
+static bool typing_russian(void) {
+    return layer_state_is(L_RUSSIAN) || layer_state_is(L_RU_OPT);
 }
 
 static void toggle_apply(void) {
@@ -378,7 +391,7 @@ combo_t key_combos[] = {
   [CMB_RALT]       = COMBO(ralt_combo, OS_ALT),
   [CMB_RGUI]       = COMBO(rgui_combo, OS_GUI),
 
-  [CMB_DQUO]       = COMBO(dquo_combo, KC_DQUO),
+  [CMB_DQUO]       = COMBO(dquo_combo, KK_QUOTE),
   [CMB_FSYS]       = COMBO(fkeys_combo, OSL(L_FKEYS_SYS)),
 
   [CMB_RU_VIM]     = COMBO(ru_vim_combo, KK_RU_VIM),
@@ -701,6 +714,21 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
       }
       return false;
 
+    case KK_QUOTE:
+      if (record->event.pressed) {
+        if (smart_quote_kind(typing_russian()) == QUOTE_GUILLEMET_PAIR) {
+          /* « » with the cursor left between them: Russian prose quotes with one
+           * press and types inside. ru_emit_glyph clears the one-shot and strips
+           * shift; KC_LEFT then steps back over the » just emitted. */
+          ru_emit_glyph("q[", 0x00AB); // «
+          ru_emit_glyph("q]", 0x00BB); // »
+          tap_code(KC_LEFT);
+        } else {
+          tap_code16(KC_DQUO);         // "
+        }
+      }
+      return false;
+
     /* The two outer thumbs are custom leader keys (distinct so the reset combo
      * can tell them apart); both arm the timeoutless leader. lead_begin() sets
      * the capture flag; the intercept at the top of this function then captures
@@ -929,9 +957,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    * - `⌫` backspace (right inner) and `⌦` delete (left inner).
    *
    * Not on SYM (all global, so they work while Russian is active):
-   * - `"`  — the left inner-index top+home combo (v+g). The same two keys are
-   *          ц and й on the Russian layer, where the chord types `ъ` instead;
-   *          `"` is no loss there, since Russian quotes with `« »`.
+   * - `"` / `« »` — the left inner-index top+home combo (g+v). On Latin it taps
+   *          `"`; on a Russian layer it is a smart guillemet, emitting « » with
+   *          the cursor between (see modules/shofel/quote/smart_quote.h).
    * - `« »` — the angle combos via KK_LANGLE / KK_RANGLE. Shift picks the glyph
    *          the same on every layer: `< >` unshifted, `« »` with Shift.
    * - `?` is suppressed from base Shift+/, so SYM is its one canonical home.

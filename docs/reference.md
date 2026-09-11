@@ -115,6 +115,8 @@ Why the same-column pairs are the safe ones — the column stagger — is explai
 
 The angle combos are shift-aware — g + z → `<` / `«`; b + p → `>` / `»`. A held (or one-shot) Shift picks the second glyph of each pair, the same on every layer: `<` `>` unshifted, the guillemets `«` `»` with Shift — whether or not a Russian layer is live.
 
+The g + v combo is a smart quote: it taps `"` on the Latin layers, and on a Russian layer emits `« »` with the cursor between them — one press quotes Russian prose and types inside.
+
 The rest fire on keys that aren't vertically adjacent — thumbs, bottom-row rolls, and the outer corners. Each diagram marks the two trigger positions:
 
 sft + spc → Esc
