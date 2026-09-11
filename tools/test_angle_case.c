@@ -6,13 +6,9 @@
  *       -o /tmp/test_angle_case tools/test_angle_case.c && /tmp/test_angle_case
  * or:  make test-angle
  *
- * The whole behaviour is a four-row truth table, and the only way to get it
- * wrong is to invert the polarity — which is precisely what this change does on
- * purpose for one of the two states. So pin all four rows.
- *
- * Latin: shift picks the guillemet (the rare glyph costs the extra press).
- * Russian: inverted, because « » is what Russian prose quotes with and < > is
- * the rarity there.
+ * The glyph choice is stable on every layer: Shift alone picks between the two,
+ * with no dependence on whether a Russian layer is live. Unshifted gives the
+ * ASCII angle `< >`; Shift gives the guillemet `« »`. Two rows say all of it.
  */
 #include <stdio.h>
 #include "angle_case.h"
@@ -30,24 +26,8 @@ static int failures = 0;
     } while (0)
 
 int main(void) {
-    /* Latin (RU layer off) — unchanged from how the board has always behaved. */
-    CHECK(angle_emits_guillemet(false, false) == false,
-          "latin, unshifted -> < >");
-    CHECK(angle_emits_guillemet(true, false) == true,
-          "latin, shifted   -> guillemet");
-
-    /* Russian (RU layer live) — inverted. */
-    CHECK(angle_emits_guillemet(false, true) == true,
-          "russian, unshifted -> guillemet");
-    CHECK(angle_emits_guillemet(true, true) == false,
-          "russian, shifted   -> < >");
-
-    /* The two states must genuinely differ, or the inversion is a no-op that
-     * would still satisfy any single row above. */
-    CHECK(angle_emits_guillemet(false, false) != angle_emits_guillemet(false, true),
-          "unshifted output differs between latin and russian");
-    CHECK(angle_emits_guillemet(true, false) != angle_emits_guillemet(true, true),
-          "shifted output differs between latin and russian");
+    CHECK(angle_emits_guillemet(false) == false, "unshifted -> < >");
+    CHECK(angle_emits_guillemet(true)  == true,  "shifted   -> guillemet");
 
     if (failures) {
         printf("\n%d angle_case test(s) FAILED\n", failures);

@@ -581,11 +581,9 @@ def gen_doc(src):
         notes = "; ".join(
             f"{' + '.join(glyph(k) for k in ks)} → {combo_out(o)}" for ks, o in angle)
         out.append(f"The angle combos are shift-aware — {notes}. A held (or "
-                   "one-shot) Shift picks the second glyph of each pair, so the "
-                   "Latin layers give `<` `>` unshifted and the guillemets "
-                   "shifted. The Russian layer inverts that: `«` `»` come "
-                   "unshifted there, since Russian prose quotes with them, and "
-                   "`<` `>` take the Shift.")
+                   "one-shot) Shift picks the second glyph of each pair, the same "
+                   "on every layer: `<` `>` unshifted, the guillemets `«` `»` with "
+                   "Shift — whether or not a Russian layer is live.")
         out.append("")
     nonadj = nonadjacent_combos(base, combos)
     if nonadj:
