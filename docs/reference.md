@@ -227,7 +227,7 @@ r + n → Russian — balanced layout (leader-armed only)
 
 ## Leader sequences
 
-Tap `LEAD`, then the keys in order. Mirror pairs (either hand) share one entry; the diagram numbers the presses — `0` is `LEAD` (either outer thumb), then `1`, `2` for the keys after it.
+Tap `LEAD`, then the keys in order. Mirror pairs (either hand) share one entry; the diagram numbers the presses — `0` is `LEAD` (either outer thumb), then `1`, `2` for the keys after it. Re-selecting the toggle layer that is already active turns it off (like a one-shot's second tap); `LEAD, spc` stays the catch-all that clears any of them.
 
 `LEAD, r` — Russian — compose backend (default; rolling-safe, host-wide)
 

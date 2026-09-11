@@ -602,7 +602,9 @@ def gen_doc(src):
     out.append("")
     out.append("Tap `LEAD`, then the keys in order. Mirror pairs (either hand) share "
                "one entry; the diagram numbers the presses — `0` is `LEAD` (either "
-               "outer thumb), then `1`, `2` for the keys after it.")
+               "outer thumb), then `1`, `2` for the keys after it. Re-selecting the "
+               "toggle layer that is already active turns it off (like a one-shot's "
+               "second tap); `LEAD, spc` stays the catch-all that clears any of them.")
     out.append("")
     for key_seqs, doc in group_leader_seqs(extract_leader_seqs(src)):
         triggers = " / ".join(

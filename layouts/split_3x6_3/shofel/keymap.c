@@ -10,6 +10,7 @@
 #include "modules/getreuer/orbital_mouse/introspection.h"
 #include "modules/shofel/leader/leader_fsm.h"
 #include "modules/shofel/angle/angle_case.h"
+#include "modules/shofel/toggle/toggle_select.h"
 #include "modules/shofel/keylog/keylog.h"
 
 /*
@@ -168,6 +169,27 @@ static void toggle_disable(void) {
      * backend dies with the layer rather than outliving it. */
     ru_backend = RU_BACKEND_COMPOSE;
     toggle_apply();
+}
+
+/* Turn on `layer` — with `backend` for the Russian layers — or, if that exact
+ * target is already active, turn it off. Re-selecting the active switcher cancels
+ * it, the way a one-shot's second tap does; selecting a different layer, or the
+ * same Russian layer with a different backend, switches. */
+static void toggle_select(uint8_t layer, ru_backend_t backend) {
+    if (toggle_reselect_cancels(active_toggle == layer, is_ru_layer(layer),
+                                ru_backend == backend)) {
+        toggle_disable();
+        return;
+    }
+    if (is_ru_layer(layer)) {
+        ru_backend = backend;
+    }
+    toggle_enable(layer);
+}
+
+/* The non-Russian toggle layers carry no backend; keep the current one. */
+static void toggle_layer(uint8_t layer) {
+    toggle_select(layer, ru_backend);
 }
 
 static void toggle_reset(void) {
@@ -422,15 +444,15 @@ typedef struct {
 } leader_seq_t;
 
 /* Ru compose is the default backend; see the unicode_ru module. */
-static void lead_ru(void)       { ru_backend = RU_BACKEND_COMPOSE; toggle_enable(L_RUSSIAN); }
-static void lead_vim(void)      { ru_backend = RU_BACKEND_VIM; toggle_enable(L_RUSSIAN); }
-static void lead_win(void)      { ru_backend = RU_BACKEND_WINDOWS; toggle_enable(L_RUSSIAN); }
-static void lead_ru_opt(void)   { ru_backend = RU_BACKEND_COMPOSE; toggle_enable(L_RU_OPT); }
+static void lead_ru(void)       { toggle_select(L_RUSSIAN, RU_BACKEND_COMPOSE); }
+static void lead_vim(void)      { toggle_select(L_RUSSIAN, RU_BACKEND_VIM); }
+static void lead_win(void)      { toggle_select(L_RUSSIAN, RU_BACKEND_WINDOWS); }
+static void lead_ru_opt(void)   { toggle_select(L_RU_OPT, RU_BACKEND_COMPOSE); }
 static void lead_en(void)       { ru_backend = RU_BACKEND_COMPOSE; toggle_disable(); }
 static void lead_reset(void)    { toggle_reset(); }
-static void lead_fkeys(void)    { toggle_enable(L_FKEYS_SYS); }
-static void lead_mouse(void)    { toggle_enable(L_MOUSE); }
-static void lead_num(void)      { toggle_enable(L_NUM_NAV); }
+static void lead_fkeys(void)    { toggle_layer(L_FKEYS_SYS); }
+static void lead_mouse(void)    { toggle_layer(L_MOUSE); }
+static void lead_num(void)      { toggle_layer(L_NUM_NAV); }
 static void lead_lira(void)     { ru_emit_glyph("$l", 0x20BA); }
 static void lead_rub(void)      { ru_emit_glyph("$r", 0x20BD); }
 static void lead_eur(void)      { ru_emit_glyph("$e", 0x20AC); }
