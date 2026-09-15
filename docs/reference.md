@@ -9,6 +9,7 @@ Source of truth: `layouts/split_3x6_3/shofel/keymap.c`.
 
 - [Base (BOO)](#base-boo-l_boo)
 - [Russian](#russian-l_russian)
+- [Russian — balanced (leader,(r+n))](#russian--balanced-leaderrn-l_ru_opt)
 - [Symbols](#symbols-l_symbols)
 - [Numbers & Navigation](#numbers--navigation-l_num_nav)
 - [F-keys & System](#f-keys--system-l_fkeys_sys)
@@ -38,6 +39,17 @@ Russian layer — stock ЙЦУКЕН.
 ё  й  ц  у  к  е        н  г  ш  щ  з  х
 ·  ф  ы  в  а  п        р  о  л  д  ж  э
 ·  я  ч  с  м  и        т  ь  б  ю  .  ъ
+      __  __  __        __  __  __
+```
+
+## Russian — balanced (leader,(r+n)) <sub>`L_RU_OPT`</sub>
+
+Balanced Russian layer — the optimised alternative to ЙЦУКЕН, reached by leader,(r+n) (compose backend). It coexists with L_RUSSIAN, so the familiar ЙЦУКЕН and the balanced layout are each one leader-chord away. Placed right after L_RUSSIAN, BELOW the overlay layers (SYM/NUM/FKEYS/MOUSE), so those momentary layers can shadow it — a Russian layer stacked above them would swallow their keys (SYM/NUM appeared dead on-device when this sat last).
+
+```
+·  у  п  я  л  э        ё  д  а  м  ч  ж
+ъ  и  в  е  н  ц        ш  к  о  т  с  з
+·  ы  г  ю  р  щ        ф  б  ь  й  .  х
       __  __  __        __  __  __
 ```
 
@@ -101,7 +113,9 @@ Why the same-column pairs are the safe ones — the column stagger — is explai
 └─────┴─────┴─────┴─────┴─────┴─────┘    └─────┴─────┴─────┴─────┴─────┴─────┘
 ```
 
-The angle combos are shift-aware — g + z → `<` / `«`; b + p → `>` / `»`. A held (or one-shot) Shift picks the second glyph of each pair, so the Latin layers give `<` `>` unshifted and the guillemets shifted. The Russian layer inverts that: `«` `»` come unshifted there, since Russian prose quotes with them, and `<` `>` take the Shift.
+The angle combos are shift-aware — g + z → `<` / `«`; b + p → `>` / `»`. A held (or one-shot) Shift picks the second glyph of each pair, the same on every layer: `<` `>` unshifted, the guillemets `«` `»` with Shift — whether or not a Russian layer is live.
+
+The g + v combo is a smart quote: it taps `"` on the Latin layers, and on a Russian layer emits `« »` with the cursor between them — one press quotes Russian prose and types inside.
 
 The rest fire on keys that aren't vertically adjacent — thumbs, bottom-row rolls, and the outer corners. Each diagram marks the two trigger positions:
 
@@ -204,9 +218,18 @@ r + w → Russian — Windows backend (leader-armed only)
         · · ·   · · ·
 ```
 
+r + n → Russian — balanced layout (leader-armed only)
+
+```
+· · · · · ·       · · · · · ·
+· · · · · ·       · ● · ● · ·
+· · · · · ·       · · · · · ·
+        · · ·   · · ·
+```
+
 ## Leader sequences
 
-Tap `LEAD`, then the keys in order. Mirror pairs (either hand) share one entry; the diagram numbers the presses — `0` is `LEAD` (either outer thumb), then `1`, `2` for the keys after it.
+Tap `LEAD`, then the keys in order. Mirror pairs (either hand) share one entry; the diagram numbers the presses — `0` is `LEAD` (either outer thumb), then `1`, `2` for the keys after it. Re-selecting the toggle layer that is already active turns it off (like a one-shot's second tap); `LEAD, spc` stays the catch-all that clears any of them.
 
 `LEAD, r` — Russian — compose backend (default; rolling-safe, host-wide)
 

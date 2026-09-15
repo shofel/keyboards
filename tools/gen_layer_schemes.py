@@ -132,6 +132,7 @@ LAYER_TITLES = {
     "L_NUM_NAV": "Numbers & Navigation",
     "L_FKEYS_SYS": "F-keys & System",
     "L_MOUSE": "Mouse — Polar",
+    "L_RU_OPT": "Russian — balanced (leader,(r+n))",
 }
 
 
@@ -183,12 +184,13 @@ COMBO_OUT = {  # combo outputs that aren't plain layer glyphs
     "KK_FAT_LEFT_ARROW": "<=", "KK_LEFT_ARROW": "<-",
     "KK_RU_VIM": "Russian — vim backend (leader-armed only)",
     "KK_RU_WIN": "Russian — Windows backend (leader-armed only)",
+    "KK_RU_OPT": "Russian — balanced layout (leader-armed only)",
     "KC_LBRC": "[", "KC_RBRC": "]", "KC_LPRN": "(", "KC_RPRN": ")",
     "KC_LCBR": "{", "KC_RCBR": "}",
     "KK_LANGLE": "`<` / `«`", "KK_RANGLE": "`>` / `»`",
     "OS_CTL": "one-shot Ctrl", "OS_ALT": "one-shot Alt", "OS_GUI": "one-shot Gui",
     "OSL(L_NUM_NAV)": "one-shot NUM_NAV", "OSL(L_FKEYS_SYS)": "one-shot FKEYS_SYS",
-    "KC_DQUO": '"',
+    "KC_DQUO": '"', "KK_QUOTE": '`"` (Latin) / `« »` (Russian, cursor between)',
 }
 
 # Short labels for the combo board — each must fit a border cell (<= CW-2 chars).
@@ -198,10 +200,10 @@ COMBO_SHORT = {
     "OSL(L_NUM_NAV)": "Nav", "OSL(L_FKEYS_SYS)": "Fky",
     "KC_LBRC": "[", "KC_RBRC": "]", "KC_LPRN": "(", "KC_RPRN": ")",
     "KC_LCBR": "{", "KC_RCBR": "}",
-    "KK_LANGLE": "<", "KK_RANGLE": ">", "KC_DQUO": '"',
+    "KK_LANGLE": "<", "KK_RANGLE": ">", "KC_DQUO": '"', "KK_QUOTE": '"',
     "KK_RIGHT_ARROW": "->", "KK_FAT_RIGHT_ARROW": "=>",
     "KK_FAT_LEFT_ARROW": "<=", "KK_LEFT_ARROW": "<-",
-    "KK_RU_VIM": "RUv", "KK_RU_WIN": "RUw",
+    "KK_RU_VIM": "RUv", "KK_RU_WIN": "RUw", "KK_RU_OPT": "RUo",
 }
 CW = 5  # combo-board cell width
 
@@ -579,11 +581,16 @@ def gen_doc(src):
         notes = "; ".join(
             f"{' + '.join(glyph(k) for k in ks)} → {combo_out(o)}" for ks, o in angle)
         out.append(f"The angle combos are shift-aware — {notes}. A held (or "
-                   "one-shot) Shift picks the second glyph of each pair, so the "
-                   "Latin layers give `<` `>` unshifted and the guillemets "
-                   "shifted. The Russian layer inverts that: `«` `»` come "
-                   "unshifted there, since Russian prose quotes with them, and "
-                   "`<` `>` take the Shift.")
+                   "one-shot) Shift picks the second glyph of each pair, the same "
+                   "on every layer: `<` `>` unshifted, the guillemets `«` `»` with "
+                   "Shift — whether or not a Russian layer is live.")
+        out.append("")
+    quote = [(ks, o) for ks, o in combos if o == "KK_QUOTE"]
+    if quote:
+        keys = " + ".join(glyph(k) for k in quote[0][0])
+        out.append(f"The {keys} combo is a smart quote: it taps `\"` on the Latin "
+                   "layers, and on a Russian layer emits `« »` with the cursor "
+                   "between them — one press quotes Russian prose and types inside.")
         out.append("")
     nonadj = nonadjacent_combos(base, combos)
     if nonadj:
@@ -602,7 +609,9 @@ def gen_doc(src):
     out.append("")
     out.append("Tap `LEAD`, then the keys in order. Mirror pairs (either hand) share "
                "one entry; the diagram numbers the presses — `0` is `LEAD` (either "
-               "outer thumb), then `1`, `2` for the keys after it.")
+               "outer thumb), then `1`, `2` for the keys after it. Re-selecting the "
+               "toggle layer that is already active turns it off (like a one-shot's "
+               "second tap); `LEAD, spc` stays the catch-all that clears any of them.")
     out.append("")
     for key_seqs, doc in group_leader_seqs(extract_leader_seqs(src)):
         triggers = " / ".join(

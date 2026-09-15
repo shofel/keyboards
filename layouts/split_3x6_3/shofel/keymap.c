@@ -10,6 +10,8 @@
 #include "modules/getreuer/orbital_mouse/introspection.h"
 #include "modules/shofel/leader/leader_fsm.h"
 #include "modules/shofel/angle/angle_case.h"
+#include "modules/shofel/toggle/toggle_select.h"
+#include "modules/shofel/quote/smart_quote.h"
 #include "modules/shofel/keylog/keylog.h"
 
 /*
@@ -38,17 +40,21 @@ enum my_keycodes {
   KK_FAT_RIGHT_ARROW,           // emits "=>"
   KK_FAT_LEFT_ARROW,            // emits "<="
   KK_LEFT_ARROW,                // emits "<-"
-  /* `<` `>` vs `« »`. Shift picks between them, but which one shift costs is
-   * inverted while the Russian layer is live — Russian quotes with « », Latin
-   * code is full of < >. See modules/shofel/angle/angle_case.h. */
+  /* `<` `>` (unshifted) vs `« »` (Shift), the same on every layer. See
+   * modules/shofel/angle/angle_case.h. */
   KK_LANGLE,
   KK_RANGLE,
 
-  /* Combo outputs for RU backend select, captured by the armed leader only (see
-   * combo_should_trigger): leader,(r+v) -> vim, leader,(r+w) -> Windows. Never
-   * typed on their own. */
+  /* The g+v quote combo: taps `"` on Latin, a smart guillemet on a Russian layer
+   * (emits « » with the cursor between). See modules/shofel/quote/smart_quote.h. */
+  KK_QUOTE,
+
+  /* Combo outputs captured by the armed leader only (see combo_should_trigger):
+   * leader,(r+v) -> vim, leader,(r+w) -> Windows, leader,(r+n) -> the balanced
+   * Russian layout (L_RU_OPT). Never typed on their own. */
   KK_RU_VIM,
   KK_RU_WIN,
+  KK_RU_OPT,
 
   /* The two outer-thumb leader keys. Distinct keycodes (not a single shared
    * QK_LEAD) so the reset chord — both of them at once — is an unambiguous
@@ -71,6 +77,10 @@ enum my_keycodes {
 enum my_layer_names {
   L_BOO,
   L_RUSSIAN,
+  L_RU_OPT,   // balanced Russian layout (leader,(r+n)); coexists with ЙЦУКЕН.
+              // Must sit BELOW the overlays (SYM/NUM/FKEYS/MOUSE): QMK resolves
+              // top-down, so a Russian layer stacked above them would shadow
+              // their keys and they could not be reached while Russian is on.
   L_SYMBOLS,
   L_NUM_NAV,
   L_FKEYS_SYS,
@@ -124,21 +134,29 @@ static bool mod_ru_suspended(void) {
     return false;
 }
 
-/* Is Russian physically live right now? Decides which of `< >` / `« »` the
- * angle combos treat as the rare, shifted glyph.
- *
- * Reads the LIVE layer rather than active_toggle on purpose — a held
- * Ctrl/Alt/Gui suspends Russian so Latin shortcuts keep working, and an angle
- * typed in that state is a Latin one. */
+/* Which layers count as Russian (stock ЙЦУКЕН and the balanced L_RU_OPT). Used
+ * to mask Russian — and only Russian — while a Ctrl/Alt/Gui one-shot physically
+ * holds its mod, so that chord falls through to the Latin base while num/nav etc.
+ * stay put (see toggle_apply / mod_ru_suspended). The user-facing consequence —
+ * Ctrl+<letter> reaches a Latin shortcut only on the text layers, not the
+ * overlays — and why that trade-off is accepted live in docs/known-limitations.md. */
+static bool is_ru_layer(uint8_t layer) {
+    return layer == L_RUSSIAN || layer == L_RU_OPT;
+}
+
+/* Is a Russian layer physically live right now? Layer-scoped emission (the smart
+ * quote) reads this rather than active_toggle, so a held Ctrl/Alt/Gui — which
+ * suspends Russian so Latin shortcuts work — is respected: a quote typed then is
+ * a Latin one. */
 static bool typing_russian(void) {
-    return layer_state_is(L_RUSSIAN);
+    return layer_state_is(L_RUSSIAN) || layer_state_is(L_RU_OPT);
 }
 
 static void toggle_apply(void) {
     uint8_t want = active_toggle;
     if (leader_active) {
         want = TOGGLE_NONE;
-    } else if (active_toggle == L_RUSSIAN && mod_ru_suspended()) {
+    } else if (is_ru_layer(active_toggle) && mod_ru_suspended()) {
         want = TOGGLE_NONE;
     }
     if (applied_layer == want) {
@@ -166,6 +184,27 @@ static void toggle_disable(void) {
      * backend dies with the layer rather than outliving it. */
     ru_backend = RU_BACKEND_COMPOSE;
     toggle_apply();
+}
+
+/* Turn on `layer` — with `backend` for the Russian layers. Re-selecting an
+ * already-active *overlay* (num/nav, F-keys, mouse) turns it off, the way a
+ * one-shot's second tap does. The Russian layers are stable switches: re-selecting
+ * the active one does not cancel — same backend re-asserts it, a different backend
+ * switches the backend. Leave Russian with leader,e / leader,space. */
+static void toggle_select(uint8_t layer, ru_backend_t backend) {
+    if (toggle_reselect_cancels(active_toggle == layer, is_ru_layer(layer))) {
+        toggle_disable();
+        return;
+    }
+    if (is_ru_layer(layer)) {
+        ru_backend = backend;
+    }
+    toggle_enable(layer);
+}
+
+/* The non-Russian toggle layers carry no backend; keep the current one. */
+static void toggle_layer(uint8_t layer) {
+    toggle_select(layer, ru_backend);
 }
 
 static void toggle_reset(void) {
@@ -269,12 +308,14 @@ const uint16_t PROGMEM dquo_combo[] = {KC_G, KC_V, COMBO_END};
  * SYM no longer needs this combo: it is reached via the left thumb (KK_SYMBO)
  * and the RET layer-tap (right inner thumb). */
 const uint16_t PROGMEM fkeys_combo[] = {KC_SLASH, KC_MINUS, COMBO_END};
-/* RU backend select under the armed leader: leader,(r+v) -> vim, leader,(r+w) ->
- * Windows. combo_should_trigger gates these to lead_cap.active, so they never
- * fire in ordinary typing ("se[rv]e", "cu[rv]e"); the armed leader captures the
- * combo's output keycode. Compose stays the bare tap, leader,r. */
+/* RU selection under the armed leader: leader,(r+v) -> vim, leader,(r+w) ->
+ * Windows, leader,(r+n) -> the balanced layout L_RU_OPT. combo_should_trigger
+ * gates these to lead_cap.active, so they never fire in ordinary typing
+ * ("se[rv]e", "cu[rv]e", "tu[rn]"); the armed leader captures the combo's output
+ * keycode. Compose ЙЦУКЕН stays the bare tap, leader,r. */
 const uint16_t PROGMEM ru_vim_combo[] = {KC_R, KC_V, COMBO_END};
 const uint16_t PROGMEM ru_win_combo[] = {KC_R, KC_W, COMBO_END};
+const uint16_t PROGMEM ru_opt_combo[] = {KC_R, KC_N, COMBO_END};
 
 /* Indices for all combos (designated initializers) */
 enum combos {
@@ -315,6 +356,7 @@ enum combos {
 
   CMB_RU_VIM,
   CMB_RU_WIN,
+  CMB_RU_OPT,
 };
 
 combo_t key_combos[] = {
@@ -351,11 +393,12 @@ combo_t key_combos[] = {
   [CMB_RALT]       = COMBO(ralt_combo, OS_ALT),
   [CMB_RGUI]       = COMBO(rgui_combo, OS_GUI),
 
-  [CMB_DQUO]       = COMBO(dquo_combo, KC_DQUO),
+  [CMB_DQUO]       = COMBO(dquo_combo, KK_QUOTE),
   [CMB_FSYS]       = COMBO(fkeys_combo, OSL(L_FKEYS_SYS)),
 
   [CMB_RU_VIM]     = COMBO(ru_vim_combo, KK_RU_VIM),
   [CMB_RU_WIN]     = COMBO(ru_win_combo, KK_RU_WIN),
+  [CMB_RU_OPT]     = COMBO(ru_opt_combo, KK_RU_OPT),
 };
 
 /* Oneshot */
@@ -416,14 +459,15 @@ typedef struct {
 } leader_seq_t;
 
 /* Ru compose is the default backend; see the unicode_ru module. */
-static void lead_ru(void)       { ru_backend = RU_BACKEND_COMPOSE; toggle_enable(L_RUSSIAN); }
-static void lead_vim(void)      { ru_backend = RU_BACKEND_VIM; toggle_enable(L_RUSSIAN); }
-static void lead_win(void)      { ru_backend = RU_BACKEND_WINDOWS; toggle_enable(L_RUSSIAN); }
+static void lead_ru(void)       { toggle_select(L_RUSSIAN, RU_BACKEND_COMPOSE); }
+static void lead_vim(void)      { toggle_select(L_RUSSIAN, RU_BACKEND_VIM); }
+static void lead_win(void)      { toggle_select(L_RUSSIAN, RU_BACKEND_WINDOWS); }
+static void lead_ru_opt(void)   { toggle_select(L_RU_OPT, RU_BACKEND_COMPOSE); }
 static void lead_en(void)       { ru_backend = RU_BACKEND_COMPOSE; toggle_disable(); }
 static void lead_reset(void)    { toggle_reset(); }
-static void lead_fkeys(void)    { toggle_enable(L_FKEYS_SYS); }
-static void lead_mouse(void)    { toggle_enable(L_MOUSE); }
-static void lead_num(void)      { toggle_enable(L_NUM_NAV); }
+static void lead_fkeys(void)    { toggle_layer(L_FKEYS_SYS); }
+static void lead_mouse(void)    { toggle_layer(L_MOUSE); }
+static void lead_num(void)      { toggle_layer(L_NUM_NAV); }
 static void lead_lira(void)     { ru_emit_glyph("$l", 0x20BA); }
 static void lead_rub(void)      { ru_emit_glyph("$r", 0x20BD); }
 static void lead_eur(void)      { ru_emit_glyph("$e", 0x20AC); }
@@ -577,7 +621,8 @@ static void lead_feed(uint16_t keycode) {
  * lead_cap.active is false, so they're inert — no misfire on "serve"/"curve" —
  * and `r` keeps its usual combo footprint. All other combos are unaffected. */
 bool combo_should_trigger(uint16_t combo_index, combo_t *combo, uint16_t keycode, keyrecord_t *record) {
-  if (combo_index == CMB_RU_VIM || combo_index == CMB_RU_WIN) {
+  if (combo_index == CMB_RU_VIM || combo_index == CMB_RU_WIN ||
+      combo_index == CMB_RU_OPT) {
     return lead_cap.active;
   }
   return true;
@@ -598,10 +643,12 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     /* The RU-select chords resolve to a combo keycode, not a physical key, so
      * they can't live in leader_seqs — complete the sequence directly, mirroring
      * lead_feed's UNIQUE path (clear capture, un-mask layers, then fire). */
-    if (keycode == KK_RU_VIM || keycode == KK_RU_WIN) {
+    if (keycode == KK_RU_VIM || keycode == KK_RU_WIN || keycode == KK_RU_OPT) {
       lead_cap.active = false;
       leader_resume();
-      if (keycode == KK_RU_VIM) { lead_vim(); } else { lead_win(); }
+      if (keycode == KK_RU_VIM)      { lead_vim(); }
+      else if (keycode == KK_RU_WIN) { lead_win(); }
+      else                           { lead_ru_opt(); }
       return false;
     }
     lead_feed(keycode);
@@ -641,6 +688,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
       return false;
     case KK_RU_VIM:
     case KK_RU_WIN:
+    case KK_RU_OPT:
       /* Combo tokens for RU select; the press is consumed by the leader capture.
        * A stray release (combo key-up after the sequence completed) is a no-op. */
       return false;
@@ -651,30 +699,34 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
          * the pending one-shot mods too. */
         uint8_t mods    = get_mods() | get_oneshot_mods();
         bool    shifted = (mods & MOD_MASK_SHIFT) != 0;
-        /* Shift picks between `< >` and `« »`, but WHICH of them costs the extra
-         * press flips with the script: Russian prose quotes with « » and hardly
-         * ever writes `<`, Latin code is the other way round. So the choice is a
-         * XOR, not a plain shift test — see modules/shofel/angle/angle_case.h.
-         *
-         * layer_state_is (rather than active_toggle) is deliberate: holding
-         * Ctrl/Alt/GUI suspends L_RUSSIAN so Latin shortcuts keep working, and
-         * an angle typed in that state is a Latin one. Shift does NOT suspend
-         * the layer (mod_ru_suspended ignores it), which is precisely what makes
-         * the shifted-Russian case reachable at all. */
-        if (angle_emits_guillemet(shifted, typing_russian())) {
-          /* Emit the guillemet via the active backend (it strips shift itself).
-           * Compose uses the private code; vim emits the codepoint. */
+        /* Shift picks the glyph, the same on every layer: unshifted -> `< >`,
+         * Shift -> `« »`. No dependence on whether Russian is live. See
+         * modules/shofel/angle/angle_case.h. */
+        if (angle_emits_guillemet(shifted)) {
+          /* Emit the guillemet via the active backend, which clears the pending
+           * one-shot and strips shift itself. Compose uses the private code; vim
+           * emits the codepoint. */
           ru_emit_glyph(keycode == KK_LANGLE ? "q[" : "q]",
                         keycode == KK_LANGLE ? 0x00AB : 0x00BB); // « »
         } else {
-          /* Russian + shift now reaches here, which the old code never did. The
-           * shift was consumed choosing the glyph, so clear the one-shot rather
-           * than let it capitalise the next letter; KC_LABK/KC_RABK carry their
-           * own shift, so the tap still emits `<`/`>` either way. */
-          if (shifted) {
-            clear_oneshot_mods();
-          }
+          /* Unshifted only — Shift always routes to the guillemet above — so no
+           * one-shot shift can be pending here. */
           tap_code16(keycode == KK_LANGLE ? KC_LABK : KC_RABK); // < >
+        }
+      }
+      return false;
+
+    case KK_QUOTE:
+      if (record->event.pressed) {
+        if (smart_quote_kind(typing_russian()) == QUOTE_GUILLEMET_PAIR) {
+          /* « » with the cursor left between them: Russian prose quotes with one
+           * press and types inside. ru_emit_glyph clears the one-shot and strips
+           * shift; KC_LEFT then steps back over the » just emitted. */
+          ru_emit_glyph("q[", 0x00AB); // «
+          ru_emit_glyph("q]", 0x00BB); // »
+          tap_code(KC_LEFT);
+        } else {
+          tap_code16(KC_DQUO);         // "
         }
       }
       return false;
@@ -853,6 +905,32 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   ),
 
   /**
+   * Balanced Russian layer — the optimised alternative to ЙЦУКЕН, reached by
+   * leader,(r+n) (compose backend). It coexists with L_RUSSIAN, so the familiar
+   * ЙЦУКЕН and the balanced layout are each one leader-chord away. Placed right
+   * after L_RUSSIAN, BELOW the overlay layers (SYM/NUM/FKEYS/MOUSE), so those
+   * momentary layers can shadow it — a Russian layer stacked above them would
+   * swallow their keys (SYM/NUM appeared dead on-device when this sat last).
+   *
+   * Placed by tools/opt_ru_layout.py (a balanced multi-objective anneal). Its
+   * rationale, the score tables and the learnability mnemonics live in
+   * docs/ru-balanced-layout.md — the single home for this layout's narrative;
+   * the generated grid and leader chords are in docs/reference.md.
+   */
+  [L_RU_OPT] = LAYOUT_split_3x6_3(/* GENERATED scheme — edit the array, then `make gen-docs`.
+       ·  у  п  я  л  э        ё  д  а  м  ч  ж
+       ъ  и  в  е  н  ц        ш  к  о  т  с  з
+       ·  ы  г  ю  р  щ        ф  б  ь  й  .  х
+             __  __  __        __  __  __
+  */
+           XX      , RU_U    , RU_P    , RU_YA   , RU_L   , RU_EE   , RU_YO  , RU_D    , RU_A   , RU_M   , RU_CH   , RU_ZH   ,
+           RU_HARD , RU_I    , RU_V    , RU_E    , RU_N   , RU_TS   , RU_SH  , RU_K    , RU_O   , RU_T   , RU_S    , RU_Z    ,
+           XX      , RU_YERU , RU_G    , RU_YU   , RU_R   , RU_SHCH , RU_F   , RU_B    , RU_SOFT, RU_Y   , RU_DOT  , RU_H    ,
+
+                                     __ ,    __ ,   __ ,       __ ,   __ ,   __
+  ),
+
+  /**
    * Symbol layer — frequency-first, punctuation on the RIGHT hand.
    *
    * Reach SYM two ways: KK_SYMBO (left thumb) — tap for a one-shot (next key from
@@ -881,12 +959,11 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    * - `⌫` backspace (right inner) and `⌦` delete (left inner).
    *
    * Not on SYM (all global, so they work while Russian is active):
-   * - `"`  — the left inner-index top+home combo (v+g). The same two keys are
-   *          ц and й on the Russian layer, where the chord types `ъ` instead;
-   *          `"` is no loss there, since Russian quotes with `« »`.
-   * - `« »` — the angle combos via KK_LANGLE / KK_RANGLE. Shift picks between
-   *          `< >` and `« »`, and the Russian layer inverts which one shift
-   *          costs: unshifted gives `«` `»` there, `<` `>` on the Latin layers.
+   * - `"` / `« »` — the left inner-index top+home combo (g+v). On Latin it taps
+   *          `"`; on a Russian layer it is a smart guillemet, emitting « » with
+   *          the cursor between (see modules/shofel/quote/smart_quote.h).
+   * - `« »` — the angle combos via KK_LANGLE / KK_RANGLE. Shift picks the glyph
+   *          the same on every layer: `< >` unshifted, `« »` with Shift.
    * - `?` is suppressed from base Shift+/, so SYM is its one canonical home.
    *
    * Other combos still work here: `=>` `->`, brackets, mods.

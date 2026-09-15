@@ -54,34 +54,25 @@ ALPHABET = "абвгдеёжзийклмнопрстуфхцчшщъыьэюя"
 # `.` keeps its current home; only the letters are optimised.
 DOT_SLOT = (2, 10)
 
-# Column 0 — the leftmost column of the left half — is never pressed. ЙЦУКЕН,
-# the layout actually typed on this board for years, puts no letter on (1,0) or
-# (2,0), and the user has confirmed the whole column is out. v1 ignored this:
-# the comfort map scored those keys only 1/0/0, a soft penalty the annealer was
-# happy to pay to park ш/х/ъ there. A score cannot express "never"; an exclusion
-# can.
-DEAD_COLS = {0}
+# The left outer-pinky column (col 0) is scored 1/0/0 top-to-bottom. The top and
+# bottom keys are 0 — "don't use" — and stay excluded. But the HOME key (1,0) is
+# a reachable home-row key whose 0 is an exclusion marker, not real physical
+# cost, so it is reclaimed to carry ъ (see HARD_SLOT). Excluding these two slots
+# rather than the whole column is what frees (1,0) for the rarest letter.
+DEAD_SLOTS = {(0, 0), (2, 0)}
 
-# The 33rd slot is not a key. It is the v+g vertical combo — left inner column,
-# top+home — which types `"` on the Latin layers and a Russian letter while
-# L_RUSSIAN is live. Row 3 is a sentinel (there is no fourth physical row);
-# column 5 keeps it on the correct finger, so it forms same-finger bigrams with
-# the index and inner columns exactly as the two real keys under it do.
-COMBO_SLOT = (3, 5)
-# Scored below every real key on purpose. A chord is not a key: it costs a
-# COMBO_TERM window before it resolves and it cannot be rolled into or out of,
-# neither of which the single-key comfort map can express. Scoring it by its
-# keys' comfort (2) made it *better* than the pinky-bottom keys, so the annealer
-# rewarded it with `э` — the letter in это/этот/эти. The combo is here only
-# because the alphabet is one letter longer than the grid, so it is the last
-# resort and must take the letter that is almost never typed.
-COMBO_COMFORT = 0
+# ъ — the rarest letter — is pinned here: the outer-pinky HOME key. Reclaiming a
+# real key for it is what lets us drop the old v+g vertical combo (a chord that
+# cost a resolve window and could not be rolled into or out of). Every one of the
+# 33 letters is now a single keypress.
+HARD_SLOT = (1, 0)
 
-# 36 keys − 3 dead (column 0) − 1 for `.` = 32, plus the combo = 33: exactly the
-# 33 letters of the alphabet. An exact fit means no key the user does press is
-# left empty, which is how (0,6)/(2,6) — ЙЦУКЕН's н and т — come back into use.
+# 36 keys − 2 dead (outer-pinky top/bottom) − 1 for `.` = 33: exactly the 33
+# letters of the alphabet. An exact fit of REAL keys means no combo is needed and
+# no key the user presses is left empty — which is how (0,6)/(2,6), ЙЦУКЕН's н and
+# т, come back into use.
 SLOTS = [(r, c) for r in range(ROWS) for c in range(COLS)
-         if (r, c) != DOT_SLOT and c not in DEAD_COLS] + [COMBO_SLOT]
+         if (r, c) != DOT_SLOT and (r, c) not in DEAD_SLOTS]
 
 # ЙЦУКЕН exactly as it sits in keymap.c today — the control to beat.
 JCUKEN = {}
@@ -100,6 +91,18 @@ SFB_ROW_JUMP = 1.0
 # SFB percentage costs about as much as 0.3 of average per-key comfort cost.
 SFB_PENALTY = 30.0
 
+# --- balanced-objective weights (folded into bigram_cost) --------------------
+# The old objective was effort + SFB only: a pure effort model. "Balanced" adds
+# rolls (rewarded), lateral stretch and scissors (penalised). SFB stays the
+# heaviest term by a wide margin — one same-finger bigram must never be tradeable
+# for one roll — so the "досадные SFB" of a roll-first layout cannot sneak back
+# in. Rewards are deliberately gentle, so this is balanced, not roll-first:
+# effort and SFB still lead, rolls only break ties toward better rhythm.
+ROLL_IN = 4.0           # reward: an inward roll (toward the index finger)
+ROLL_OUT = 2.0          # reward: an outward roll (toward the pinky)
+LSB_PENALTY = 10.0      # adjacent fingers splayed >=2 columns (inner-column stretch)
+SCISSOR_PENALTY = 12.0  # adjacent fingers two rows apart (a top<->bottom pinch)
+
 
 def finger_of(col):
     return _FINGERS[col]
@@ -110,8 +113,6 @@ def hand_of(col):
 
 
 def comfort_of(slot):
-    if slot == COMBO_SLOT:
-        return COMBO_COMFORT
     return COMFORT[slot[0]][slot[1]]
 
 
@@ -136,14 +137,77 @@ def is_sfb(a, b):
 
 
 def _sfb_row(slot):
-    """Row charged for SFB row-jump distance. The combo has no row of its own —
-    it is chorded across rows 0+1 — so charge it as the home row it rests on
-    rather than letting the row-3 sentinel invent a three-row leap."""
-    return 1 if slot == COMBO_SLOT else slot[0]
+    """The row a slot sits on. Every slot is a real key now, so this is just its
+    row — kept as a helper because SFB row-jump weighting and scissor detection
+    both need it."""
+    return slot[0]
 
 
 def _sfb_weight(a, b):
     return 1.0 + SFB_ROW_JUMP * abs(_sfb_row(a) - _sfb_row(b))
+
+
+_FINGER_RANK = {"pinky": 0, "ring": 1, "mid": 2, "index": 3}
+
+
+def _rank_in_hand(col):
+    """0=pinky .. 3=index within a hand. Higher = further toward the centre, so a
+    rising rank across a bigram is an inward roll."""
+    return _FINGER_RANK[finger_of(col).split("-", 1)[1]]
+
+
+def _adjacent_fingers(a, b):
+    """Same hand, neighbouring fingers. Same finger (rank delta 0) is an SFB, not
+    a roll, so it is excluded here."""
+    return (hand_of(a[1]) == hand_of(b[1])
+            and abs(_rank_in_hand(a[1]) - _rank_in_hand(b[1])) == 1)
+
+
+def is_roll(a, b):
+    """Two different adjacent fingers on one hand — the motion that feels fast."""
+    return a != b and _adjacent_fingers(a, b)
+
+
+def is_lsb(a, b):
+    """Lateral-stretch bigram: adjacent fingers splayed two or more columns apart
+    — on this board, the index reaching the inner column while its neighbour
+    holds home."""
+    return _adjacent_fingers(a, b) and abs(a[1] - b[1]) >= 2
+
+
+def is_scissor(a, b):
+    """Adjacent fingers two rows apart — a top<->bottom pinch. The combo has no
+    real row, so it is charged at the home row it rests on (see _sfb_row)."""
+    return _adjacent_fingers(a, b) and abs(_sfb_row(a) - _sfb_row(b)) == 2
+
+
+def bigram_cost(a, b):
+    """Net cost of one ordered bigram, in effort units. The SINGLE function that
+    both the full score and the annealing delta route through, so the two can
+    never disagree — the drift guard in optimize() enforces exactly this.
+    Positive is bad, negative is good.
+
+        same key                     0   (a fast repeat, not a conflict)
+        same finger, different key   heavy positive   (SFB — the thing to avoid)
+        opposite hands               0   (alternation — neither rolled nor strained)
+        adjacent same-hand fingers   roll reward, less any stretch/scissor penalty
+        same hand, non-adjacent      0   (a hand hurdle, but not same-finger)
+    """
+    if a == b:
+        return 0.0
+    if is_sfb(a, b):
+        return SFB_PENALTY * _sfb_weight(a, b)
+    if hand_of(a[1]) != hand_of(b[1]):
+        return 0.0
+    if not _adjacent_fingers(a, b):
+        return 0.0
+    inroll = _rank_in_hand(b[1]) > _rank_in_hand(a[1])
+    cost = -(ROLL_IN if inroll else ROLL_OUT)
+    if is_lsb(a, b):
+        cost += LSB_PENALTY
+    if is_scissor(a, b):
+        cost += SCISSOR_PENALTY
+    return cost
 
 
 def effort(layout, unigrams):
@@ -198,9 +262,64 @@ def sfb_cost(layout, bigrams):
     return bad / total
 
 
+def _bigram_mass(layout, bigrams):
+    """Frequency-weighted mean of bigram_cost — the balanced bigram term of the
+    objective. Divides by the SAME total as sfb_rate so the units stay
+    comparable, and iterates bigrams the SAME way the incremental scorer iterates
+    entries, so the drift guard holds."""
+    total = sum(bigrams.values())
+    if not total:
+        return 0.0
+    acc = 0.0
+    for gram, n in bigrams.items():
+        if len(gram) != 2:
+            continue
+        a, b = layout.get(gram[0]), layout.get(gram[1])
+        if a is None or b is None:
+            continue
+        acc += n * bigram_cost(a, b)
+    return acc / total
+
+
 def score(layout, unigrams, bigrams):
-    """Lower is better."""
-    return effort(layout, unigrams) + SFB_PENALTY * sfb_cost(layout, bigrams)
+    """Lower is better. Effort plus the balanced bigram term — SFB, rolls,
+    lateral stretch, scissors — all folded into bigram_cost."""
+    return effort(layout, unigrams) + _bigram_mass(layout, bigrams)
+
+
+def _bigram_share(layout, bigrams, pred):
+    """Share of bigram mass matching a predicate on (slot_a, slot_b), in [0, 1] —
+    the plain-percentage reporting counterpart to bigram_cost."""
+    total = sum(bigrams.values())
+    if not total:
+        return 0.0
+    hit = 0
+    for gram, n in bigrams.items():
+        if len(gram) != 2:
+            continue
+        a, b = layout.get(gram[0]), layout.get(gram[1])
+        if a is None or b is None:
+            continue
+        if pred(a, b):
+            hit += n
+    return hit / total
+
+
+def roll_rate(layout, bigrams):
+    return _bigram_share(layout, bigrams, is_roll)
+
+
+def alt_rate(layout, bigrams):
+    return _bigram_share(layout, bigrams,
+                         lambda a, b: hand_of(a[1]) != hand_of(b[1]))
+
+
+def lsb_rate(layout, bigrams):
+    return _bigram_share(layout, bigrams, is_lsb)
+
+
+def scissor_rate(layout, bigrams):
+    return _bigram_share(layout, bigrams, is_scissor)
 
 
 def _bigram_index(bigrams, letters):
@@ -223,6 +342,9 @@ def _bigram_index(bigrams, letters):
 
 
 def _entries_cost(entries, ids, layout):
+    """Incremental bigram cost over just the touched entries. Routes through the
+    SAME bigram_cost as score()/_bigram_mass — that shared function is what keeps
+    the delta arithmetic honest (see the drift guard in optimize())."""
     total = 0.0
     for i in ids:
         a, b, n = entries[i]
@@ -230,8 +352,7 @@ def _entries_cost(entries, ids, layout):
         pb = layout.get(b)
         if pa is None or pb is None:
             continue
-        if is_sfb(pa, pb):
-            total += n * _sfb_weight(pa, pb)
+        total += n * bigram_cost(pa, pb)
     return total
 
 
@@ -248,23 +369,19 @@ def optimize(unigrams, bigrams, seed=0, iters=200000, restarts=1, letters=ALPHAB
     Deterministic for a given seed so a published layout can be reproduced.
     Scoring is incremental — see `_bigram_index`.
 
-    The chord slot is pinned rather than optimised: WHICH letter lives on it is
-    a constraint, not something to discover. A chord costs a COMBO_TERM window
-    before it resolves and cannot be rolled into or out of — costs the per-key
-    comfort map has no way to express — so letting the annealer trade it against
-    ordinary keys is trading with a broken price. Left free it parked `ю` (487
-    in the corpus, and every `любой`/`юг`) on the chord to buy back 0.06pp of
-    same-finger rate. By default the rarest letter is pinned there; pass
-    `pinned={}` to let the annealer have it back."""
+    ъ is pinned to the outer-pinky home key (HARD_SLOT) rather than optimised:
+    which letter takes that reclaimed 0-comfort key is a deliberate constraint,
+    not something to discover. The rarest letter is pinned there by default; pass
+    `pinned={}` to let the annealer place it freely."""
     if pinned is None:
-        pinned = {rarest_letter(unigrams, letters): COMBO_SLOT}
+        pinned = {rarest_letter(unigrams, letters): HARD_SLOT}
     pinned_slots = set(pinned.values())
     movable = [ch for ch in letters if ch not in pinned]
     rng = random.Random(seed)
     entries, index = _bigram_index(bigrams, letters)
     uni_total = sum(unigrams.get(ch, 0) for ch in letters) or 1
     bi_total = sum(n for _a, _b, n in entries) or 1
-    k_sfb = SFB_PENALTY / bi_total
+    k_bi = 1.0 / bi_total   # bigram_cost already carries every weight
 
     best_layout, best_cost = None, float("inf")
 
@@ -293,7 +410,7 @@ def optimize(unigrams, bigrams, seed=0, iters=200000, restarts=1, letters=ALPHAB
                 touched = set(index[a]) | set(index[b])
                 old_a, new_a = layout[a], layout[b]
 
-            before_sfb = _entries_cost(entries, touched, layout)
+            before_bi = _entries_cost(entries, touched, layout)
             before_uni = unigrams.get(a, 0) * cost_of(layout[a])
             if b is not None:
                 before_uni += unigrams.get(b, 0) * cost_of(layout[b])
@@ -303,12 +420,12 @@ def optimize(unigrams, bigrams, seed=0, iters=200000, restarts=1, letters=ALPHAB
             else:
                 layout[a], layout[b] = layout[b], layout[a]
 
-            after_sfb = _entries_cost(entries, touched, layout)
+            after_bi = _entries_cost(entries, touched, layout)
             after_uni = unigrams.get(a, 0) * cost_of(layout[a])
             if b is not None:
                 after_uni += unigrams.get(b, 0) * cost_of(layout[b])
 
-            delta = (after_uni - before_uni) / uni_total + k_sfb * (after_sfb - before_sfb)
+            delta = (after_uni - before_uni) / uni_total + k_bi * (after_bi - before_bi)
 
             if delta <= 0 or rng.random() < math.exp(-delta / temp):
                 cur += delta
@@ -334,36 +451,14 @@ def optimize(unigrams, bigrams, seed=0, iters=200000, restarts=1, letters=ALPHAB
     return best_layout
 
 
-def combo_keys(layout):
-    """The two letters the chord physically sits under, on this layout.
-
-    Calling it the `v+g` combo is only meaningful on the Latin layers. Someone
-    typing Russian sees the letters at those positions, so name it by those."""
-    at = {slot: ch for ch, slot in layout.items()}
-    return at.get((0, 5)), at.get((1, 5))
-
-
-def combo_name(layout):
-    a, b = combo_keys(layout)
-    return f"{a}+{b}" if a and b else "v+g"
-
-
 def render(layout, dot=True):
-    """3 rows of 12 tokens; `·` marks an unused key. The combo letter is not on
-    the grid, so it trails on its own line."""
+    """3 rows of 12 tokens; `·` marks an unused key (outer-pinky top/bottom)."""
     grid = [["·"] * COLS for _ in range(ROWS)]
-    combo = None
     for ch, slot in layout.items():
-        if slot == COMBO_SLOT:
-            combo = ch
-            continue
         grid[slot[0]][slot[1]] = ch
     if dot:
         grid[DOT_SLOT[0]][DOT_SLOT[1]] = "."
-    out = "\n".join(" ".join(row) for row in grid)
-    if combo is not None:
-        out += f"\n{combo_name(layout)} combo: {combo}"
-    return out
+    return "\n".join(" ".join(row) for row in grid)
 
 
 def load_freqs(path):
@@ -439,18 +534,10 @@ def emit_keymap(layout):
     BASE layer, so an unused slot at (0,6)/(2,6) would type Latin `q`/`p` in the
     middle of Russian text — a silent, maddening bug."""
     grid = [["XX"] * COLS for _ in range(ROWS)]
-    combo = None
     for ch, slot in layout.items():
-        if slot == COMBO_SLOT:
-            combo = ch
-            continue
         grid[slot[0]][slot[1]] = RU_KEYCODE[ch]
     grid[DOT_SLOT[0]][DOT_SLOT[1]] = "RU_DOT"
-    body = "\n".join("           " + ", ".join(f"{k:<8}" for k in row) + "," for row in grid)
-    if combo is not None:
-        body += (f"\n           /* {combo_name(layout)} combo (v+g on Latin) -> "
-                 f"{RU_KEYCODE[combo]}  ({combo}) */")
-    return body
+    return "\n".join("           " + ", ".join(f"{k:<8}" for k in row) + "," for row in grid)
 
 
 def word_report(layout, words):
@@ -465,10 +552,13 @@ def word_report(layout, words):
 
 
 def report_row(name, layout, uni, bi):
-    return (f"  {name:<16} score {score(layout, uni, bi):7.3f}   "
-            f"effort {effort(layout, uni):5.3f}   "
-            f"SFB {100 * sfb_rate(layout, bi):5.2f}%   "
-            f"keys {len(layout)}")
+    return (f"  {name:<12} score {score(layout, uni, bi):7.3f}  "
+            f"effort {effort(layout, uni):5.3f}  "
+            f"SFB {100 * sfb_rate(layout, bi):5.2f}%  "
+            f"roll {100 * roll_rate(layout, bi):5.1f}%  "
+            f"alt {100 * alt_rate(layout, bi):5.1f}%  "
+            f"LSB {100 * lsb_rate(layout, bi):4.1f}%  "
+            f"scis {100 * scissor_rate(layout, bi):4.1f}%")
 
 
 def main(argv=None):
