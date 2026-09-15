@@ -137,7 +137,9 @@ static bool mod_ru_suspended(void) {
 /* Which layers count as Russian (stock ЙЦУКЕН and the balanced L_RU_OPT). Used
  * to mask Russian — and only Russian — while a Ctrl/Alt/Gui one-shot physically
  * holds its mod, so that chord falls through to the Latin base while num/nav etc.
- * stay put (see toggle_apply / mod_ru_suspended). */
+ * stay put (see toggle_apply / mod_ru_suspended). The user-facing consequence —
+ * Ctrl+<letter> reaches a Latin shortcut only on the text layers, not the
+ * overlays — and why that trade-off is accepted live in docs/known-limitations.md. */
 static bool is_ru_layer(uint8_t layer) {
     return layer == L_RUSSIAN || layer == L_RU_OPT;
 }
