@@ -184,13 +184,13 @@ static void toggle_disable(void) {
     toggle_apply();
 }
 
-/* Turn on `layer` — with `backend` for the Russian layers — or, if that exact
- * target is already active, turn it off. Re-selecting the active switcher cancels
- * it, the way a one-shot's second tap does; selecting a different layer, or the
- * same Russian layer with a different backend, switches. */
+/* Turn on `layer` — with `backend` for the Russian layers. Re-selecting an
+ * already-active *overlay* (num/nav, F-keys, mouse) turns it off, the way a
+ * one-shot's second tap does. The Russian layers are stable switches: re-selecting
+ * the active one does not cancel — same backend re-asserts it, a different backend
+ * switches the backend. Leave Russian with leader,e / leader,space. */
 static void toggle_select(uint8_t layer, ru_backend_t backend) {
-    if (toggle_reselect_cancels(active_toggle == layer, is_ru_layer(layer),
-                                ru_backend == backend)) {
+    if (toggle_reselect_cancels(active_toggle == layer, is_ru_layer(layer))) {
         toggle_disable();
         return;
     }

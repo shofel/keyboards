@@ -6,10 +6,11 @@
  *       -o /tmp/test_toggle_select tools/test_toggle_select.c && /tmp/test_toggle_select
  * or:  make test-toggle
  *
- * The rule (mirroring a one-shot's second-tap cancel): re-selecting the switcher
- * that is already active turns it off. A switcher's identity is its layer — and,
- * for the Russian layers, also its backend, so that switching vim -> compose
- * while Russian is live still switches rather than cancelling.
+ * The rule: cancel-on-reselect applies only to the non-Russian overlays (they
+ * are mods, reversible by a second tap). The Russian layers are stable language
+ * switches — re-selecting one never cancels; you leave Russian with leader,e /
+ * leader,space. So the decision reduces to: cancel iff the same non-Russian
+ * layer is re-selected.
  */
 #include <stdio.h>
 #include "toggle_select.h"
@@ -28,22 +29,20 @@ static int failures = 0;
 
 int main(void) {
     /* Selecting a different layer always switches, never cancels. */
-    CHECK(toggle_reselect_cancels(false, false, false) == false,
+    CHECK(toggle_reselect_cancels(false, false) == false,
           "different non-ru layer -> switch");
-    CHECK(toggle_reselect_cancels(false, true, true) == false,
-          "different ru layer -> switch (even same backend)");
+    CHECK(toggle_reselect_cancels(false, true) == false,
+          "different ru layer -> switch");
 
-    /* Re-selecting the same non-Russian layer cancels; backend is irrelevant. */
-    CHECK(toggle_reselect_cancels(true, false, false) == true,
-          "same non-ru layer -> cancel (backend ignored)");
-    CHECK(toggle_reselect_cancels(true, false, true) == true,
-          "same non-ru layer -> cancel");
+    /* Re-selecting the same non-Russian overlay cancels (mod, second-tap off). */
+    CHECK(toggle_reselect_cancels(true, false) == true,
+          "same non-ru overlay -> cancel");
 
-    /* Russian: cancel only when the backend also matches. */
-    CHECK(toggle_reselect_cancels(true, true, true) == true,
-          "same ru layer + same backend -> cancel");
-    CHECK(toggle_reselect_cancels(true, true, false) == false,
-          "same ru layer, different backend -> switch backend, not cancel");
+    /* Re-selecting the active Russian layer never cancels — it stays (or, with a
+     * different backend, the caller switches the backend). You leave Russian with
+     * leader,e / leader,space, not by re-pressing the same switch. */
+    CHECK(toggle_reselect_cancels(true, true) == false,
+          "same ru layer -> stay (not cancel)");
 
     if (failures) {
         printf("\n%d toggle_select test(s) FAILED\n", failures);
