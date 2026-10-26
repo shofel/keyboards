@@ -101,7 +101,7 @@ Why the same-column pairs are the safe ones — the column stagger — is explai
 └─────┴─────┴─────┴─────┴─────┴─────┘    └─────┴─────┴─────┴─────┴─────┴─────┘
 ```
 
-The angle combos are shift-aware — g + z → `<` / `«`; b + p → `>` / `»`. A held (or one-shot) Shift picks the second glyph of each pair, so the Latin layers give `<` `>` unshifted and the guillemets shifted. The Russian layer inverts that: `«` `»` come unshifted there, since Russian prose quotes with them, and `<` `>` take the Shift.
+The angle combos are shift-aware — g + z → `<` / `«`; b + p → `>` / `»`. A held (or one-shot) Shift picks the second glyph of each pair: `<` `>` plain, `«` `»` shifted, in both English and Russian.
 
 The rest fire on keys that aren't vertically adjacent — thumbs, bottom-row rolls, and the outer corners. Each diagram marks the two trigger positions:
 
