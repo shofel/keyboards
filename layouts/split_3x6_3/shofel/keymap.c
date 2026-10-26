@@ -38,9 +38,8 @@ enum my_keycodes {
   KK_FAT_RIGHT_ARROW,           // emits "=>"
   KK_FAT_LEFT_ARROW,            // emits "<="
   KK_LEFT_ARROW,                // emits "<-"
-  /* `<` `>` vs `« »`. Shift picks between them, but which one shift costs is
-   * inverted while the Russian layer is live — Russian quotes with « », Latin
-   * code is full of < >. See modules/shofel/angle/angle_case.h. */
+  /* `<` `>` plain, `« »` with Shift, in every language.
+   * See modules/shofel/angle/angle_case.h. */
   KK_LANGLE,
   KK_RANGLE,
 
@@ -122,16 +121,6 @@ static bool mod_ru_suspended(void) {
         }
     }
     return false;
-}
-
-/* Is Russian physically live right now? Decides which of `< >` / `« »` the
- * angle combos treat as the rare, shifted glyph.
- *
- * Reads the LIVE layer rather than active_toggle on purpose — a held
- * Ctrl/Alt/Gui suspends Russian so Latin shortcuts keep working, and an angle
- * typed in that state is a Latin one. */
-static bool typing_russian(void) {
-    return layer_state_is(L_RUSSIAN);
 }
 
 static void toggle_apply(void) {
@@ -651,29 +640,14 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
          * the pending one-shot mods too. */
         uint8_t mods    = get_mods() | get_oneshot_mods();
         bool    shifted = (mods & MOD_MASK_SHIFT) != 0;
-        /* Shift picks between `< >` and `« »`, but WHICH of them costs the extra
-         * press flips with the script: Russian prose quotes with « » and hardly
-         * ever writes `<`, Latin code is the other way round. So the choice is a
-         * XOR, not a plain shift test — see modules/shofel/angle/angle_case.h.
-         *
-         * layer_state_is (rather than active_toggle) is deliberate: holding
-         * Ctrl/Alt/GUI suspends L_RUSSIAN so Latin shortcuts keep working, and
-         * an angle typed in that state is a Latin one. Shift does NOT suspend
-         * the layer (mod_ru_suspended ignores it), which is precisely what makes
-         * the shifted-Russian case reachable at all. */
-        if (angle_emits_guillemet(shifted, typing_russian())) {
+        /* The same mapping in English and Russian: `< >` plain, `« »` shifted. */
+        if (angle_emits_guillemet(shifted)) {
           /* Emit the guillemet via the active backend (it strips shift itself).
            * Compose uses the private code; vim emits the codepoint. */
           ru_emit_glyph(keycode == KK_LANGLE ? "q[" : "q]",
                         keycode == KK_LANGLE ? 0x00AB : 0x00BB); // « »
         } else {
-          /* Russian + shift now reaches here, which the old code never did. The
-           * shift was consumed choosing the glyph, so clear the one-shot rather
-           * than let it capitalise the next letter; KC_LABK/KC_RABK carry their
-           * own shift, so the tap still emits `<`/`>` either way. */
-          if (shifted) {
-            clear_oneshot_mods();
-          }
+          /* KC_LABK/KC_RABK carry the shift needed for ASCII angles. */
           tap_code16(keycode == KK_LANGLE ? KC_LABK : KC_RABK); // < >
         }
       }
@@ -884,9 +858,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    * - `"`  — the left inner-index top+home combo (v+g). The same two keys are
    *          ц and й on the Russian layer, where the chord types `ъ` instead;
    *          `"` is no loss there, since Russian quotes with `« »`.
-   * - `« »` — the angle combos via KK_LANGLE / KK_RANGLE. Shift picks between
-   *          `< >` and `« »`, and the Russian layer inverts which one shift
-   *          costs: unshifted gives `«` `»` there, `<` `>` on the Latin layers.
+   * - `« »` — the angle combos via KK_LANGLE / KK_RANGLE: `< >` plain,
+   *          `« »` with held or one-shot Shift, in both English and Russian.
    * - `?` is suppressed from base Shift+/, so SYM is its one canonical home.
    *
    * Other combos still work here: `=>` `->`, brackets, mods.
