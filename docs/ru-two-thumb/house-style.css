@@ -1,0 +1,34 @@
+
+:root{font-family:system-ui,sans-serif;color:#203047;background:#f3f6fa;line-height:1.5}
+body{margin:0}main{max-width:900px;margin:auto;padding:30px 20px 50px}
+h1{font-size:clamp(25px,4vw,36px);line-height:1.15}h2{font-size:20px}p{margin:.5rem 0}
+.card,ol.steps>li{background:white;border:1px solid #d8e0eb;border-radius:12px;padding:18px;margin:14px 0}
+.pass{border-left:5px solid #218454}.pending{border-left:5px solid #b37c12}.info{border-left:5px solid #5269a1}.fail{border-left:5px solid #b3261e}
+ol.steps{list-style:none;counter-reset:steps;padding:0}ol.steps>li{counter-increment:steps}
+ol.steps>li h2:before{content:counter(steps) ". ";color:#5269a1}ol.steps>li h2{margin:0 0 8px}
+.see{color:#315b42;margin-top:10px}
+a{color:#175b9f}code{overflow-wrap:anywhere}small,.muted{color:#58677a}strong{font-weight:650}
+.decision{font-size:19px;font-weight:650}
+details{margin-top:24px}summary{cursor:pointer}footer{margin-top:24px;font-size:14px}
+/* optional components */
+.tag{display:inline-block;font-size:12px;font-weight:600;padding:1px 9px;border-radius:99px;margin-right:6px;vertical-align:2px}
+.t-pass{background:#e3f3ea;color:#1b6b44}.t-pending{background:#f8eed8;color:#8a5f0d}.t-info{background:#e6ebf6;color:#3d5288}.t-fail{background:#f8e1df;color:#8f1e18}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}.grid .card{margin:0}
+.flow{background:white;border:1px solid #d8e0eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+.row{display:flex;align-items:center;gap:8px;margin:8px 0;flex-wrap:wrap}
+.node{padding:5px 11px;border-radius:8px;border:1.5px solid #d8e0eb;background:#f8fafc;font-size:14px;white-space:nowrap}
+.node.pass{border-color:#218454}.node.pending{border-color:#b37c12}.node.info{border-color:#5269a1}.node.fail{border-color:#b3261e}
+.arr{color:#8a96a8}
+/* dark theme: follows the system/browser setting */
+@media (prefers-color-scheme:dark){
+:root{color-scheme:dark;color:#dde4ee;background:#12161c}
+.card,ol.steps>li,.flow{background:#1b2129;border-color:#2f3946}
+.pass{border-left-color:#3fb27a}.pending{border-left-color:#d9a43c}.info{border-left-color:#8399d8}.fail{border-left-color:#e06a60}
+ol.steps>li h2:before{color:#8399d8}
+.see{color:#8fd3a9}
+a{color:#82b8ef}small,.muted{color:#9ba7b6}
+.t-pass{background:#173627;color:#8fe0b3}.t-pending{background:#3a2c10;color:#f0c675}.t-info{background:#222b45;color:#adbbec}.t-fail{background:#421f1c;color:#f3a7a0}
+.node{background:#212833;border-color:#2f3946}
+.node.pass{border-color:#3fb27a}.node.pending{border-color:#d9a43c}.node.info{border-color:#8399d8}.node.fail{border-color:#e06a60}
+.arr{color:#7d8898}
+}
