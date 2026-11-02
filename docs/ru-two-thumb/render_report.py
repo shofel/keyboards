@@ -2,6 +2,10 @@
 """Render a self-contained proposal using the unchanged house-style CSS."""
 import html,json,pathlib
 from study import ROOT,POP
+if (ROOT/'lateral_results.json').exists():
+    from render_lateral_report import render
+    render()
+    raise SystemExit(0)
 css=(ROOT/'house-style.css').read_text()
 head='<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Russian for phone thumbs — research proposal</title><style>'+css+'</style></head><body><main>\n'
 r=json.loads((ROOT/'results.json').read_text()); c=json.loads((ROOT/'counts.json').read_text())

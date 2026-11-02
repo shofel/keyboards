@@ -34,6 +34,22 @@ class ResearchChecks(unittest.TestCase):
                         self.assertTrue(math.isfinite(value))
                         self.assertAlmostEqual(value,saved[name][key],places=10)
                     self.assertGreaterEqual(values['same_thumb_pct'],values['same_target_pct'])
+    def test_lateral_revision_and_penalty_sensitivity(self):
+        from lateral_study import EDGE_COLUMNS,metrics
+        r=json.loads((ROOT/'lateral_results.json').read_text())
+        self.assertEqual(EDGE_COLUMNS,{0,9})
+        self.assertEqual(r['layouts']['previous'],self.r['candidate'])
+        for p in (0,.5,1,2,4):
+            for name,lay in r['layouts'].items():
+                self.assertEqual(len(set(lay)),30)
+                self.assertEqual(set(lay)|set(POP),set(ALPHA))
+                actual=metrics(lay,self.counts['test'],p)
+                saved=r['penalty_sensitivity'][str(p)][name]
+                for key,value in actual.items():
+                    self.assertTrue(math.isfinite(value))
+                    self.assertAlmostEqual(value,saved[key],places=10)
+        self.assertLess(r['nominal']['revised']['outer_edge_tap_pct'],r['nominal']['previous']['outer_edge_tap_pct'])
+        self.assertLess(r['nominal']['revised']['outer_edge_tap_pct'],r['nominal']['baseline']['outer_edge_tap_pct'])
     def test_document_retains_limits_and_local_style(self):
         report=(ROOT/'proposal.html').read_text(); HTMLParser().feed(report)
         self.assertEqual(report.split('<style>')[1].split('</style>')[0],(ROOT/'house-style.css').read_text())

@@ -1,6 +1,6 @@
 # Russian for a phone typed with two thumbs — research only
 
-Open [the self-contained proposal](proposal.html) in a browser. It recovers the Android 2Thumbs v24 source geometry, distinguishes the unfinished draft, and compares one candidate with the shipped Russian layout on held-out public text. No application or firmware change is included.
+Open [the self-contained proposal](proposal.html) in a browser. It recovers the Android 2Thumbs v24 source geometry, distinguishes the unfinished draft, and compares the lateral-discomfort revision, the superseded first candidate, and the shipped Russian layout on held-out public text. “Lateral” is interpreted as the two outer screen-edge columns (0 and 9); that interpretation and the numerical discomfort penalty are explicitly not confirmed measurements. No application or firmware change is included.
 
 Reproduce (Python 3 standard library, network needed for public corpus downloads):
 
@@ -8,6 +8,7 @@ Reproduce (Python 3 standard library, network needed for public corpus downloads
 free -h  # coordinate shared resources; do not run below 4 GiB available
 nice -n 15 python3 -B study.py
 nice -n 15 python3 -B evaluate.py
+nice -n 15 python3 -B lateral_study.py
 python3 -B render_report.py
 nice -n 15 python3 -B -m unittest discover -s . -p 'test_*.py' -v
 ```
