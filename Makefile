@@ -48,7 +48,12 @@ flash: build
 	exit 1
 
 # All off-target host tests (pure logic; no QMK, no hardware).
-test: test-oneshot test-leader-fsm test-angle test-toggle test-quote test-compose test-schemes test-schemes-unit test-leader-prefix test-typing-corpus test-keylog test-ru-layout lint-leader
+test: test-layer-retap test-oneshot test-leader-fsm test-angle test-toggle test-quote test-compose test-schemes test-schemes-unit test-leader-prefix test-typing-corpus test-keylog test-ru-layout lint-leader
+
+.PHONY: test-layer-retap
+# State-based OSL retaps, exercised around the stock QMK action model.
+test-layer-retap:
+	gcc -std=c11 -Wall -Wextra -Werror -Imodules/shofel/oneshot -o /tmp/test_layer_retap tools/test_layer_retap.c && /tmp/test_layer_retap
 
 # Off-target unit test for oneshot_fsm.h (the eager one-shot state machine).
 test-oneshot:
