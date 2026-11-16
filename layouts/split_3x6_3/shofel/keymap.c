@@ -9,6 +9,7 @@
 #include "modules/shofel/unicode_ru/introspection.h"
 #include "modules/getreuer/orbital_mouse/introspection.h"
 #include "modules/shofel/leader/leader_fsm.h"
+#include "modules/shofel/oneshot/layer_retap.h"
 #include "modules/shofel/angle/angle_case.h"
 #include "modules/shofel/toggle/toggle_select.h"
 #include "modules/shofel/quote/smart_quote.h"
@@ -628,6 +629,24 @@ bool combo_should_trigger(uint16_t combo_index, combo_t *combo, uint16_t keycode
   return true;
 }
 
+static layer_retap_t layer_retap;
+
+/* Finish after QMK's stock OSL action, without changing its tap classifier. */
+void post_process_record_user(uint16_t keycode, keyrecord_t *record) {
+  if (!IS_QK_ONE_SHOT_LAYER(keycode) || !keymap_config.oneshot_enable) return;
+  uint8_t layer = QK_ONE_SHOT_LAYER_GET_LAYER(keycode);
+  switch (layer_retap_after(&layer_retap, layer)) {
+    case LAYER_RETAP_ARM:
+      set_oneshot_layer(layer, ONESHOT_OTHER_KEY_PRESSED);
+      break;
+    case LAYER_RETAP_CANCEL:
+      clear_oneshot_layer_state(ONESHOT_OTHER_KEY_PRESSED);
+      break;
+    default:
+      break;
+  }
+}
+
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   /* Timeoutless leader takes priority: while capturing, each PRESS is a sequence
    * token fed to the matcher and swallowed (never typed nor seen by a layer).
@@ -749,6 +768,13 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
       break;
   }
 
+  if (IS_QK_ONE_SHOT_LAYER(keycode) && keymap_config.oneshot_enable) {
+    uint8_t layer = QK_ONE_SHOT_LAYER_GET_LAYER(keycode);
+    bool pending = get_oneshot_layer() == layer &&
+                   (get_oneshot_layer_state() & ONESHOT_OTHER_KEY_PRESSED);
+    layer_retap_before(&layer_retap, layer, record->event.pressed,
+                       record->tap.count != 0, pending);
+  }
   return true;
 }
 
@@ -790,6 +816,19 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
  * below) are more of a reach — which is why the highest-value
  * combos (mods, backspace, primary num-layer access) take the top slots and
  * brackets the bottom.
+ *
+ * ### One-shot layers
+ *
+ * Starting with the layer off, repeatedly tap the same activator without typing
+ * between taps: one or three taps arm it; two or four cancel it. The pause
+ * between taps does not matter. An armed layer supplies the next ordinary key:
+ * for example, tap SYM, then the BOO `r` key to type `+`; the following `r`
+ * types `r` again. Holding the activator while typing keeps the layer active
+ * until release instead.
+ *
+ * This rule applies to the left-thumb SYM key and the `Nav` and `Fky` activators
+ * shown in [Combos](#combos). Language selectors and the Enter/SYM layer-tap
+ * keep their separate behavior; they are not one-shot layer activators.
  *
  * ### Thumbs
  *

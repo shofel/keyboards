@@ -426,6 +426,19 @@ below) are more of a reach — which is why the highest-value
 combos (mods, backspace, primary num-layer access) take the top slots and
 brackets the bottom.
 
+### One-shot layers
+
+Starting with the layer off, repeatedly tap the same activator without typing
+between taps: one or three taps arm it; two or four cancel it. The pause
+between taps does not matter. An armed layer supplies the next ordinary key:
+for example, tap SYM, then the BOO `r` key to type `+`; the following `r`
+types `r` again. Holding the activator while typing keeps the layer active
+until release instead.
+
+This rule applies to the left-thumb SYM key and the `Nav` and `Fky` activators
+shown in [Combos](#combos). Language selectors and the Enter/SYM layer-tap
+keep their separate behavior; they are not one-shot layer activators.
+
 ### Thumbs
 
 On the Cantor the middle thumb is the most comfortable key, so the two most
