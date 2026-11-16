@@ -88,14 +88,18 @@ The `modules/shofel/` directory contains QMK community modules:
 
 ## Russian unicode input (compose mode)
 
-Russian is typed on a firmware layer and emitted as keystrokes. Backends, by leader:
+Russian is typed on a firmware layer and emitted as keystrokes. A leader sequence
+picks the backend — the exact chords are in the generated reference, so they can't
+drift out of sync here:
 
-- `leader,r` / `leader,c` — **compose mode (default)**: each glyph (Cyrillic, `« »`,
-  `— № §`) is emitted as one X Compose sequence (`Compose` + a private code),
-  which is robust to rolling/overlapping keystrokes.
-- `leader,v` — vim mode (vim-native unicode); `leader,e` — back to English.
-- `leader,a,<sel>` / `leader,i,<sel>` — **emoji** (host-wide, via the same Compose
-  backend). `a`/`i` are a home-row mirror pair, so either hand works:
+- **compose mode (default)** — each glyph (Cyrillic, `« »`, `— № §`) is emitted as
+  one X Compose sequence (`Compose` + a private code), robust to
+  rolling/overlapping keystrokes.
+- **vim mode** — vim-native unicode; plus a sequence back to English.
+- **the balanced Russian layout** `L_RU_OPT` (compose backend) — an optimised
+  alternative to ЙЦУКЕН; see [the balanced layer](#the-balanced-russian-layer-l_ru_opt) below.
+- **emoji** — host-wide, via the same Compose backend. The two selector keys are a
+  home-row mirror pair, so either hand works:
   `t`🌷 `r`🌹 `c`🌸 `h`🌺 `s`🌻 `d`🌼 · `u`👍 `o`👌 `k`🤔 `m`🧐 `n`🤝.
 - All leader sequences, combos and layer schemes: see
   [docs/reference.md](docs/reference.md) (generated).
@@ -136,6 +140,20 @@ ibus restart                                  # reload ~/.XCompose (or re-login)
 
 Symptom of a stale table: pressing an unmapped sequence (e.g. a new emoji) leaves
 a pending Compose indicator "stuck" — the glyph isn't in the table the IM loaded.
+
+## The balanced Russian layer (`L_RU_OPT`)
+
+Stock ЙЦУКЕН stays the default Russian layer. Alongside it, a leader chord
+activates `L_RU_OPT` — an optimised alternative placed by `tools/opt_ru_layout.py`
+against this board's comfort map and real Cyrillic typing. It is built to be
+**learnable**: optimising purely for finger mechanics happened to cluster whole
+phonetic classes onto single fingers.
+
+The rationale, score tables and mnemonics are in
+**[docs/ru-balanced-layout.md](docs/ru-balanced-layout.md)** — rendered, with the
+comfort heatmap, in [`ru-balanced-layout.html`](docs/ru-balanced-layout.html). The
+layout grid and its activation chord are in the generated
+[docs/reference.md](docs/reference.md).
 
 ## Development
 

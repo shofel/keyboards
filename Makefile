@@ -48,7 +48,12 @@ flash: build
 	exit 1
 
 # All off-target host tests (pure logic; no QMK, no hardware).
-test: test-oneshot test-leader-fsm test-angle test-compose test-schemes test-schemes-unit test-leader-prefix test-typing-corpus test-keylog test-ru-layout lint-leader
+test: test-layer-retap test-oneshot test-leader-fsm test-angle test-toggle test-quote test-compose test-schemes test-schemes-unit test-leader-prefix test-typing-corpus test-keylog test-ru-layout lint-leader
+
+.PHONY: test-layer-retap
+# State-based OSL retaps, exercised around the stock QMK action model.
+test-layer-retap:
+	gcc -std=c11 -Wall -Wextra -Werror -Imodules/shofel/oneshot -o /tmp/test_layer_retap tools/test_layer_retap.c && /tmp/test_layer_retap
 
 # Off-target unit test for oneshot_fsm.h (the eager one-shot state machine).
 test-oneshot:
@@ -62,6 +67,16 @@ test-leader-fsm:
 # `< >` plain or `« »` shifted, independent of the active language).
 test-angle:
 	gcc -Wall -Wextra -Imodules/shofel/angle -o /tmp/test_angle_case tools/test_angle_case.c && /tmp/test_angle_case
+
+# Off-target unit test for toggle_select.h (cancel-on-reselect for the leader
+# toggle layers: re-selecting the active switcher turns it off).
+test-toggle:
+	gcc -Wall -Wextra -Imodules/shofel/toggle -o /tmp/test_toggle_select tools/test_toggle_select.c && /tmp/test_toggle_select
+
+# Off-target unit test for smart_quote.h (the g+v quote combo: « » on Russian
+# layers, ASCII " on Latin).
+test-quote:
+	gcc -Wall -Wextra -Imodules/shofel/quote -o /tmp/test_smart_quote tools/test_smart_quote.c && /tmp/test_smart_quote
 
 test-compose:
 	python3 tools/test_gen_compose.py

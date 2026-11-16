@@ -161,3 +161,24 @@ why the scheme uses symbol prefixes at all). Requires re-importing the
 regenerated `~/.XCompose`. Rule of thumb for any new compose prefix: avoid the
 app-trigger characters `@` (mentions), `#` (hashtags), `/` (commands), and `:`
 (emoji/sticker shortcodes). (Root-caused and fixed 2026-08-18.)
+
+## Ctrl+&lt;letter&gt; shortcuts work only on the text layers (En / Ru)
+
+Hold a mod combo (Ctrl/Alt/Gui — e.g. `s+c` for Ctrl) and press a letter, and you
+get the Latin shortcut (Ctrl+C, Ctrl+U, …) — but only while a **text layer** is
+live: the Latin base (En) or a Russian layer. On the function overlays (SYM,
+NUM/NAV, F-keys, MOUSE) the same chord produces `Ctrl+<whatever that overlay puts
+at the letter's position>` (e.g. Ctrl+digit on NUM), not Ctrl+&lt;letter&gt;.
+
+Why: a held Ctrl/Alt/Gui one-shot masks **Russian, and only Russian**
+(`mod_ru_suspended` / `is_ru_layer` in `layouts/split_3x6_3/shofel/keymap.c`), so a
+shortcut typed in Russian falls through to the Latin base — Ctrl+C is Ctrl+C in En
+and Ru alike. The overlays are deliberately **not** masked: on them the whole point
+of a held mod is to reach the overlay's own key — Ctrl+←/word-jump on NAV,
+Ctrl+digit, Ctrl+F5 — so dropping them to the base would break exactly those. One
+physical key cannot serve both Ctrl+&lt;letter&gt; and Ctrl+&lt;overlay-key&gt;
+without a modifier-aware layer switch, and the overlay shortcuts are the ones worth
+keeping.
+
+Accepted as-is: reaching a letter-shortcut from a function overlay is rare (you tap
+out of the overlay first), while Ctrl+&lt;overlay-key&gt; is the daily case.
