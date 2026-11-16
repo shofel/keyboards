@@ -581,9 +581,8 @@ def gen_doc(src):
         notes = "; ".join(
             f"{' + '.join(glyph(k) for k in ks)} → {combo_out(o)}" for ks, o in angle)
         out.append(f"The angle combos are shift-aware — {notes}. A held (or "
-                   "one-shot) Shift picks the second glyph of each pair, the same "
-                   "on every layer: `<` `>` unshifted, the guillemets `«` `»` with "
-                   "Shift — whether or not a Russian layer is live.")
+                   "one-shot) Shift picks the second glyph of each pair: "
+                   "`<` `>` plain, `«` `»` shifted, in both English and Russian.")
         out.append("")
     quote = [(ks, o) for ks, o in combos if o == "KK_QUOTE"]
     if quote:

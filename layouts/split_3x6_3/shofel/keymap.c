@@ -41,8 +41,8 @@ enum my_keycodes {
   KK_FAT_RIGHT_ARROW,           // emits "=>"
   KK_FAT_LEFT_ARROW,            // emits "<="
   KK_LEFT_ARROW,                // emits "<-"
-  /* `<` `>` (unshifted) vs `« »` (Shift), the same on every layer. See
-   * modules/shofel/angle/angle_case.h. */
+  /* `<` `>` plain, `« »` with Shift, in every language.
+   * See modules/shofel/angle/angle_case.h. */
   KK_LANGLE,
   KK_RANGLE,
 
@@ -718,18 +718,14 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
          * the pending one-shot mods too. */
         uint8_t mods    = get_mods() | get_oneshot_mods();
         bool    shifted = (mods & MOD_MASK_SHIFT) != 0;
-        /* Shift picks the glyph, the same on every layer: unshifted -> `< >`,
-         * Shift -> `« »`. No dependence on whether Russian is live. See
-         * modules/shofel/angle/angle_case.h. */
+        /* The same mapping in English and Russian: `< >` plain, `« »` shifted. */
         if (angle_emits_guillemet(shifted)) {
-          /* Emit the guillemet via the active backend, which clears the pending
-           * one-shot and strips shift itself. Compose uses the private code; vim
-           * emits the codepoint. */
+          /* Emit the guillemet via the active backend (it strips shift itself).
+           * Compose uses the private code; vim emits the codepoint. */
           ru_emit_glyph(keycode == KK_LANGLE ? "q[" : "q]",
                         keycode == KK_LANGLE ? 0x00AB : 0x00BB); // « »
         } else {
-          /* Unshifted only — Shift always routes to the guillemet above — so no
-           * one-shot shift can be pending here. */
+          /* KC_LABK/KC_RABK carry the shift needed for ASCII angles. */
           tap_code16(keycode == KK_LANGLE ? KC_LABK : KC_RABK); // < >
         }
       }
@@ -1001,8 +997,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    * - `"` / `« »` — the left inner-index top+home combo (g+v). On Latin it taps
    *          `"`; on a Russian layer it is a smart guillemet, emitting « » with
    *          the cursor between (see modules/shofel/quote/smart_quote.h).
-   * - `« »` — the angle combos via KK_LANGLE / KK_RANGLE. Shift picks the glyph
-   *          the same on every layer: `< >` unshifted, `« »` with Shift.
+   * - `« »` — the angle combos via KK_LANGLE / KK_RANGLE: `< >` plain,
+   *          `« »` with held or one-shot Shift, in both English and Russian.
    * - `?` is suppressed from base Shift+/, so SYM is its one canonical home.
    *
    * Other combos still work here: `=>` `->`, brackets, mods.

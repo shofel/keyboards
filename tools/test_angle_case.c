@@ -1,14 +1,8 @@
 /* Off-target unit test for angle_case.h — which glyph the angle combos emit.
- * No QMK deps, so it runs on the host.
+ * No QMK deps, so it runs on the host with make test-angle.
  *
- * Build & run from the repo root:
- *   gcc -Wall -Wextra -Imodules/shofel/angle \
- *       -o /tmp/test_angle_case tools/test_angle_case.c && /tmp/test_angle_case
- * or:  make test-angle
- *
- * The glyph choice is stable on every layer: Shift alone picks between the two,
- * with no dependence on whether a Russian layer is live. Unshifted gives the
- * ASCII angle `< >`; Shift gives the guillemet `« »`. Two rows say all of it.
+ * The helper deliberately has no language input: English and Russian must use
+ * the same mapping. Both held and one-shot Shift are resolved by the caller.
  */
 #include <stdio.h>
 #include "angle_case.h"
@@ -26,8 +20,10 @@ static int failures = 0;
     } while (0)
 
 int main(void) {
-    CHECK(angle_emits_guillemet(false) == false, "unshifted -> < >");
-    CHECK(angle_emits_guillemet(true)  == true,  "shifted   -> guillemet");
+    CHECK(angle_emits_guillemet(false) == false,
+          "unshifted -> < > in every language");
+    CHECK(angle_emits_guillemet(true) == true,
+          "shifted -> guillemet in every language");
 
     if (failures) {
         printf("\n%d angle_case test(s) FAILED\n", failures);

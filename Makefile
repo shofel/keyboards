@@ -64,7 +64,7 @@ test-leader-fsm:
 	gcc -Wall -Wextra -Imodules/shofel/leader -o /tmp/test_leader_fsm tools/test_leader_fsm.c && /tmp/test_leader_fsm
 
 # Off-target unit test for angle_case.h (which glyph the angle combos emit —
-# `< >` unshifted or `« »` with Shift, the same on every layer).
+# `< >` plain or `« »` shifted, independent of the active language).
 test-angle:
 	gcc -Wall -Wextra -Imodules/shofel/angle -o /tmp/test_angle_case tools/test_angle_case.c && /tmp/test_angle_case
 
